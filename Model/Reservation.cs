@@ -14,18 +14,18 @@ namespace BookingApp.Model
         public int GuestId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public int NumberOfGuests { get; set; }
+        public int GuestsNumber { get; set; } //btoj gostiju koji dolaze
         public ReservationStatus Status { get; set; }
 
         public Reservation() { }
 
-        public Reservation(int accommodationId, int guestId, DateTime startDate, DateTime endDate, int numberOfGuests)
+        public Reservation(int accommodationId, int guestId, DateTime startDate, DateTime endDate, int guestsNumber)
         {
             AccommodationId = accommodationId;
             GuestId = guestId;
             StartDate = startDate;
             EndDate = endDate;
-            NumberOfGuests = numberOfGuests;
+            GuestsNumber = guestsNumber;
             Status = ReservationStatus.Active;
 
         }
@@ -38,7 +38,7 @@ namespace BookingApp.Model
                 GuestId.ToString(),
                 StartDate.ToString("o"),
                 EndDate.ToString("o"),
-                NumberOfGuests.ToString(),
+                GuestsNumber.ToString(),
                 Status.ToString()
             };
         }
@@ -49,7 +49,7 @@ namespace BookingApp.Model
             GuestId = int.Parse(values[2]);
             StartDate = DateTime.Parse(values[3]);
             EndDate = DateTime.Parse(values[4]);
-            NumberOfGuests = int.Parse(values[5]);
+            GuestsNumber = int.Parse(values[5]);
             Status = Enum.Parse<ReservationStatus>(values[6]);
         }
     }
