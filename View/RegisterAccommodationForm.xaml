@@ -5,15 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BookingApp.View"
         mc:Ignorable="d"
-        Title="RegisterAccommodationForm" Height="450" Width="800">
-    <Grid>
-        
-        
-        
-        
-        
-        
-        
-        
-    </Grid>
+        Title="RegisterAccommodationForm" Height="450" Width="800"   WindowStartupLocation="CenterScreen" >
+    
+        <DockPanel>
+            <!-- Gornji panel sa Logout dugmetom -->
+        <StackPanel Orientation="Horizontal"
+                    DockPanel.Dock="Top"
+                    HorizontalAlignment="Right"
+                    Margin="0,10,10,0">
+            <Button Content="Logout" Click="Logout_Click"/>
+        </StackPanel>
+
+        <Grid>
+               
+            </Grid>
+        </DockPanel>
+
 </Window>
