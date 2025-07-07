@@ -1,5 +1,6 @@
 ﻿using BookingApp.Model;
 using BookingApp.Repository;
+using BookingApp.Utilities;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -45,13 +46,30 @@ namespace BookingApp.View
         private void SignIn(object sender, RoutedEventArgs e)
         {
             User user = _repository.GetByUsername(Username);
+
             if (user != null)
             {
                 if(user.Password == txtPassword.Password)
                 {
+                    Session.CurrentUser = user;
+                    switch (user.Role)
+                    {
+                        case UserRole.OWNER:
+                            var ownerView = new RegisterAccommodationForm();
+                            ownerView.Show();
+                            break;
+
+                        default:
+                            MessageBox.Show($"User role {user.Role} not implemented.");
+                            break;
+                    }
+
+                    this.Close();
+                    /*
                     CommentsOverview commentsOverview = new CommentsOverview(user);
                     commentsOverview.Show();
                     Close();
+                    */
                 } 
                 else
                 {
