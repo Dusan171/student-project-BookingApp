@@ -91,14 +91,14 @@ namespace BookingApp.Model
             if (CancellationDeadlineDays < 1)
                 return false;
 
-           /* if (Images == null || Images.Count == 0)
+            if (Images == null || Images.Count == 0)
                 return false;
 
             foreach (var img in Images)
             {
                 if (string.IsNullOrWhiteSpace(img.Path))
                     return false;
-            }*/
+            }
 
             return true;
         }
