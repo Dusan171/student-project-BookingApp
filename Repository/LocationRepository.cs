@@ -11,7 +11,7 @@ namespace BookingApp.Repository
     public class LocationRepository
     {
 
-        private const string FilePath = "../../../Resources/Data/comments.csv";
+        private const string FilePath = "../../../Resources/Data/location.csv";
 
         private readonly Serializer<Location> _serializer;
 

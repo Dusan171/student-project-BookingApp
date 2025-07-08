@@ -1,10 +1,11 @@
 ﻿using BookingApp.Serializer;
 using System;
+using System.ComponentModel;
 
 
 namespace BookingApp.Model
 {
-    public class AccommodationImage : ISerializable
+    public class AccommodationImage : ISerializable,INotifyPropertyChanged
     {
         public int Id { get; set; }
         public string Path { get; set; }
@@ -20,6 +21,7 @@ namespace BookingApp.Model
             AccommodationId = accommodationId;
         }
 
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public string[] ToCSV()
         {
@@ -40,9 +42,6 @@ namespace BookingApp.Model
             Path =values[1];
             AccommodationId = int.Parse(values[2]);
         }
-
-
-
 
 
     }

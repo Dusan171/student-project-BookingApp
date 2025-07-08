@@ -1,26 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
+using System.Reflection;
+using System.Xml.Linq;
 using BookingApp.Serializer;
 using static System.Net.Mime.MediaTypeNames;
+using System.ComponentModel;
 
 
 namespace BookingApp.Model
 {
     public enum AccommodationType { APARTMENT, HOUSE, COTTAGE }
-    public class Accommodation : ISerializable
+    public class Accommodation : ISerializable,INotifyPropertyChanged
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public Location GeoLocation { get; set; }
         public AccommodationType Type { get; set; }
-        public int MaxGuests { get; set; }
-        public int MinReservationDays { get; set; }
+        public int? MaxGuests { get; set; }
+        public int? MinReservationDays { get; set; }
         public int CancellationDeadlineDays { get; set; }
         public List<AccommodationImage> Images { get; set; }
 
 
-        public Accommodation() { CancellationDeadlineDays = 1; }
+        public Accommodation() { CancellationDeadlineDays = 1; Images = new List<AccommodationImage>(); }
 
         public Accommodation(int id, string name, Location geolocation, AccommodationType type, int maxguests, int minreservationdays, int cancellationdeadlinedays=1)
         {
@@ -32,13 +37,13 @@ namespace BookingApp.Model
             MinReservationDays = minreservationdays;
             CancellationDeadlineDays = cancellationdeadlinedays;
             Images = new List<AccommodationImage>();
-            
         }
 
+        public event PropertyChangedEventHandler? PropertyChanged;
 
+        
         public string[] ToCSV()
         {
-            
             string[] csvValues = { 
                 Id.ToString(),
                 Name,
@@ -67,8 +72,35 @@ namespace BookingApp.Model
             Type = Enum.Parse<AccommodationType>(values[5]);
             MaxGuests = int.Parse(values[6]);
             MinReservationDays = int.Parse(values[7]);
-            CancellationDeadlineDays = int.Parse(values[9]);
+            CancellationDeadlineDays = int.Parse(values[8]);
 
+        }
+
+
+        public bool IsValid()
+        {
+            if (string.IsNullOrWhiteSpace(Name))
+                return false;
+
+            if (!MaxGuests.HasValue || MaxGuests < 1)
+                return false;
+
+            if (!MinReservationDays.HasValue || MinReservationDays < 1)
+                return false;
+
+            if (CancellationDeadlineDays < 1)
+                return false;
+
+           /* if (Images == null || Images.Count == 0)
+                return false;
+
+            foreach (var img in Images)
+            {
+                if (string.IsNullOrWhiteSpace(img.Path))
+                    return false;
+            }*/
+
+            return true;
         }
     }
 }

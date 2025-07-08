@@ -5,10 +5,15 @@ using BookingApp.Serializer;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
+using System.Net.Mail;
+using System.Net;
+using System.Reflection;
+using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace BookingApp.Model
 {
-    public class Location : ISerializable
+    public class Location : ISerializable, INotifyPropertyChanged
     {
         public int Id { get; set; }
         public string City { get; set; }
@@ -23,7 +28,12 @@ namespace BookingApp.Model
             Country = country;
         }
 
+        public event PropertyChangedEventHandler? PropertyChanged;
 
+        public Location ToLocation()
+        {
+            return new Location(Id,City,Country);
+        }
         public string[] ToCSV()
         {
             string[] csvValues = { Id.ToString(),City,Country};
