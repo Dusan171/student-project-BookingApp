@@ -59,6 +59,11 @@ namespace BookingApp.View
                             ownerView.Show();
                             break;
 
+                        case UserRole.GUEST:
+                            var guestView = new AccommodationLookup();
+                            guestView.Show();
+                            break;
+
                         default:
                             MessageBox.Show($"User role {user.Role} not implemented.");
                             break;

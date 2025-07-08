@@ -67,7 +67,8 @@ namespace BookingApp.Model
             Type = Enum.Parse<AccommodationType>(values[5]);
             MaxGuests = int.Parse(values[6]);
             MinReservationDays = int.Parse(values[7]);
-            CancellationDeadlineDays = int.Parse(values[9]);
+           // CancellationDeadlineDays = int.Parse(values[9]);
+            CancellationDeadlineDays = int.Parse(values[8]);
 
         }
     }
