@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace BookingApp.Repository
 {
-    internal class AccommodationRepository
+    public class AccommodationRepository
     {
 
         private const string FilePath = "../../../Resources/Data/accommodation.csv";
