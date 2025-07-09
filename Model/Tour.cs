@@ -47,11 +47,22 @@ public class Tour : ISerializable
         string startTimeIds = string.Join("|", StartTimes.Select(st => st.Id));
         string imageIds = string.Join("|", Images.Select(img => img.Id));
 
-        string line = $"{Id},{Name},{Location.Id},{Description},{Language},{MaxTourists},{DurationHours}," +
-                      $"{keyPointIds},{startTimeIds},{imageIds}";
+        string[] csvValues = {
+        Id.ToString(),
+        Name,
+        Location.Id.ToString(),
+        Description,
+        Language,
+        MaxTourists.ToString(),
+        DurationHours.ToString(),
+        keyPointIds,
+        startTimeIds,
+        imageIds
+        };
 
-        return new string[] { line };
+        return csvValues;
     }
+
 
     public void FromCSV(string[] values)
     {
