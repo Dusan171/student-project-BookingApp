@@ -1,0 +1,60 @@
+﻿<Window x:Class="BookingApp.View.TourSearch"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BookingApp.View"
+        mc:Ignorable="d"
+        Title="TourSearch" Height="450" Width="800">
+    <Grid Margin="10">
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
+
+    <!-- Pretraga -->
+    <StackPanel Orientation="Vertical" Grid.Row="0" Margin="0,0,0,10">
+
+        <WrapPanel Margin="0,0,0,5">
+            <Label Content="Grad:" Width="80"/>
+            <TextBox Name="CityTextBox" Width="150"/>
+
+            <Label Content="Država:" Margin="20,0,0,0" Width="80"/>
+            <TextBox Name="CountryTextBox" Width="150"/>
+        </WrapPanel>
+
+        <WrapPanel Margin="0,0,0,5">
+            <Label Content="Jezik:" Width="80"/>
+            <TextBox Name="LanguageTextBox" Width="150"/>
+
+            <Label Content="Trajanje (h):" Margin="20,0,0,0" Width="100"/>
+            <TextBox Name="DurationTextBox" Width="100"/>
+        </WrapPanel>
+
+        <WrapPanel Margin="0,0,0,5">
+            <Label Content="Broj ljudi:" Width="80"/>
+            <TextBox Name="PeopleCountTextBox" Width="150"/>
+
+            <Button Content="Pretraži" Width="100" Margin="20,0,0,0" Click="SearchTours_Click"/>
+        </WrapPanel>
+
+    </StackPanel>
+
+    <!-- Prikaz rezultata -->
+    <DataGrid Name="ToursDataGrid"
+              Grid.Row="1"
+              AutoGenerateColumns="False"
+              CanUserAddRows="False"
+              SelectionMode="Single">
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="Naziv" Binding="{Binding Name}" Width="*"/>
+            <DataGridTextColumn Header="Grad" Binding="{Binding Location.City}" Width="*"/>
+            <DataGridTextColumn Header="Država" Binding="{Binding Location.Country}" Width="*"/>
+            <DataGridTextColumn Header="Jezik" Binding="{Binding Language}" Width="*"/>
+            <DataGridTextColumn Header="Trajanje (h)" Binding="{Binding DurationHours}" Width="*"/>
+            <DataGridTextColumn Header="Max Turista" Binding="{Binding MaxTourists}" Width="*"/>
+            <DataGridTextColumn Header="Rezervisano" Binding="{Binding ReservedSpots}" Width="*"/>
+        </DataGrid.Columns>
+    </DataGrid>
+</Grid>
+</Window>
