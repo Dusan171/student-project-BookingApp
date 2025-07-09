@@ -31,14 +31,15 @@
             <TextBox Name="DurationTextBox" Width="100"/>
         </WrapPanel>
 
-        <WrapPanel Margin="0,0,0,5">
-            <Label Content="Broj ljudi:" Width="80"/>
-            <TextBox Name="PeopleCountTextBox" Width="150"/>
+            <WrapPanel Margin="0,0,0,5">
+                <Label Content="Broj ljudi:" Width="80"/>
+                <TextBox Name="PeopleCountTextBox" Width="150"/>
 
-            <Button Content="Pretraži" Width="100" Margin="20,0,0,0" Click="SearchTours_Click"/>
-        </WrapPanel>
+                <Button Content="Pretraži" Width="100" Margin="20,0,0,0" Click="SearchTours_Click"/>
+                <Button Content="Logout" Width="100" Margin="10,0,0,0" Click="LogoutButton_Click"/>
+            </WrapPanel>
 
-    </StackPanel>
+        </StackPanel>
 
     <!-- Prikaz rezultata -->
     <DataGrid Name="ToursDataGrid"

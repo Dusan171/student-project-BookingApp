@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using BookingApp.Model;
 using BookingApp.Repository;
+using BookingApp.Utilities;
 
 namespace BookingApp.View
 {
@@ -50,6 +51,18 @@ namespace BookingApp.View
             ).ToList();
 
             ToursDataGrid.ItemsSource = filteredTours;
+        }
+
+        private void LogoutButton_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("Are you sure you want to logout?", "Logout", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.Yes)
+            {
+                Session.CurrentUser = null;
+                var signInWindow = new SignInForm();
+                signInWindow.Show();
+                this.Close();
+            }
         }
     }
 }

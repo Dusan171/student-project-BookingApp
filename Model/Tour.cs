@@ -14,6 +14,7 @@ public class Tour : ISerializable
     public string Description { get; set; }
     public string Language { get; set; }
     public int MaxTourists { get; set; }
+    public int ReservedSpots { get; set; }
     public List<KeyPoint> KeyPoints { get; set; }
     public List<StartTourTime> StartTimes { get; set; }
     public double DurationHours { get; set; }
@@ -27,7 +28,7 @@ public class Tour : ISerializable
     }
 
     public Tour(int id, string name, Location location, string description, string language,
-                int maxTourists, double durationHours)
+                int maxTourists,int reservedSpots, double durationHours)
     {
         Id = id;
         Name = name;
@@ -35,6 +36,7 @@ public class Tour : ISerializable
         Description = description;
         Language = language;
         MaxTourists = maxTourists;
+        ReservedSpots = reservedSpots;
         DurationHours = durationHours;
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
