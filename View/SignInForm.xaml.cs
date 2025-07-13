@@ -63,6 +63,15 @@ namespace BookingApp.View
                             var guestView = new AccommodationLookup();
                             guestView.Show();
                             break;
+                        case UserRole.GUIDE:
+                            var guideView = new CreateTourForm();
+                            guideView.Show();
+                            break;
+
+                        case UserRole.TOURIST:
+                            var touristView = new TourSearch();
+                            touristView.Show();
+                            break;
 
                         default:
                             MessageBox.Show($"User role {user.Role} not implemented.");

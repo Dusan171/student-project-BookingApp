@@ -17,10 +17,10 @@ namespace BookingApp.Model
 
         public ReservationGuest() { }
 
-        public ReservationGuest(string firstName, string lastName, int age)
+        public ReservationGuest(int id,int reservationId, string firstName, string lastName, int age)
         {
-            Id = Id;
-            ReservationId = ReservationId;
+            Id = id;
+            ReservationId = reservationId;
             FirstName = firstName;
             LastName = lastName;
             Age = age;
