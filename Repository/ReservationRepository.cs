@@ -45,5 +45,14 @@ namespace BookingApp.Repository
         {
             return _reservations.Any() ? _reservations.Max(r => r.Id) + 1 : 1;
         }
+        //potrebna za obavljanje rezervacije
+        public Reservation Save(Reservation reservation)
+        {
+            reservation.Id = NextId();
+            _reservations = _serializer.FromCSV(FilePath);
+            _reservations.Add(reservation);
+            _serializer.ToCSV(FilePath, _reservations);
+            return reservation;
+        }
     }
 }
