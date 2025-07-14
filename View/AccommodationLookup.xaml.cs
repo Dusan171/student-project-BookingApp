@@ -76,13 +76,6 @@ namespace BookingApp.View
                 TypeMatches(acc, selectedType) &&
                 MaxGuestsMatches(acc, maxGuests) &&
                 MinDaysMatches(acc, minDays);
-            /* return (string.IsNullOrEmpty(name) || acc.Name.Contains(name, StringComparison.OrdinalIgnoreCase)) &&
-        (string.IsNullOrEmpty(country) || acc.GeoLocation.Country.Contains(country, StringComparison.OrdinalIgnoreCase)) &&
-        (string.IsNullOrEmpty(city) || acc.GeoLocation.City.Contains(city, StringComparison.OrdinalIgnoreCase)) &&
-        (selectedType == "All" || acc.Type.ToString() == selectedType) &&
-        (maxGuests == 0 || acc.MaxGuests >= maxGuests) &&
-        (minDays == 0 || acc.MinReservationDays <= minDays);*/
-
         }
         private bool NameMatches(Accommodation acc, string name) =>
             string.IsNullOrEmpty(name) || acc.Name.Contains(name, StringComparison.OrdinalIgnoreCase);
@@ -112,9 +105,26 @@ namespace BookingApp.View
                 //Zatvara trenutni prozor
                 this.Close();
             }
+        }
+        private void ReserveButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedAccommodation = (Accommodation)AccommodationsDataGrid.SelectedItem;
 
-            //Zatvara trenutni prozor
-            //this.Close();
+            if (selectedAccommodation == null)
+            {
+                MessageBox.Show("Please select an accommodation to reserve.");
+                return;
+            }
+            try
+            {
+                var reservationWindow = new AccommodationReservationView(selectedAccommodation);
+                reservationWindow.ShowDialog();
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show("Error: " + ex.Message);
+            }
+            
         }
     }
 }

@@ -61,16 +61,29 @@
 
         <Button Content="Logout" Width="49" Height="23" HorizontalAlignment="Right" VerticalAlignment="Top" Click="LogoutButton_Click" Margin="0,5,5,0"/>
 
-        <DataGrid x:Name="AccommodationsDataGrid" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                <DataGridTextColumn Header="City" Binding="{Binding GeoLocation.City}"/>
-                <DataGridTextColumn Header="Country" Binding="{Binding GeoLocation.Country}"/>
-                <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
-                <DataGridTextColumn Header="Max Guests" Binding="{Binding MaxGuests}"/>
-                <DataGridTextColumn Header="Min Days" Binding="{Binding MinReservationDays}"/>
-                <DataGridTextColumn Header="CancelDeadLinde" Binding="{Binding CancellationDeadlineDays}"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <StackPanel Grid.Row="1">
+            <DataGrid x:Name="AccommodationsDataGrid"
+              AutoGenerateColumns="False"
+              CanUserAddRows="False"
+              IsReadOnly="True"
+              Height="300"
+              Margin="0,0,0,10">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                    <DataGridTextColumn Header="City" Binding="{Binding GeoLocation.City}"/>
+                    <DataGridTextColumn Header="Country" Binding="{Binding GeoLocation.Country}"/>
+                    <DataGridTextColumn Header="Type" Binding="{Binding Type}"/>
+                    <DataGridTextColumn Header="Max Guests" Binding="{Binding MaxGuests}"/>
+                    <DataGridTextColumn Header="Min Days" Binding="{Binding MinReservationDays}"/>
+                    <DataGridTextColumn Header="CancelDeadline" Binding="{Binding CancellationDeadlineDays}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Button Content="Reserve"
+            Width="100"
+            Height="30"
+            HorizontalAlignment="Center"
+            Click="ReserveButton_Click"/>
+        </StackPanel>
     </Grid>
 </Window>
