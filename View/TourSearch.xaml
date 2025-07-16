@@ -55,7 +55,16 @@
             <DataGridTextColumn Header="Trajanje (h)" Binding="{Binding DurationHours}" Width="*"/>
             <DataGridTextColumn Header="Max Turista" Binding="{Binding MaxTourists}" Width="*"/>
             <DataGridTextColumn Header="Rezervisano" Binding="{Binding ReservedSpots}" Width="*"/>
-        </DataGrid.Columns>
+
+                <DataGridTemplateColumn Header="Akcija">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Rezerviši" Click="ReserveButton_Click" Tag="{Binding}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+            </DataGrid.Columns>
     </DataGrid>
 </Grid>
 </Window>

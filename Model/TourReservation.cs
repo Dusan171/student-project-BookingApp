@@ -15,8 +15,10 @@ namespace BookingApp.Model
         public DateTime ReservationTime { get; set; }
         public bool IsActive { get; set; }
 
-        // Ove se ne čuvaju direktno u CSV-u
-        public List<ReservationGuest> Guests { get; set; }
+        
+        public Tour Tour { get; set; }
+        public Tourist Tourist { get; set; }
+        public List<ReservationGuest> Guests { get; set; } 
 
         public TourReservation()
         {
