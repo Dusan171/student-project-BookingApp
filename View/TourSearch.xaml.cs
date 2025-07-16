@@ -20,10 +20,12 @@ namespace BookingApp.View
     public partial class TourSearch : Window
     {
         public TourRepository _tourRepository = new TourRepository();
+        public Tourist LoggedInTourist { get; }
 
-        public TourSearch()
+        public TourSearch(Tourist loggedInTourist)
         {
             InitializeComponent();
+            LoggedInTourist = loggedInTourist;
             _tourRepository = new TourRepository();
             LoadAllTours();
         }
@@ -62,6 +64,20 @@ namespace BookingApp.View
                 var signInWindow = new SignInForm();
                 signInWindow.Show();
                 this.Close();
+            }
+        }
+
+        private void ReserveButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is Tour selectedTour)
+            {
+
+                var reservationWindow = new TourReservationWindow(selectedTour, LoggedInTourist);
+                reservationWindow.Owner = this;
+                reservationWindow.ShowDialog();
+
+                // Reload lista posle zatvaranja rezervacije
+                LoadAllTours();
             }
         }
     }

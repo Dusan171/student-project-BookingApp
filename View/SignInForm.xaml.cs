@@ -69,7 +69,16 @@ namespace BookingApp.View
                             break;
 
                         case UserRole.TOURIST:
-                            var touristView = new TourSearch();
+                            var tourist = user as Tourist ?? new Tourist
+                            {
+                                Id = user.Id,
+                                Username = user.Username,
+                                Password = user.Password,
+                            
+                         
+                            };
+
+                            var touristView = new TourSearch(tourist);
                             touristView.Show();
                             break;
 
