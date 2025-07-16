@@ -1,6 +1,7 @@
 ﻿using BookingApp.Model;
 using BookingApp.Repository;
 using BookingApp.Utilities;
+using BookingApp.View.Owner;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -55,7 +56,7 @@ namespace BookingApp.View
                     switch (user.Role)
                     {
                         case UserRole.OWNER:
-                            var ownerView = new RegisterAccommodationForm();
+                            var ownerView = new OwnerDashboard();
                             ownerView.Show();
                             break;
 
