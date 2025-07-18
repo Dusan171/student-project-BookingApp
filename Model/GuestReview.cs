@@ -3,7 +3,7 @@ using BookingApp.Serializer;
 
 namespace BookingApp.Model
 {
-    internal class GuestReview : ISerializable
+    public class GuestReview : ISerializable
     {
         public int Id { get; set; }
         public int ReservationId { get; set; }
