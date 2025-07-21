@@ -1,7 +1,8 @@
 ﻿using BookingApp.Model;
 using BookingApp.Repository;
 using BookingApp.Utilities;
-using BookingApp.View.Owner;
+//using BookingApp.View.Owner;
+using BookingApp.View.Guide;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -56,7 +57,7 @@ namespace BookingApp.View
                     switch (user.Role)
                     {
                         case UserRole.OWNER:
-                            var ownerView = new OwnerDashboard();
+                            var ownerView = new RegisterAccommodationForm();
                             ownerView.Show();
                             break;
 
@@ -69,19 +70,10 @@ namespace BookingApp.View
                             guideView.Show();
                             break;
 
-                        case UserRole.TOURIST:
-                            var tourist = user as Tourist ?? new Tourist
-                            {
-                                Id = user.Id,
-                                Username = user.Username,
-                                Password = user.Password,
-                            
-                         
-                            };
-
-                            var touristView = new TourSearch(tourist);
+                        /*case UserRole.TOURIST:
+                            var touristView = new TourSearch();
                             touristView.Show();
-                            break;
+                            break;*/
 
                         default:
                             MessageBox.Show($"User role {user.Role} not implemented.");

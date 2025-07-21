@@ -7,16 +7,16 @@ using BookingApp.Model;
 
 namespace BookingApp.Model
 {
-    public class Image : ISerializable
+    public class Images : ISerializable
     {
         public int Id { get; set; }
         public string Path { get; set; }
 
-        public Image()
+        public Images()
         {
         }
 
-        public Image(int id, string path)
+        public Images(int id, string path)
         {
             Id = id;
             Path = path;
@@ -24,7 +24,7 @@ namespace BookingApp.Model
 
         public string[] ToCSV()
         {
-            return new string[] { $"{Id},{Path}" };
+            return new string[] { $"{Id}|{Path}" };
         }
 
         public void FromCSV(string[] values)
