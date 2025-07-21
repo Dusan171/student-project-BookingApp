@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Serializer;
-using BookingApp.Model; 
+using BookingApp.Model;
+using System.Windows;
 
 
 public class Tour : ISerializable
@@ -17,13 +18,13 @@ public class Tour : ISerializable
     public List<KeyPoint> KeyPoints { get; set; }
     public List<StartTourTime> StartTimes { get; set; }
     public double DurationHours { get; set; }
-    public List<Image> Images { get; set; }
+    public List<Images> Images { get; set; }
 
     public Tour()
     {
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
-        Images = new List<Image>();
+        Images = new List<Images>();
     }
 
     public Tour(int id, string name, Location location, string description, string language,
@@ -38,7 +39,7 @@ public class Tour : ISerializable
         DurationHours = durationHours;
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
-        Images = new List<Image>();
+        Images = new List<Images>();
     }
 
     public string[] ToCSV()
@@ -51,7 +52,6 @@ public class Tour : ISerializable
         Id.ToString(),
         Name,
         Location.Id.ToString(),
-        Description,
         Language,
         MaxTourists.ToString(),
         DurationHours.ToString(),
@@ -69,15 +69,14 @@ public class Tour : ISerializable
         Id = int.Parse(values[0]);
         Name = values[1];
         Location = new Location { Id = int.Parse(values[2]) };
-        Description = values[3];
-        Language = values[4];
-        MaxTourists = int.Parse(values[5]);
-        DurationHours = double.Parse(values[6]);
+        Language = values[3];
+        MaxTourists = int.Parse(values[4]);
+        DurationHours = double.Parse(values[5]);
 
         KeyPoints = new List<KeyPoint>();
-        if (!string.IsNullOrEmpty(values[7]))
+        if (!string.IsNullOrEmpty(values[6]))
         {
-            var keyPointIds = values[7].Split('|');
+            var keyPointIds = values[6].Split('|');
             foreach (var id in keyPointIds)
             {
                 KeyPoints.Add(new KeyPoint { Id = int.Parse(id) });
@@ -85,22 +84,22 @@ public class Tour : ISerializable
         }
 
         StartTimes = new List<StartTourTime>();
-        if (!string.IsNullOrEmpty(values[8]))
+        if (!string.IsNullOrEmpty(values[7]))
         {
-            var startTimeIds = values[8].Split('|');
+            var startTimeIds = values[7].Split('|');
             foreach (var id in startTimeIds)
             {
                 StartTimes.Add(new StartTourTime { Id = int.Parse(id) });
             }
         }
 
-        Images = new List<Image>();
-        if (!string.IsNullOrEmpty(values[9]))
+        Images = new List<Images>();
+        if (!string.IsNullOrEmpty(values[8]))
         {
-            var imageIds = values[9].Split('|');
+            var imageIds = values[8].Split('|');
             foreach (var id in imageIds)
             {
-                Images.Add(new Image { Id = int.Parse(id) });
+                Images.Add(new Images { Id = int.Parse(id) });
             }
         }
     }
