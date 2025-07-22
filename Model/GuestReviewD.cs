@@ -58,5 +58,16 @@ namespace BookingApp.Model
             CreatedAt = values.Length > 6 ? DateTime.Parse(values[6]) : DateTime.Now;
 
         }
+
+        public int ImageCount
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(ImagePaths))
+                    return 0;
+
+                return ImagePaths.Split(';', StringSplitOptions.RemoveEmptyEntries).Length;
+            }
+        }
     }
 }

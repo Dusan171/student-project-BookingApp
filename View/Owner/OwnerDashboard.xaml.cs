@@ -46,5 +46,15 @@ namespace BookingApp.View.Owner
             MainContentControl.Content = new RegisterAccommodationView();
         }
 
+        private void Requests_Click(object sender, RoutedEventArgs e)
+        {
+          
+        }
+
+        private void Reviews_Click(object sender, RoutedEventArgs e)
+        {
+            MainContentControl.Content = new ReviewsView();
+        }
+
     }
 }
