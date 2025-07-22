@@ -1,57 +1,49 @@
 ﻿using System;
+using System.ComponentModel;
 using BookingApp.Serializer;
 
 namespace BookingApp.Model
 {
-    public class GuestReview : ISerializable
+    public class GuestReview : ISerializable, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public int Id { get; set; }
         public int ReservationId { get; set; }
-
         public int CleanlinessRating { get; set; }
-        public int OwnerRating { get; set; }
+        public int RuleRespectingRating { get; set; }
         public string Comment { get; set; }
-        public string ImagePaths { get; set; }
-        public DateTime CreatedAt { get; set; }
-
-
         public GuestReview() { }
-
-        public GuestReview(int id, int reservationId, int cleanliness, int owner, string comment, string imagePaths)
+        public GuestReview(int id, int reservationId, int cleanlinessRating, int ruleRespectingRating, string comment)
         {
             Id = id;
             ReservationId = reservationId;
-            CleanlinessRating = cleanliness;
-            OwnerRating = owner;
+            CleanlinessRating = cleanlinessRating;
+            RuleRespectingRating = ruleRespectingRating;
             Comment = comment;
-            ImagePaths = imagePaths;
-            CreatedAt = DateTime.Now;
         }
+
+        public void FromCSV(string[] values)
+        {
+            Id = Convert.ToInt32(values[0]);
+            ReservationId = Convert.ToInt32(values[1]);
+            CleanlinessRating = Convert.ToInt32(values[2]); ;
+            RuleRespectingRating= Convert.ToInt32(values[3]);
+            Comment = Convert.ToString(values[4]);
+        }
+
         public string[] ToCSV()
         {
-            return new string[]
+            string[] csvValues =
             {
                 Id.ToString(),
                 ReservationId.ToString(),
                 CleanlinessRating.ToString(),
-                OwnerRating.ToString(),
-                Comment ?? string.Empty,
-                ImagePaths ?? string.Empty,
-                CreatedAt.ToString("o")
+
+                RuleRespectingRating.ToString(),
+                Comment
             };
-        }
-        public void FromCSV(string[] values)
-        {
-            Id = int.Parse(values[0]);
-            ReservationId= int.Parse(values[1]);
-            CleanlinessRating = int.Parse(values[2]);
-            OwnerRating = int.Parse(values[3]);
-
-            Comment = values.Length > 4 ? values[4] : string.Empty;
-            
-            ImagePaths = values.Length > 5 ? values[5] : string.Empty;
-
-            CreatedAt = values.Length > 6 ? DateTime.Parse(values[6]) : DateTime.Now;
+            return csvValues;
         }
     }
 }

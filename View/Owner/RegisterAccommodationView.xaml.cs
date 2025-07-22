@@ -1,16 +1,26 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Windows;
-using BookingApp.Model;
+﻿using BookingApp.Model;
 using BookingApp.Repository;
-using BookingApp.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
 
-namespace BookingApp.View
+namespace BookingApp.View.Owner
 {
     /// <summary>
-    /// Interaction logic for RegisterAccommodationForm.xaml
+    /// Interaction logic for RegisterAccommodationView.xaml
     /// </summary>
-    public partial class RegisterAccommodationForm : Window
+    public partial class RegisterAccommodationView : UserControl
     {
         public AccommodationRepository AccommodationRepository { get; set; }
         public Accommodation Accommodation { get; set; }
@@ -20,10 +30,10 @@ namespace BookingApp.View
 
         public LocationRepository LocationRepository { get; set; }
 
-        public RegisterAccommodationForm()
+        public RegisterAccommodationView()
         {
             InitializeComponent();
-            
+
             Accommodation = new Accommodation
             {
                 GeoLocation = new Location(),
@@ -31,21 +41,13 @@ namespace BookingApp.View
             };
             AccommodationRepository = new AccommodationRepository();
             LocationRepository = new LocationRepository();
-            
+
             //AccommodationImageRepository = new AccommodationImageRepository();
             DataContext = this;
         }
 
 
-        public void Logout_Click(object sender, RoutedEventArgs e)
-        {
-            Session.CurrentUser = null;
-            var signInWindow = new SignInForm();
-            signInWindow.Show();
 
-            //Zatvara trenutni prozor
-            this.Close();
-        }
 
         private void Confirm_Click(object sender, RoutedEventArgs e)
         {
@@ -61,7 +63,7 @@ namespace BookingApp.View
                     foreach (var image in Accommodation.Images)
                     {
                         image.AccommodationId = savedAccommodation.Id;
-                       // MessageBox.Show($"{image.Path}");
+                        // MessageBox.Show($"{image.Path}");
                         imageRepository.Save(image);
                     }
 
@@ -72,7 +74,7 @@ namespace BookingApp.View
                     MessageBox.Show("Error while saving: " + ex.Message, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
             }
-            else 
+            else
             {
                 MessageBox.Show("Invalid informations!", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
@@ -80,10 +82,19 @@ namespace BookingApp.View
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            ClearForm();
+        }
+        private void ClearForm()
+        {
+            Accommodation = new Accommodation
+            {
+                GeoLocation = new Location(),
+                Images = new List<AccommodationImage>()
+            };
+            DataContext = null;
+            DataContext = this;
         }
 
-      
         private void AddImage_Click(object sender, RoutedEventArgs e)
         {
             string imagePath = ImagePathTextBox.Text.Trim();
@@ -107,3 +118,4 @@ namespace BookingApp.View
 
     }
 }
+

@@ -17,13 +17,18 @@ public class StartTourTime : ISerializable
 
     public string[] ToCSV()
     {
-        return new string[] { $"{Id},{Time}" };
+        return new string[]
+        {
+        Id.ToString(),
+        Time.ToString("yyyy-MM-dd HH:mm:ss")
+        };
     }
+
 
     public void FromCSV(string[] values)
     {
         Id = int.Parse(values[0]);
-        Time = DateTime.ParseExact(values[1], "dd-mm-yyyys HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+        Time = DateTime.ParseExact(values[1], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
     }
 }
 

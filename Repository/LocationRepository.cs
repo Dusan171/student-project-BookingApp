@@ -30,11 +30,19 @@ namespace BookingApp.Repository
 
         public Location Save(Location location)
         {
-            location.Id = NextId();
-            _locations = _serializer.FromCSV(FilePath);
-            _locations.Add(location);
-            _serializer.ToCSV(FilePath, _locations);
-            return location;
+            Location current = _locations.Find(c => c.City == location.City && c.Country == location.Country);
+            if (current != null)
+            {
+                return location;
+            }
+            else
+            {
+                location.Id = NextId();
+                _locations = _serializer.FromCSV(FilePath);
+                _locations.Add(location);
+                _serializer.ToCSV(FilePath, _locations);
+                return location;
+            }
         }
 
         public int NextId()

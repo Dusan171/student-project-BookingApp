@@ -11,12 +11,12 @@ namespace BookingApp.View
     public partial class GuestReviewView : Window
     {
         private readonly Reservation _reservation;
-        private readonly GuestReviewRepository _guestReviewRepository;
+        private readonly GuestReviewRepositoryD _guestReviewRepositoryD;
         public GuestReviewView(Reservation reservation)
         {
             InitializeComponent();
             _reservation = reservation;
-            _guestReviewRepository = new GuestReviewRepository();
+            _guestReviewRepositoryD = new GuestReviewRepositoryD();
 
            /* if ((DateTime.Now - _reservation.EndDate).TotalDays > 5)
             {
@@ -40,9 +40,10 @@ namespace BookingApp.View
             string comment = CommentTextBox.Text.Trim();
             string imagePaths = ImagesTextBox.Text.Trim();
 
-            var review = new GuestReview
+            //var review = new GuestReview
+            /*var review = new GuestReview
             {
-                Id = _guestReviewRepository.NextId(),
+                Id = _guestReviewRepositoryD.NextId(),
                 ReservationId = _reservation.Id,
                 CleanlinessRating = cleanliness,
                 OwnerRating = owner,
@@ -50,7 +51,18 @@ namespace BookingApp.View
                 ImagePaths = imagePaths,
                 CreatedAt = DateTime.Now
             };
-            _guestReviewRepository.Save(review);
+            _guestReviewRepository.Save(review);*/
+            var reviewD = new GuestReviewD
+            {
+                Id = _guestReviewRepositoryD.NextId(),
+                ReservationId = _reservation.Id,
+                CleanlinessRating = cleanliness,
+                OwnerRating = owner,
+                Comment = comment,
+                ImagePaths = imagePaths,
+                CreatedAt = DateTime.Now
+            };
+            _guestReviewRepositoryD.Save(reviewD);
 
             MessageBox.Show("Thank you for your review!");
             this.Close();
