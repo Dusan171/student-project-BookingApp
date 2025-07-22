@@ -1,3 +1,4 @@
+
 ﻿using BookingApp.Model;
 using BookingApp.Serializer;
 using System;
@@ -13,7 +14,6 @@ namespace BookingApp.Repository
         private const string FilePath = "../../../Resources/Data/guestReview.csv";
 
         private readonly Serializer<GuestReview> _serializer;
-
         private List<GuestReview> _reviews;
 
         public GuestReviewRepository()
@@ -21,6 +21,7 @@ namespace BookingApp.Repository
             _serializer = new Serializer<GuestReview>();
             _reviews = _serializer.FromCSV(FilePath);
         }
+
 
         public List<GuestReview> GetAll()
         {
@@ -35,7 +36,6 @@ namespace BookingApp.Repository
             _serializer.ToCSV(FilePath, _reviews);
             return review;
         }
-
         public int NextId()
         {
             _reviews = _serializer.FromCSV(FilePath);
@@ -64,12 +64,11 @@ namespace BookingApp.Repository
             _serializer.ToCSV(FilePath, _reviews);
             return review;
         }
-
+         
         public List<GuestReview> GetByReservationId(Reservation reservation)
         {
             _reviews = _serializer.FromCSV(FilePath);
             return _reviews.FindAll(c => c.ReservationId == reservation.Id);
         }
-
     }
 }
