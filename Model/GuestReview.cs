@@ -39,6 +39,7 @@ namespace BookingApp.Model
                 Id.ToString(),
                 ReservationId.ToString(),
                 CleanlinessRating.ToString(),
+
                 RuleRespectingRating.ToString(),
                 Comment
             };

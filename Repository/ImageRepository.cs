@@ -10,21 +10,21 @@ namespace BookingApp.Repository
     {
         private const string FilePath = "../../../Resources/Data/images.csv";
 
-        private readonly Serializer<Image> _serializer;
-        private List<Image> _images;
+        private readonly Serializer<Images> _serializer;
+        private List<Images> _images;
 
         public ImageRepository()
         {
-            _serializer = new Serializer<Image>();
+            _serializer = new Serializer<Images>();
             _images = _serializer.FromCSV(FilePath);
         }
 
-        public List<Image> GetAll()
+        public List<Images> GetAll()
         {
             return _serializer.FromCSV(FilePath);
         }
 
-        public Image Save(Image image)
+        public Images Save(Images image)
         {
             image.Id = NextId();
             _images = _serializer.FromCSV(FilePath);
@@ -43,18 +43,18 @@ namespace BookingApp.Repository
             return _images.Max(c => c.Id) + 1;
         }
 
-        public void Delete(Image image)
+        public void Delete(Images image)
         {
             _images = _serializer.FromCSV(FilePath);
-            Image found = _images.Find(c => c.Id == image.Id);
+            Images found = _images.Find(c => c.Id == image.Id);
             _images.Remove(found);
             _serializer.ToCSV(FilePath, _images);
         }
 
-        public Image Update(Image image)
+        public Images Update(Images image)
         {
             _images = _serializer.FromCSV(FilePath);
-            Image current = _images.Find(c => c.Id == image.Id);
+            Images current = _images.Find(c => c.Id == image.Id);
             int index = _images.IndexOf(current);
             _images.Remove(current);
             _images.Insert(index, image);

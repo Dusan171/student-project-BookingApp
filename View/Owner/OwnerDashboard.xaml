@@ -90,7 +90,7 @@
                     </StackPanel>
                     
                     <!-- Natpis Booking App levo -->
-                    <TextBlock Text="Booking App" Foreground="White" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                    <TextBlock Text="Owner Dashboard" Foreground="White" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" DockPanel.Dock="Left"/>
 
                 </DockPanel>
 
@@ -100,29 +100,11 @@
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Height="35" Width="1176">
                         <Button Content="🏠 Home" Style="{StaticResource NavButtonStyle}" Click="HomeView_Click" Margin="0,0,17,0"/>
                         <Button Content="➕Register accommodation" Style="{StaticResource NavButtonStyle}" Click="RegisterAccommodation_Click" Margin="0,0,17,0"/>
-
-                        <Menu>
-                            <MenuItem Header="📊 Statistic" Style="{StaticResource {x:Type MenuItem}}" Height="36" Margin="0,0,17,0" Cursor="Hand">
-                                <MenuItem Header="All units" Cursor="Hand"/>
-                                <MenuItem Header="Criteria" Cursor="Hand"/>
-                            </MenuItem>
-                        </Menu>
-
-                        <Menu>
-                            <MenuItem Header="⭐Ratings and Reviews" Height="35" Margin="0,0,17,0" Cursor="Hand">
-                                <MenuItem Header="Guest → Host" Cursor="Hand"/>
-                                <MenuItem Header="Host → Guest" Cursor="Hand"/>
-                            </MenuItem>
-                        </Menu>
-
+                        <Button Content="❔Requests" Style="{StaticResource NavButtonStyle}" Click="Requests_Click"  Margin="0,0,17,0"/>
+                        <Button Content="📊 Statistic" Style="{StaticResource NavButtonStyle}"  Margin="0,0,17,0"/>
+                        <Button Content="📜 Reviews" Style="{StaticResource NavButtonStyle}" Click="Reviews_Click" Margin="0,0,17,0"/>
                         <Button Content="📄 PDF Reports" Style="{StaticResource NavButtonStyle}"  Margin="0,0,17,0"/>
 
-                        <Menu>
-                            <MenuItem Header="💬 Comments" Height="35" Cursor="Hand">
-                                <MenuItem Header="All comments" Cursor="Hand"/>
-                                <MenuItem Header="Report comment" Cursor="Hand"/>
-                            </MenuItem>
-                        </Menu>
                     </StackPanel>
                 </DockPanel>
             </StackPanel>

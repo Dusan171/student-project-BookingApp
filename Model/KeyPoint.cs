@@ -26,7 +26,7 @@ public class KeyPoint : ISerializable
     }
     public string[] ToCSV()
     {
-        return new string[] { $"{Id},{Name}" };
+        return new string[] { $"{Id}|{Name}" };
     }
 
     public void FromCSV(string[] values)
@@ -35,4 +35,8 @@ public class KeyPoint : ISerializable
         Name = values[1];
     }
 
+    public override string? ToString()
+    {
+        return $"{Name}";
+    }
 }
