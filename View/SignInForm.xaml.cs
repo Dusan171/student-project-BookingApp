@@ -60,7 +60,7 @@ namespace BookingApp.View
                             break;
 
                         case UserRole.GUEST:
-                            var guestView = new AccommodationLookup();
+                            var guestView = new GuestMainView();//samo ovdje treba pozvati drugi prozor
                             guestView.Show();
                             break;
                         case UserRole.GUIDE:

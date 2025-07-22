@@ -35,8 +35,9 @@ namespace BookingApp.Model
                 ReservationId.ToString(),
                 CleanlinessRating.ToString(),
                 OwnerRating.ToString(),
-                Comment,
-                ImagePaths,
+                Comment ?? string.Empty,
+                ImagePaths ?? string.Empty,
+                CreatedAt.ToString("o")
             };
         }
         public void FromCSV(string[] values)
@@ -45,9 +46,12 @@ namespace BookingApp.Model
             ReservationId= int.Parse(values[1]);
             CleanlinessRating = int.Parse(values[2]);
             OwnerRating = int.Parse(values[3]);
-            Comment = values[4];
-            ImagePaths = values[5];
-            CreatedAt = DateTime.Parse(values[6]);
+
+            Comment = values.Length > 4 ? values[4] : string.Empty;
+            
+            ImagePaths = values.Length > 5 ? values[5] : string.Empty;
+
+            CreatedAt = values.Length > 6 ? DateTime.Parse(values[6]) : DateTime.Now;
         }
     }
 }

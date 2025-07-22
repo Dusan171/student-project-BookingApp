@@ -8,7 +8,7 @@ namespace BookingApp.Repository
 {
     public class GuestReviewRepository
     {
-        private const string FilePath = "../../../Data/guestReviews.csv";
+        private const string FilePath = "../../../Resources/Data/guestReviews.csv";
         private readonly Serializer<GuestReview> _serializer;
         private List<GuestReview> _reviews;
 

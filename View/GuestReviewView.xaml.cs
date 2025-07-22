@@ -18,11 +18,11 @@ namespace BookingApp.View
             _reservation = reservation;
             _guestReviewRepository = new GuestReviewRepository();
 
-            if ((DateTime.Now - _reservation.EndDate).TotalDays > 5)
+           /* if ((DateTime.Now - _reservation.EndDate).TotalDays > 5)
             {
                 MessageBox.Show("You can only leave a review within 5 days after your stay.");
                 this.Close();
-            }
+            }*/
         }
         private void Submit_Click(Object sender, RoutedEventArgs e)
         {
