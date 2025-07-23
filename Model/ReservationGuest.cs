@@ -14,17 +14,28 @@ namespace BookingApp.Model
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public int Age { get; set; }
+        public bool HasAppeared { get; set; }
+        public int KeyPointJoinedAt { get; set; } // ID ključne tačke gde se gost pridružio turi
 
-        public ReservationGuest() { }
+        public ReservationGuest()
+        {
+            HasAppeared = false;
+            KeyPointJoinedAt = -1; // -1 znači da se još nije pridružio
+        }
 
-        public ReservationGuest(int id,int reservationId, string firstName, string lastName, int age)
+        public ReservationGuest(int id, int reservationId, string firstName, string lastName,
+                               int age, bool hasAppeared = false, int keyPointJoinedAt = -1)
         {
             Id = id;
             ReservationId = reservationId;
             FirstName = firstName;
             LastName = lastName;
             Age = age;
+            HasAppeared = hasAppeared;
+            KeyPointJoinedAt = keyPointJoinedAt;
         }
+
+        public string FullName => $"{FirstName} {LastName}";
 
         public string[] ToCSV()
         {
@@ -34,7 +45,9 @@ namespace BookingApp.Model
                 ReservationId.ToString(),
                 FirstName,
                 LastName,
-                Age.ToString()
+                Age.ToString(),
+                HasAppeared.ToString(),
+                KeyPointJoinedAt.ToString()
             };
         }
 
@@ -45,7 +58,8 @@ namespace BookingApp.Model
             FirstName = values[2];
             LastName = values[3];
             Age = int.Parse(values[4]);
+            HasAppeared = bool.Parse(values[5]);
+            KeyPointJoinedAt = int.Parse(values[6]);
         }
     }
 }
-

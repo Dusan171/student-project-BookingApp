@@ -1,0 +1,15 @@
+﻿<Window x:Class="BookingApp.View.Guide.ReservedTouristsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Reserved Tourists" Height="400" Width="300" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <DockPanel Margin="10">
+        <TextBlock Text="Reserved Tourists:" FontWeight="Bold" FontSize="16" DockPanel.Dock="Top" Margin="0,0,0,10" />
+        <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="GuestsPanel"/>
+        </ScrollViewer>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,10,10" DockPanel.Dock="Bottom">
+            <Button Content="Save" Height="30" Width="75" Margin="5" Click="SaveButton_Click"/>
+            <Button Content="Cancel" Height="30" Width="75" Margin="5" Click="CancelButton_Click"/>
+        </StackPanel>
+    </DockPanel>
+</Window>
