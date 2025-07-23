@@ -1,5 +1,6 @@
 ﻿using System;
 using BookingApp.Serializer;
+using System.Globalization;
 public class StartTourTime : ISerializable
 {
     public int Id { get; set; }
@@ -28,7 +29,8 @@ public class StartTourTime : ISerializable
     public void FromCSV(string[] values)
     {
         Id = int.Parse(values[0]);
-        Time = DateTime.ParseExact(values[1], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+        Time = DateTime.ParseExact(values[1], "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
     }
 }
 

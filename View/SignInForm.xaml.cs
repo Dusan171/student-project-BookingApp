@@ -1,7 +1,7 @@
 ﻿using BookingApp.Model;
 using BookingApp.Repository;
 using BookingApp.Utilities;
-//using BookingApp.View.Owner;
+using BookingApp.View.Owner;
 using BookingApp.View.Guide;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -57,7 +57,7 @@ namespace BookingApp.View
                     switch (user.Role)
                     {
                         case UserRole.OWNER:
-                            var ownerView = new RegisterAccommodationForm();
+                            var ownerView = new OwnerDashboard();
                             ownerView.Show();
                             break;
 
@@ -66,7 +66,7 @@ namespace BookingApp.View
                             guestView.Show();
                             break;
                         case UserRole.GUIDE:
-                            var guideView = new CreateTourForm();
+                            var guideView = new MainWindow();
                             guideView.Show();
                             break;
 
