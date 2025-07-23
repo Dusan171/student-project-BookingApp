@@ -11,10 +11,8 @@ using System.IO;
 
 namespace BookingApp.View.Guide
 {
-    public partial class CreateTourForm : Page
+    public partial class CreateTourForm : Window
     {
-        public event EventHandler Cancelled;
-
         private List<KeyPoint> keyPoints = new();
         //private List<Images> images = new();
         private List<StartTourTime> startTimes = new();
@@ -224,7 +222,7 @@ namespace BookingApp.View.Guide
                     imageRepository.Save(image);
                 }
 
-                Cancelled?.Invoke(this, EventArgs.Empty);
+                this.Close();
             }
             catch (Exception ex)
             {
@@ -236,7 +234,7 @@ namespace BookingApp.View.Guide
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            Cancelled?.Invoke(this, EventArgs.Empty);
+            this.Close();
         }
     }
 }
