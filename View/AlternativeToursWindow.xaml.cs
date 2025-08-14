@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Collections.Generic;
-using BookingApp.Model;
+using BookingApp.Domain;
 
 namespace BookingApp.View
 {

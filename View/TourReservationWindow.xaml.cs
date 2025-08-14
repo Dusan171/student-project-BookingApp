@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using BookingApp.Model;
-using BookingApp.Repository;
+using BookingApp.Domain;
+using BookingApp.Repositories;
 
 namespace BookingApp.View
 {

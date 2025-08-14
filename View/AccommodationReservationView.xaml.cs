@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
-using BookingApp.Repository;
-using BookingApp.Model;
 using BookingApp.Utilities;
 using System.Windows.Documents;
 using System.Collections.Generic;
 using System.Windows.Controls;
+using BookingApp.Domain;
+using BookingApp.Repositories;
 
 namespace BookingApp.View
 {

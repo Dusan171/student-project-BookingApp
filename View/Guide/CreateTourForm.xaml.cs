@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using BookingApp.Model;
-using BookingApp.Repository;
+using BookingApp.Domain;
 using System.Collections.ObjectModel;
 using System.IO;
-
+using BookingApp.Repositories;
 
 namespace BookingApp.View.Guide
 {

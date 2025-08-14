@@ -1,11 +1,11 @@
-﻿using BookingApp.Model;
-using BookingApp.Repository;
-using BookingApp.Utilities;
-using BookingApp.View.Owner;
+﻿using BookingApp.Utilities;
+using BookingApp.Presentation.Owner;
 using BookingApp.View.Guide;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using BookingApp.Domain;
+using BookingApp.Repositories;
 
 namespace BookingApp.View
 {

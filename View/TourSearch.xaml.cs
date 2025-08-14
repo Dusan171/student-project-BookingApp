@@ -11,8 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using BookingApp.Model;
-using BookingApp.Repository;
+using BookingApp.Domain;
+using BookingApp.Repositories;
 using BookingApp.Utilities;
 
 namespace BookingApp.View
