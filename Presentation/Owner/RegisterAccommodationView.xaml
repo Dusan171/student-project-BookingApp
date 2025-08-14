@@ -1,0 +1,173 @@
+﻿<UserControl x:Class="BookingApp.Presentation.Owner.RegisterAccommodationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:BookingApp.Presentation.Owner"
+             xmlns:utilities="clr-namespace:BookingApp.Utilities"
+             mc:Ignorable="d" 
+             Background="#f2f4f8">
+             
+    <UserControl.Resources>
+        <utilities:LocationConverter x:Key="LocationConverter"/>
+
+        <!-- Stil za zaobljene TextBox-ove -->
+        <Style TargetType="TextBox" x:Key="RoundedTextBox">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#003580"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="6"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="10" SnapsToDevicePixels="True">
+                            <ScrollViewer Margin="0" x:Name="PART_ContentHost"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#0059b3"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="BorderBrush" Value="#002850"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Stil za zaobljene ComboBox-ove -->
+        <Style x:Key="RoundedComboBox" TargetType="ComboBox">
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#003580"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Stil za dugmad u skladu sa OwnerDashboard -->
+        <Style x:Key="RoundedButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#003580"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="10,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="10" >
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#0059b3"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#002850"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="Transparent">
+        <DockPanel>
+            <Grid Grid.Row="0" Margin="300,200,300,50" Height="auto">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="1.5*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold">Name</Label>
+                <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold">Location</Label>
+                <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold">Accommodation Type</Label>
+                <Label Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold">Guest limit</Label>
+                <Label Grid.Row="4" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold">Minimum stay</Label>
+                <Label Grid.Row="5" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold">Cancellation deadline days</Label>
+                <Label Grid.Row="6" Grid.Column="0" VerticalAlignment="Center" FontWeight="SemiBold">Image path</Label>
+
+                <TextBox x:Name="textbox1" Grid.Row="0" Grid.Column="1" Style="{StaticResource RoundedTextBox}" 
+                         Text="{Binding Path=Accommodation.Name,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBox x:Name="textbox2" Grid.Row="1" Grid.Column="1" Style="{StaticResource RoundedTextBox}" 
+                         Text="{Binding Path=Accommodation.GeoLocation,Mode=TwoWay, UpdateSourceTrigger=LostFocus,Converter={StaticResource LocationConverter}}" />
+
+                
+
+                <TextBox x:Name="textbox3" Grid.Row="3" Grid.Column="1" Style="{StaticResource RoundedTextBox}" 
+                         Text="{Binding Path=Accommodation.MaxGuests,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBox x:Name="textbox4" Grid.Row="4" Grid.Column="1" Style="{StaticResource RoundedTextBox}" 
+                         Text="{Binding Path=Accommodation.MinReservationDays,Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+
+                <TextBox x:Name="textbox5" Grid.Row="5" Grid.Column="1" Style="{StaticResource RoundedTextBox}" 
+                         Text="{Binding Path=Accommodation.CancellationDeadlineDays,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <!-- Images -->
+                <StackPanel Grid.Row="6" Grid.Column="1" Margin="5,0,5,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                        <TextBox x:Name="ImagePathTextBox" Width="300" Style="{StaticResource RoundedTextBox}"/>
+                        <Button Content="Add" Width="50" Click="AddImage_Click" Height="25" Style="{StaticResource RoundedButtonStyle}"/>
+                    </StackPanel>
+
+                    <ListBox x:Name="ListBoxImages" Height="50" ItemsSource="{Binding Accommodation.Images}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path}" FontWeight="SemiBold"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+                <Border Grid.Row="2" Grid.Column="1" CornerRadius="10" BorderThickness="2" BorderBrush="#003580" Background="White" Margin="5">
+                    <ComboBox 
+                        x:Name="YearStatus" 
+                        Padding="10,0"
+                        Height="36"
+                        Background="White"
+                        IsEditable="True"
+                        IsReadOnly="True"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        VerticalContentAlignment="Center"
+                        SelectedValue="{Binding Path=Accommodation.Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedValuePath="Tag">    
+
+                        <ComboBoxItem Content="Apartment" Tag="APARTMENT"/>
+                        <ComboBoxItem Content="House" Tag="HOUSE"/>
+                        <ComboBoxItem Content="Cottage" Tag="COTTAGE"/>
+                    </ComboBox>
+                </Border>
+                <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="20,30,20,0">
+                    <Button Name="Confirm" Content="Confirm" IsDefault="True" Width="120" Click="Confirm_Click" Style="{StaticResource RoundedButtonStyle}"/>
+                    <Button Content="Cancel" IsCancel="True" Width="120" Click="Cancel_Click" Style="{StaticResource RoundedButtonStyle}"/>
+                </StackPanel>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</UserControl>
