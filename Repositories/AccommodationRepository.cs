@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 
 namespace BookingApp.Repositories
 {
-    public class AccommodationRepository
+    public class AccommodationRepository : IAccommodationRepository
     {
 
         private const string FilePath = "../../../Resources/Data/accommodation.csv";
@@ -27,6 +28,11 @@ namespace BookingApp.Repositories
             return _serializer.FromCSV(FilePath);
         }
 
+        public Accommodation GetById(int id)
+        {
+            _accommodations = _serializer.FromCSV(FilePath);
+            return _accommodations.FirstOrDefault(a => a.Id == id);
+        }
         public Accommodation Save(Accommodation accommodation)
         {
             accommodation.Id = NextId();
@@ -71,5 +77,11 @@ namespace BookingApp.Repositories
             return _accommodations.FindAll(c => c.GeoLocation.Id == location.Id);
         }
 
+        Accommodation IAccommodationRepository.GetById(int id)
+        {
+            throw new NotImplementedException();
+        }
+
     }
-}
+    }
+
