@@ -1,11 +1,12 @@
 ﻿using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace BookingApp.Repositories
 {
-    public class CommentRepository
+    public class CommentRepository : ICommentRepository
     {
 
         private const string FilePath = "../../../Resources/Data/comments.csv";
