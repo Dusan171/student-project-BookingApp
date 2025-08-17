@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain;
@@ -7,27 +6,31 @@ using BookingApp.Serializer;
 
 namespace BookingApp.Repositories
 {
-    public class GuestReviewRepositoryD
+    public class OwnerReviewRepository
     {
         private const string FilePath = "../../../Resources/Data/guestReviewsD.csv";
-        private readonly Serializer<GuestReviewD> _serializer;
+        private readonly Serializer<OwnerReview> _serializer;
 
-        private List<GuestReviewD> _reviews;
+        private List<OwnerReview> _reviews;
 
-        public GuestReviewRepositoryD()
+        public OwnerReviewRepository()
         {
-            _serializer = new Serializer<GuestReviewD>();
+            _serializer = new Serializer<OwnerReview>();
             _reviews = _serializer.FromCSV(FilePath);
         }
-        public List<GuestReviewD> GetAll()
+        public List<OwnerReview> GetAll()
         {
             return _reviews;
         }
-        public List<GuestReviewD> GetByReservationId(int reservationId)
+        public List<OwnerReview> GetByReservationId(int reservationId)
         {
             return _reviews.Where(r => r.ReservationId == reservationId).ToList();
         }
-        public GuestReviewD Save(GuestReviewD reviewD)
+        public bool HasGuestRated(int reservationId)
+        {
+            return _reviews.Any(r=>r.ReservationId==reservationId);
+        }
+        public OwnerReview Save(OwnerReview reviewD)
         {
             reviewD.Id = NextId();
 
