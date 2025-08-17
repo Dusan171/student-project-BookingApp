@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace BookingApp.View
+namespace BookingApp.Presentation.Guest
 {
     /// <summary>
     /// Interaction logic for GuestMainView.xaml

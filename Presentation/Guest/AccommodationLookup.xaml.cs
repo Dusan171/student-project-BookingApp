@@ -6,8 +6,9 @@ using System.Windows.Controls;
 using BookingApp.Utilities;
 using BookingApp.Domain;
 using BookingApp.Repositories;
+using BookingApp.View;
 
-namespace BookingApp.View
+namespace BookingApp.Presentation.Guest
 {
     /// <summary>
     /// Interaction logic for AccommodationLookup.xaml

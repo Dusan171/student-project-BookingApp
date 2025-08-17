@@ -3,7 +3,7 @@ using BookingApp.Repositories;
 using System;
 using System.Windows;
 
-namespace BookingApp.View
+namespace BookingApp.Presentation.Guest
 {
     /// <summary>
     /// Interaction logic for GuestReviewView.xaml
