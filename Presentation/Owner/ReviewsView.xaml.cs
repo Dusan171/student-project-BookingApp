@@ -14,20 +14,20 @@ namespace BookingApp.Presentation.Owner
     public partial class ReviewsView : UserControl
     {
         public ObservableCollection<GuestReview> HostToGuestReviews { get; set; }
-        public ObservableCollection<GuestReviewD> GuestToHostReviews {  get; set; }
+        public ObservableCollection<OwnerReview> GuestToHostReviews {  get; set; }
         private readonly GuestReviewRepository _guestReviewRepository;
-        private readonly GuestReviewRepositoryD _hostReviewRepository;
+        private readonly OwnerReviewRepository _hostReviewRepository;
 
         public ReviewsView()
         {
             InitializeComponent();
             _guestReviewRepository = new GuestReviewRepository();
-            _hostReviewRepository = new GuestReviewRepositoryD();
+            _hostReviewRepository = new OwnerReviewRepository();
             var reviews = _guestReviewRepository.GetAll();
             var hostReviews = _hostReviewRepository.GetAll();
 
             HostToGuestReviews = new ObservableCollection<GuestReview>(reviews);
-            GuestToHostReviews = new ObservableCollection<GuestReviewD>(hostReviews);
+            GuestToHostReviews = new ObservableCollection<OwnerReview>(hostReviews);
 
 
             HostToGuestGrid.ItemsSource = HostToGuestReviews; 
@@ -39,7 +39,7 @@ namespace BookingApp.Presentation.Owner
 
             if (filteredGuestToHost.Count > 0)
             {
-                GuestToHostReviews = new ObservableCollection<GuestReviewD>(filteredGuestToHost);
+                GuestToHostReviews = new ObservableCollection<OwnerReview>(filteredGuestToHost);
                 GuestToHostGrid.ItemsSource = GuestToHostReviews;
                
             }
@@ -54,7 +54,7 @@ namespace BookingApp.Presentation.Owner
         }
         private void ImagesButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.DataContext is GuestReviewD review)
+            if (sender is Button btn && btn.DataContext is OwnerReview review)
             {
                 var images = review.ImagePaths?
     .Split(';', StringSplitOptions.RemoveEmptyEntries)

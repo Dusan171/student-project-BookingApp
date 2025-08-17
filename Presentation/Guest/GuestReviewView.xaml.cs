@@ -11,12 +11,12 @@ namespace BookingApp.Presentation.Guest
     public partial class GuestReviewView : Window
     {
         private readonly Reservation _reservation;
-        private readonly GuestReviewRepositoryD _guestReviewRepositoryD;
+        private readonly OwnerReviewRepository _guestReviewRepositoryD;
         public GuestReviewView(Reservation reservation)
         {
             InitializeComponent();
             _reservation = reservation;
-            _guestReviewRepositoryD = new GuestReviewRepositoryD();
+            _guestReviewRepositoryD = new OwnerReviewRepository();
 
            /* if ((DateTime.Now - _reservation.EndDate).TotalDays > 5)
             {
@@ -52,7 +52,7 @@ namespace BookingApp.Presentation.Guest
                 CreatedAt = DateTime.Now
             };
             _guestReviewRepository.Save(review);*/
-            var reviewD = new GuestReviewD
+            var reviewD = new OwnerReview
             {
                 Id = _guestReviewRepositoryD.NextId(),
                 ReservationId = _reservation.Id,

@@ -6,7 +6,7 @@ using BookingApp.Serializer;
 namespace BookingApp.Domain
 {
 
-    public class GuestReviewD : ISerializable
+    public class OwnerReview : ISerializable
     {
         public int Id { get; set; }
         public int ReservationId { get; set; }
@@ -18,9 +18,9 @@ namespace BookingApp.Domain
         public DateTime CreatedAt { get; set; }
 
 
-        public GuestReviewD() { }
+        public OwnerReview() { }
 
-        public GuestReviewD(int id, int reservationId, int cleanliness, int owner, string comment, string imagePaths)
+        public OwnerReview(int id, int reservationId, int cleanliness, int owner, string comment, string imagePaths)
         {
             Id = id;
             ReservationId = reservationId;
