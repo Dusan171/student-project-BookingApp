@@ -63,61 +63,18 @@ namespace BookingApp.Presentation.Guest
                 return;
             }
 
-            if (guestNumber > _accommodation.MaxGuests)
+            //pozivanje metode iz repozitory
+            try
             {
-                MessageBox.Show($"Max allowed guests: {_accommodation.MaxGuests}");
-                return;
+                _reservationRepository.CreateReservation(_accommodation, startDate, endDate,guestNumber,_occupiedDateRepository);
+
+                MessageBox.Show("Reservation successful.");
+                this.Close();
             }
-
-            int stayLength = (endDate - startDate).Days;
-            if (stayLength < _accommodation.MinReservationDays)
+            catch (Exception ex)
             {
-                MessageBox.Show($"Minimum stay is {_accommodation.MinReservationDays} days.");
-                return;
+                MessageBox.Show(ex.Message);   
             }
-
-            // Check for overlap with occupied dates
-            var occupiedDates = _occupiedDateRepository.GetByAccommodationId(_accommodation.Id);
-            bool overlap = Enumerable.Range(0, stayLength)
-                .Select(offset => startDate.AddDays(offset).Date)
-                .Any(date => occupiedDates.Any(o => o.Date == date));
-
-            if (overlap)
-            {
-                MessageBox.Show("Selected period is not available.");
-                return;
-            }
-
-            // Save reservation
-            var reservation = new Reservation
-            {
-                Id = _reservationRepository.NextId(),
-                AccommodationId = _accommodation.Id,
-                GuestId = Session.CurrentUser.Id,
-                StartDate = startDate,
-                EndDate = endDate,
-                GuestsNumber = guestNumber,
-                Status = ReservationStatus.Active
-            };
-
-            _reservationRepository.Save(reservation);
-
-            // Save occupied dates
-            List<OccupiedDate> occupiedDatesToSave = new List<OccupiedDate>();
-            for (DateTime date = startDate; date < endDate; date = date.AddDays(1))
-            {
-                occupiedDatesToSave.Add(new OccupiedDate
-                {
-                    Id = _occupiedDateRepository.NextId(),
-                    AccommodationId = _accommodation.Id,
-                    ReservationId = reservation.Id,
-                    Date = date
-                });
-            }
-            _occupiedDateRepository.Save(occupiedDatesToSave);
-
-            MessageBox.Show("Reservation successful.");
-            this.Close();
         }
     }
 }

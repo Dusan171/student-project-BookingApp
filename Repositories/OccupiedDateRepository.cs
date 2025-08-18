@@ -19,7 +19,9 @@ namespace BookingApp.Repositories
         }
         public List<OccupiedDate> GetAll()
         {
-            return _occupiedDates;
+            //return _occupiedDates;
+            //ovo uvek cita sveze podatke
+            return _serializer.FromCSV(FilePath);
         }
         public List<OccupiedDate> GetByAccommodationId(int accommodationId)
         {
@@ -27,12 +29,25 @@ namespace BookingApp.Repositories
         }
         public void Save(List<OccupiedDate> newDates)
         {
-            _occupiedDates.AddRange(newDates);
+            //_occupiedDates.AddRange(newDates);
+            // _serializer.ToCSV(FilePath, _occupiedDates);
+            //sada Save sama dodeljuje Id
+            _occupiedDates = GetAll();
+            int nextId = NextId();
+
+            foreach (var date in newDates) 
+            {
+                date.Id = nextId;
+                _occupiedDates.Add(date);
+                nextId++;
+            }
             _serializer.ToCSV(FilePath, _occupiedDates);
         }
         public int NextId()
         {
-            return _occupiedDates.Count == 0 ? 1 : _occupiedDates.Max(o => o.Id) + 1;
+            //return _occupiedDates.Count == 0 ? 1 : _occupiedDates.Max(o => o.Id) + 1;
+            _occupiedDates = GetAll();
+            return _occupiedDates.Any() ? _occupiedDates.Max(o => o.Id) + 1 : 1;
         }
     }
 }
