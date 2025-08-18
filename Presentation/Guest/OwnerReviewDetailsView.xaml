@@ -1,35 +1,56 @@
 ﻿<Window x:Class="BookingApp.Presentation.Guest.OwnerReviewDetailsView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Recenzija Vlasnika" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen">
-    <Border Padding="15">
+        Title="Owner's Review" 
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="WidthAndHeight" 
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <!-- Definišemo stilove za konzistentnost i lakše održavanje -->
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+            <!-- Razmak sa desne strane -->
+        </Style>
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Padding="20">
         <StackPanel MinWidth="300">
-            <TextBlock Text="Recenzija Vlasnika" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+            <TextBlock Text="Owner's Review" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center"/>
 
-            <Grid Margin="0,5">
+            <!-- Jedan Grid za sve ocene, lakši za proširenje -->
+            <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
+                    <!-- Širina se prilagođava najširem labelu -->
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <TextBlock Grid.Column="0" Text="Ocena za čistoću: " FontWeight="Medium"/>
-                <TextBlock Grid.Column="1" Text="{Binding CleanlinessRating}" Margin="10,0,0,0" FontWeight="Bold"/>
+                <!-- Red za čistoću -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Cleanliness:" Style="{StaticResource LabelStyle}"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CleanlinessRating}" Style="{StaticResource ValueStyle}"/>
+
+                <!-- Red za poštovanje pravila -->
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Rule Respecting:" Style="{StaticResource LabelStyle}" Margin="0,5,10,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding RuleRespectingRating}" Style="{StaticResource ValueStyle}" Margin="0,5,0,0"/>
             </Grid>
 
-            <Grid Margin="0,5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <!-- Komentar -->
+            <TextBlock Text="Comment:" FontWeight="Medium" Margin="0,15,0,5"/>
+            <Border Background="#f0f0f0" CornerRadius="3" Padding="8">
+                <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" MinHeight="60"/>
+            </Border>
 
-                <TextBlock Grid.Column="0" Text="Poštovanje pravila: " FontWeight="Medium"/>
-                <TextBlock Grid.Column="1" Text="{Binding RuleRespectingRating}" Margin="10,0,0,0" FontWeight="Bold"/>
-            </Grid>
-
-            <TextBlock Text="Komentar:" FontWeight="Medium" Margin="0,15,0,5"/>
-            <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" Background="#f0f0f0" Padding="8" Margin="0,0,0,15" MinHeight="60"/>
-
-            <Button Content="U redu" IsDefault="True" Click="OkButton_Click" HorizontalAlignment="Right" Width="90"/>
+            <!-- Dugme -->
+            <Button Content="OK" IsDefault="True" Click="OkButton_Click" HorizontalAlignment="Right" Margin="0,20,0,0" Padding="20,5"/>
         </StackPanel>
     </Border>
 </Window>

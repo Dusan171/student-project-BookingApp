@@ -11,36 +11,42 @@ namespace BookingApp.Repositories
         private const string FilePath = "../../../Resources/Data/guestReviewsD.csv";
         private readonly Serializer<OwnerReview> _serializer;
 
-        private List<OwnerReview> _reviews;
+        //private List<OwnerReview> _reviews;
 
         public OwnerReviewRepository()
         {
             _serializer = new Serializer<OwnerReview>();
-            _reviews = _serializer.FromCSV(FilePath);
+           // _reviews = _serializer.FromCSV(FilePath);
         }
         public List<OwnerReview> GetAll()
         {
-            return _reviews;
+            //return _reviews;
+            return _serializer.FromCSV(FilePath);
         }
         public List<OwnerReview> GetByReservationId(int reservationId)
         {
-            return _reviews.Where(r => r.ReservationId == reservationId).ToList();
+            //return _reviews.Where(r => r.ReservationId == reservationId).ToList();
+            var allReviews = GetAll();
+            return allReviews.Where(r=>r.ReservationId == reservationId).ToList();
         }
         public bool HasGuestRated(int reservationId)
         {
-            return _reviews.Any(r=>r.ReservationId==reservationId);
+            //return _reviews.Any(r=>r.ReservationId==reservationId);
+            var allReviews = GetAll();
+            return allReviews.Any(r => r.ReservationId == reservationId); ;
         }
-        public OwnerReview Save(OwnerReview reviewD)
+        public OwnerReview Save(OwnerReview review)
         {
-            reviewD.Id = NextId();
-
-            _reviews.Add(reviewD);
-            _serializer.ToCSV(FilePath, _reviews);
-            return reviewD;
+            var allReviews = GetAll();
+            review.Id = NextId();
+            allReviews.Add(review);
+            _serializer.ToCSV(FilePath, allReviews);
+            return review;
         }
         public int NextId()
         {
-            return _reviews.Count == 0 ? 1 : _reviews.Max(r => r.Id) + 1;
+            var allReviews = GetAll();
+            return allReviews.Any() ? allReviews.Max(r => r.Id) + 1 : 1;
         }
     }
 }

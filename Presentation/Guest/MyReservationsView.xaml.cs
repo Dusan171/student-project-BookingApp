@@ -6,6 +6,7 @@ using BookingApp.Utilities;
 using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Presentation.ViewModels;
+using BookingApp.Services;
 
 namespace BookingApp.Presentation.Guest
 {
@@ -14,11 +15,12 @@ namespace BookingApp.Presentation.Guest
     /// </summary>
     public partial class MyReservationsView : Window
     {
-        private readonly ReservationRepository _reservationRepository;
-        private readonly AccommodationRepository _accommodationRepository;
-        private readonly RescheduleRequestRepository _rescheduleRequestRepository;
         private readonly GuestReviewRepository _guestReviewRepository;
         private readonly OwnerReviewRepository _ownerReviewRepository;
+
+        private readonly ReviewService _reviewService;
+
+        private readonly ReservationDisplayService _reservationDisplayService;
 
        // private List<Reservation> _myReservations;
         //private List<Accommodation> _myAccommodations; //dobra zamisao ali ne treba ucitavati sve smjestaje, vec samo ove koje imaju Id guEST
@@ -29,50 +31,24 @@ namespace BookingApp.Presentation.Guest
             InitializeComponent();
             DataContext = this;
 
-            _reservationRepository = new ReservationRepository();
-            _accommodationRepository = new AccommodationRepository();
-            _rescheduleRequestRepository = new RescheduleRequestRepository();
+            var reservationRepository = new ReservationRepository();
+            var accommodationRepository = new AccommodationRepository();
+            var rescheduleRequestRepository = new RescheduleRequestRepository();
+            var ownerReviewRepository = new OwnerReviewRepository();
 
+            _reviewService = new ReviewService(ownerReviewRepository);
             _guestReviewRepository = new GuestReviewRepository();
             _ownerReviewRepository = new OwnerReviewRepository();
 
+            _reservationDisplayService = new ReservationDisplayService(reservationRepository, accommodationRepository, rescheduleRequestRepository);
             LoadReservations();
 
         }
 
         private void LoadReservations()
         {
-            var allAccommodations = _accommodationRepository.GetAll();
-            var myReservations = _reservationRepository.GetByGuestId(Session.CurrentUser.Id).OrderByDescending(r => r.StartDate).ToList();
-
-            MyReservationsDisplay = new List<MyReservationViewModel>();
-
-            foreach (var reservation in myReservations)
-            {
-                var accommodation = allAccommodations.FirstOrDefault(a => a.Id == reservation.AccommodationId);
-                var request = _rescheduleRequestRepository.GetByReservationId(reservation.Id);
-
-                var viewModel = new MyReservationViewModel
-                {
-                    ReservationId = reservation.Id,
-                    StartDate = reservation.StartDate,
-                    EndDate = reservation.EndDate,
-                    GuestsNumber = reservation.GuestsNumber,
-                    AccommodationName = accommodation?.Name ?? "N/A",
-                    RequestStatusText = request?.Status.ToString() ?? "Not requested",
-                    OwnerComment = request?.OwnerComment ?? "",
-                    OriginalReservation = reservation
-                };
-                bool hasPendingRequest = (request != null && request.Status == RequestStatus.Pending);
-                viewModel.IsRescheduleEnabled = reservation.StartDate > DateTime.Now && !hasPendingRequest;
-
-                MyReservationsDisplay.Add(viewModel);
-            }
+            MyReservationsDisplay = _reservationDisplayService.GetReservationsForGuest(Session.CurrentUser.Id);
             ReservationsDataGrid.ItemsSource = MyReservationsDisplay;
-            //ucitavanje rezervacija samo trenutno logovanog korisnika
-            //_myReservations = _reservationRepository.GetByGuestId(Session.CurrentUser.Id).OrderByDescending(r => r.StartDate).ToList();
-
-            //ReservationsDataGrid.ItemsSource = _myReservations;
         }
         private void RescheduleButton_Click(object sender, RoutedEventArgs e)
         {
@@ -101,9 +77,15 @@ namespace BookingApp.Presentation.Guest
                 return;
             }
 
+            if (_reviewService.IsReviewPeriodExpired(selectedReservation))
+            {
+                MessageBox.Show("The period for leaving a review has expired (5 days).", "Review Period Expired", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return; // Prekidamo izvršavanje, prozor se neće ni otvoriti
+            }
+
             //otvaranje prozora za ocjenjivanje
             var reviewWind = new GuestReviewView(selectedReservation);
-            reviewWind.Show();
+            reviewWind.ShowDialog();
         }
         private void ViewReviewButton_Click(object sender, RoutedEventArgs e)
         {

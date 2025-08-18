@@ -1,5 +1,6 @@
 ﻿using BookingApp.Domain;
 using BookingApp.Repositories;
+using BookingApp.Services;
 using System;
 using System.Windows;
 
@@ -11,61 +12,48 @@ namespace BookingApp.Presentation.Guest
     public partial class GuestReviewView : Window
     {
         private readonly Reservation _reservation;
-        private readonly OwnerReviewRepository _guestReviewRepositoryD;
+        // private readonly OwnerReviewRepository _ownerReviewRepository;
+        private readonly ReviewService _reviewService;
         public GuestReviewView(Reservation reservation)
         {
             InitializeComponent();
             _reservation = reservation;
-            _guestReviewRepositoryD = new OwnerReviewRepository();
 
-           /* if ((DateTime.Now - _reservation.EndDate).TotalDays > 5)
-            {
-                MessageBox.Show("You can only leave a review within 5 days after your stay.");
-                this.Close();
-            }*/
+            var ownerReviewRepository = new OwnerReviewRepository();
+            _reviewService = new ReviewService(ownerReviewRepository);
+
         }
         private void Submit_Click(Object sender, RoutedEventArgs e)
         {
-            //validacija unosa
+            // 1. Validacija unosa sa forme
             if (!int.TryParse(CleanlinessTextBox.Text, out int cleanliness) || cleanliness < 1 || cleanliness > 5)
             {
                 MessageBox.Show("Enter a valid cleanliness rating (1-5).");
                 return;
             }
-            if (!int.TryParse(OwnerTextBox.Text, out int owner) || owner < 1 || owner > 5)
+            if (!int.TryParse(OwnerTextBox.Text, out int ownerRating) || ownerRating < 1 || ownerRating > 5)
             {
                 MessageBox.Show("Enter a valid owner rating (1-5).");
                 return;
             }
+
             string comment = CommentTextBox.Text.Trim();
             string imagePaths = ImagesTextBox.Text.Trim();
 
-            //var review = new GuestReview
-            /*var review = new GuestReview
+            try
             {
-                Id = _guestReviewRepositoryD.NextId(),
-                ReservationId = _reservation.Id,
-                CleanlinessRating = cleanliness,
-                OwnerRating = owner,
-                Comment = comment,
-                ImagePaths = imagePaths,
-                CreatedAt = DateTime.Now
-            };
-            _guestReviewRepository.Save(review);*/
-            var reviewD = new OwnerReview
-            {
-                Id = _guestReviewRepositoryD.NextId(),
-                ReservationId = _reservation.Id,
-                CleanlinessRating = cleanliness,
-                OwnerRating = owner,
-                Comment = comment,
-                ImagePaths = imagePaths,
-                CreatedAt = DateTime.Now
-            };
-            _guestReviewRepositoryD.Save(reviewD);
+                // 2. Pozivamo servis da obavi sav posao
+                _reviewService.CreateOwnerReview(_reservation, cleanliness, ownerRating, comment, imagePaths);
 
-            MessageBox.Show("Thank you for your review!");
-            this.Close();
+                MessageBox.Show("Thank you for your review!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                this.DialogResult = true;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                // Prikazujemo greške koje dolaze iz poslovne logike
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }                                                      
         }
         private void Cancel_Click(object sender, RoutedEventArgs r)
         {

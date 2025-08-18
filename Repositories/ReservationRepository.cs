@@ -17,16 +17,16 @@ namespace BookingApp.Repositories
         public ReservationRepository()
         {
             _serializer = new Serializer<Reservation>();
-            if (!File.Exists(FilePath))
-                File.Create(FilePath).Close();
+           // if (!File.Exists(FilePath))
+              //  File.Create(FilePath).Close();
 
             _reservations = _serializer.FromCSV(FilePath); //ucitavanje svih rezervacija iz fajla u memoriju 
         }
 
         public List<Reservation> GetAll()
         {
-            _reservations = _serializer.FromCSV(FilePath);
-            return _reservations;
+            //_reservations = _serializer.FromCSV(FilePath);
+            return _serializer.FromCSV(FilePath);
         }
         //ovo se izgleda nigdje ne koristi
         /*public void Add(Reservation reservation)
@@ -44,19 +44,21 @@ namespace BookingApp.Repositories
         public int NextId()
         {
             // Osiguravam da uvek radim sa najsvežijim podacima pre generisanja ID-a
-            _reservations = _serializer.FromCSV(FilePath);
+            //_reservations = _serializer.FromCSV(FilePath);
+            _reservations = GetAll();
             return _reservations.Any() ? _reservations.Max(r => r.Id) + 1 : 1;
         }
         //potrebna za obavljanje rezervacije
         public Reservation Save(Reservation reservation)
         {
+            _reservations = GetAll();
             reservation.Id = NextId();
-            _reservations = _serializer.FromCSV(FilePath);
+            //_reservations = _serializer.FromCSV(FilePath);
             _reservations.Add(reservation);
             _serializer.ToCSV(FilePath, _reservations);
             return reservation;
         }
-        public void CreateReservation(Accommodation accommodation,DateTime startDate,DateTime endDate, int guestNumber, OccupiedDateRepository occupiedDateRepository)
+       /* public void CreateReservation(Accommodation accommodation,DateTime startDate,DateTime endDate, int guestNumber, OccupiedDateRepository occupiedDateRepository)
         {
             //validacija poslovnih pravila
             if (guestNumber > accommodation.MaxGuests)
@@ -102,6 +104,6 @@ namespace BookingApp.Repositories
                 });
             }
             occupiedDateRepository.Save(occupiedDatesToSave);
-        }
+        }*/
     }
 }

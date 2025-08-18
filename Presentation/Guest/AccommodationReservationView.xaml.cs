@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
-using BookingApp.Utilities;
-using System.Windows.Documents;
-using System.Collections.Generic;
 using System.Windows.Controls;
 using BookingApp.Domain;
 using BookingApp.Repositories;
+using BookingApp.Services;
 
 namespace BookingApp.Presentation.Guest
 {
@@ -16,17 +14,21 @@ namespace BookingApp.Presentation.Guest
     public partial class AccommodationReservationView : Window
     {
         private readonly Accommodation _accommodation;
-        private readonly ReservationRepository _reservationRepository;
         private readonly OccupiedDateRepository _occupiedDateRepository;
+        private readonly ReservationService _reservationService;
         public AccommodationReservationView(Accommodation accommodation)
         {
             InitializeComponent();
             _accommodation = accommodation;
-            _reservationRepository = new ReservationRepository();
+
+            var reservationRepository = new ReservationRepository();
+
             _occupiedDateRepository = new OccupiedDateRepository();
-            HighlightOccupiedDates();
+            _reservationService = new ReservationService(reservationRepository, _occupiedDateRepository);
+
+            LoadAndDisplayOccupiedDates();
         }
-        private void HighlightOccupiedDates()
+        private void LoadAndDisplayOccupiedDates()
         {
             var occupiedDates = _occupiedDateRepository.GetByAccommodationId(_accommodation.Id);
             foreach (var date in occupiedDates)
@@ -40,40 +42,50 @@ namespace BookingApp.Presentation.Guest
        
         private void Reserve_Click(object sender, RoutedEventArgs e)
         {
+            // 1. Prikupljanje i osnovna validacija unosa sa korisničkog interfejsa.
+            // Ovaj deo logike pripada View-u jer direktno radi sa kontrolama (DatePicker, TextBox).
 
-            if (!StartDatePicker.SelectedDate.HasValue || !EndDatePicker.SelectedDate.HasValue)
+            if (!StartDatePicker.SelectedDate.HasValue)
             {
-                MessageBox.Show("Please select both start and end dates.");
+                MessageBox.Show("Please select a start date.");
                 return;
             }
-            
+
+            if (!EndDatePicker.SelectedDate.HasValue)
+            {
+                MessageBox.Show("Please select an end date.");
+                return;
+            }
 
             DateTime startDate = StartDatePicker.SelectedDate.Value;
             DateTime endDate = EndDatePicker.SelectedDate.Value;
 
             if (endDate <= startDate)
             {
-                MessageBox.Show("End date must be after start date.");
+                MessageBox.Show("End date must be after the start date.");
                 return;
             }
 
-            if (!int.TryParse(GuestsTextBox.Text, out int guestNumber))
+            if (!int.TryParse(GuestsTextBox.Text, out int guestNumber) || guestNumber <= 0)
             {
                 MessageBox.Show("Please enter a valid number of guests.");
                 return;
             }
 
-            //pozivanje metode iz repozitory
+            // 2. Poziv servisnog sloja da izvrši poslovnu logiku.
+            // Sav "pametan" posao je sada sakriven iza jedne metode.
             try
             {
-                _reservationRepository.CreateReservation(_accommodation, startDate, endDate,guestNumber,_occupiedDateRepository);
+                _reservationService.Create(_accommodation, startDate, endDate, guestNumber);
 
-                MessageBox.Show("Reservation successful.");
+                MessageBox.Show("Reservation successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                this.DialogResult = true; // Dobra praksa: signalizira da je prozor uspešno završio operaciju
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);   
+                // Prikazujemo greške koje dolaze iz poslovne logike (npr. "termin je zauzet").
+                MessageBox.Show(ex.Message, "Reservation Failed", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
