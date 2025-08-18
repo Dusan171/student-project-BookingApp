@@ -1,0 +1,50 @@
+﻿<Window x:Class="BookingApp.Presentation.Guest.RescheduleRequestView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Request Reservation Change" Height="350" Width="500"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Request to Reschedule Reservation" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+
+        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+            <TextBlock>
+                <Run Text="You are requesting to change the dates for reservation at:"/>
+                <Run x:Name="AccommodationNameTextBlock" FontWeight="Bold"/>
+            </TextBlock>
+            <TextBlock>
+                <Run Text="Current period:"/>
+                <Run x:Name="CurrentPeriodTextBlock"/>
+            </TextBlock>
+        </StackPanel>
+
+        <TextBlock Grid.Row="2" Text="Select new dates:" Margin="0,0,0,5"/>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" VerticalAlignment="Top">
+            <StackPanel Margin="0,0,20,0">
+                <TextBlock Text="New Start Date"/>
+                <DatePicker x:Name="NewStartDatePicker"/>
+            </StackPanel>
+
+            <StackPanel>
+                <TextBlock Text="New End Date"/>
+                <DatePicker x:Name="NewEndDatePicker"/>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Send Request" Width="120" Height="30" Margin="0,0,10,0" 
+                    Click="SendRequest_Click"/>
+            <Button Content="Cancel" Width="100" Height="30" IsCancel="True" 
+                    Click="Cancel_Click"/>
+        </StackPanel>
+
+    </Grid>
+</Window>

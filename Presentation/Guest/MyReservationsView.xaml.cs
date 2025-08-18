@@ -5,6 +5,7 @@ using System.Windows;
 using BookingApp.Utilities;
 using BookingApp.Domain;
 using BookingApp.Repositories;
+using BookingApp.Presentation.ViewModels;
 
 namespace BookingApp.Presentation.Guest
 {
@@ -15,17 +16,22 @@ namespace BookingApp.Presentation.Guest
     {
         private readonly ReservationRepository _reservationRepository;
         private readonly AccommodationRepository _accommodationRepository;
+        private readonly RescheduleRequestRepository _rescheduleRequestRepository;
         private readonly GuestReviewRepository _guestReviewRepository;
         private readonly OwnerReviewRepository _ownerReviewRepository;
 
-        private List<Reservation> _myReservations;
-        private List<Accommodation> _myAccommodations; //dobra zamisao ali ne treba ucitavati sve smjestaje, vec samo ove koje imaju Id guEST
+       // private List<Reservation> _myReservations;
+        //private List<Accommodation> _myAccommodations; //dobra zamisao ali ne treba ucitavati sve smjestaje, vec samo ove koje imaju Id guEST
+        public List<MyReservationViewModel> MyReservationsDisplay { get; set; }
 
         public MyReservationsView()
         {
             InitializeComponent();
+            DataContext = this;
+
             _reservationRepository = new ReservationRepository();
             _accommodationRepository = new AccommodationRepository();
+            _rescheduleRequestRepository = new RescheduleRequestRepository();
 
             _guestReviewRepository = new GuestReviewRepository();
             _ownerReviewRepository = new OwnerReviewRepository();
@@ -36,19 +42,58 @@ namespace BookingApp.Presentation.Guest
 
         private void LoadReservations()
         {
-            //ucitavanje rezervacija samo trenutno logovanog korisnika
-            _myReservations = _reservationRepository.GetByGuestId(Session.CurrentUser.Id).OrderByDescending(r => r.StartDate).ToList();
+            var allAccommodations = _accommodationRepository.GetAll();
+            var myReservations = _reservationRepository.GetByGuestId(Session.CurrentUser.Id).OrderByDescending(r => r.StartDate).ToList();
 
-            ReservationsDataGrid.ItemsSource = _myReservations;
+            MyReservationsDisplay = new List<MyReservationViewModel>();
+
+            foreach (var reservation in myReservations)
+            {
+                var accommodation = allAccommodations.FirstOrDefault(a => a.Id == reservation.AccommodationId);
+                var request = _rescheduleRequestRepository.GetByReservationId(reservation.Id);
+
+                var viewModel = new MyReservationViewModel
+                {
+                    ReservationId = reservation.Id,
+                    StartDate = reservation.StartDate,
+                    EndDate = reservation.EndDate,
+                    GuestsNumber = reservation.GuestsNumber,
+                    AccommodationName = accommodation?.Name ?? "N/A",
+                    RequestStatusText = request?.Status.ToString() ?? "Not requested",
+                    OwnerComment = request?.OwnerComment ?? "",
+                    OriginalReservation = reservation
+                };
+                bool hasPendingRequest = (request != null && request.Status == RequestStatus.Pending);
+                viewModel.IsRescheduleEnabled = reservation.StartDate > DateTime.Now && !hasPendingRequest;
+
+                MyReservationsDisplay.Add(viewModel);
+            }
+            ReservationsDataGrid.ItemsSource = MyReservationsDisplay;
+            //ucitavanje rezervacija samo trenutno logovanog korisnika
+            //_myReservations = _reservationRepository.GetByGuestId(Session.CurrentUser.Id).OrderByDescending(r => r.StartDate).ToList();
+
+            //ReservationsDataGrid.ItemsSource = _myReservations;
+        }
+        private void RescheduleButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedViewModel = ReservationsDataGrid.SelectedItem as MyReservationViewModel;
+            if (selectedViewModel == null) return;
+
+            var rescheduleWindow = new RescheduleRequestView(selectedViewModel.OriginalReservation);
+            rescheduleWindow.ShowDialog();
+
+            LoadReservations();
         }
         private void RateButton_Click(object sender, RoutedEventArgs e)
         {
-            var selectedReservation = (Reservation)ReservationsDataGrid.SelectedItem;
-            if (selectedReservation == null)
+            var selectedViewModel = ReservationsDataGrid.SelectedItem as MyReservationViewModel;
+            if (selectedViewModel == null)
             {
                 MessageBox.Show("Please select a reservation to rate.");
                 return;
             }
+
+            Reservation selectedReservation = selectedViewModel.OriginalReservation;
             //Provjera da li je boravak zavrsen
             if (DateTime.Now < selectedReservation.EndDate)
             {
@@ -62,14 +107,16 @@ namespace BookingApp.Presentation.Guest
         }
         private void ViewReviewButton_Click(object sender, RoutedEventArgs e)
         {
-            var selectedReservation = (Reservation)ReservationsDataGrid.SelectedItem;
-            if (selectedReservation == null)
+            var selectedViewModel = ReservationsDataGrid.SelectedItem as MyReservationViewModel;
+            if (selectedViewModel == null)
             {
                 MessageBox.Show("Izaberite prvo smjestaj.", "Obavestenje", MessageBoxButton.OK,MessageBoxImage.Information);
                 return;
             }
             // USLOV: Proveravamo da li je gost već ocenio vlasnika za ovu rezervaciju
             // VAŽNO: Morate imati metodu kao što je "HasGuestRated" u vašem AccommodationReviewRepository
+            Reservation selectedReservation = selectedViewModel.OriginalReservation;
+
             bool guestHasRated = _ownerReviewRepository.HasGuestRated(selectedReservation.Id);
 
             if (!guestHasRated)
