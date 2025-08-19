@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using System.Xml.Linq;
 
 namespace BookingApp.Repositories
 {
-    public class AccommodationImageRepository
+    public class AccommodationImageRepository: IAccommodationImageRepository
     {
         private const string FilePath = "../../../Resources/Data/accommodationImage.csv";
 
