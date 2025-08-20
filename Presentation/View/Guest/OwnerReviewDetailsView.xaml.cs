@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using BookingApp.Domain;
 
-namespace BookingApp.Presentation.Guest
+namespace BookingApp.Presentation.View.Guest
 {
     /// <summary>
     /// Interaction logic for OwnerReviewDetailsView.xaml

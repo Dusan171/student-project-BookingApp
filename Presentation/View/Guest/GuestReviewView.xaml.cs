@@ -3,8 +3,9 @@ using BookingApp.Repositories;
 using BookingApp.Services;
 using System;
 using System.Windows;
+using BookingApp.Domain.Interfaces;
 
-namespace BookingApp.Presentation.Guest
+namespace BookingApp.Presentation.View.Guest
 {
     /// <summary>
     /// Interaction logic for GuestReviewView.xaml
@@ -12,16 +13,32 @@ namespace BookingApp.Presentation.Guest
     public partial class GuestReviewView : Window
     {
         private readonly Reservation _reservation;
-        // private readonly OwnerReviewRepository _ownerReviewRepository;
-        private readonly ReviewService _reviewService;
+        private readonly IReviewService _reviewService;
         public GuestReviewView(Reservation reservation)
         {
             InitializeComponent();
             _reservation = reservation;
 
-            var ownerReviewRepository = new OwnerReviewRepository();
-            _reviewService = new ReviewService(ownerReviewRepository);
+            // var ownerReviewRepository = new OwnerReviewRepository();
+            _reviewService = Injector.CreateInstance<IReviewService>();
+            CheckIfReviewIsAllowed();
 
+        }
+        private void CheckIfReviewIsAllowed()
+        {
+            try
+            {
+                if (_reviewService.IsReviewPeriodExpired(_reservation))
+                {
+                    MessageBox.Show("The period for leaving a review has expired (5 days). The window will now close.", "Review Period Expired", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    this.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Close(); // Zatvaramo prozor i u slučaju greške
+            }
         }
         private void Submit_Click(Object sender, RoutedEventArgs e)
         {

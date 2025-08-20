@@ -4,14 +4,15 @@ using System.Linq;
 using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Services.DTOs;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Services
 {
-    public class AccommodationFilterService
+    public class AccommodationFilterService : IAccommodationFilterService
     {
-        private readonly AccommodationRepository _accommodationRepository;
+        private readonly IAccommodationRepository _accommodationRepository;
 
-        public AccommodationFilterService(AccommodationRepository accommodationRepository)
+        public AccommodationFilterService(IAccommodationRepository accommodationRepository)
         {
             _accommodationRepository = accommodationRepository;
         }

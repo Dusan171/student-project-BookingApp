@@ -4,17 +4,18 @@ using System.Linq;
 using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Utilities;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Services
 {
-    public class ReservationService
+    public class ReservationService : IReservationService
     {
-        private readonly ReservationRepository _reservationRepository;
-        private readonly OccupiedDateRepository _occupiedDateRepository;
+        private readonly IReservationRepository _reservationRepository;
+        private readonly IOccupiedDateRepository _occupiedDateRepository;
 
         //Dependency Injection (to ce vjerovatno trebati prebaciti u posebnu klasu ili gdje vec)
 
-        public ReservationService(ReservationRepository reservationRepository, OccupiedDateRepository occupiedDateRepository)
+        public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository)
         {
             _reservationRepository = reservationRepository;
             _occupiedDateRepository = occupiedDateRepository;

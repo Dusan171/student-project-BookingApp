@@ -5,8 +5,9 @@ using System.Windows.Controls;
 using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Services;
+using BookingApp.Domain.Interfaces;
 
-namespace BookingApp.Presentation.Guest
+namespace BookingApp.Presentation.View.Guest
 {
     /// <summary>
     /// Interaction logic for AccommodationReservationView.xaml
@@ -14,8 +15,8 @@ namespace BookingApp.Presentation.Guest
     public partial class AccommodationReservationView : Window
     {
         private readonly Accommodation _accommodation;
-        private readonly OccupiedDateRepository _occupiedDateRepository;
-        private readonly ReservationService _reservationService;
+        private readonly IOccupiedDateRepository _occupiedDateRepository;
+        private readonly IReservationService _reservationService;
         public AccommodationReservationView(Accommodation accommodation)
         {
             InitializeComponent();
@@ -23,8 +24,8 @@ namespace BookingApp.Presentation.Guest
 
             var reservationRepository = new ReservationRepository();
 
-            _occupiedDateRepository = new OccupiedDateRepository();
-            _reservationService = new ReservationService(reservationRepository, _occupiedDateRepository);
+            _occupiedDateRepository = Injector.CreateInstance<IOccupiedDateRepository>();
+            _reservationService = Injector.CreateInstance<IReservationService>();
 
             LoadAndDisplayOccupiedDates();
         }
@@ -76,6 +77,7 @@ namespace BookingApp.Presentation.Guest
             // Sav "pametan" posao je sada sakriven iza jedne metode.
             try
             {
+                //ovdje se poziva _reservationService koji dobije od Injectora
                 _reservationService.Create(_accommodation, startDate, endDate, guestNumber);
 
                 MessageBox.Show("Reservation successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);

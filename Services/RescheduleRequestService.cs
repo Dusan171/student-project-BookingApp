@@ -4,16 +4,17 @@ using System.Linq;
 using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Utilities;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Services
 {
-    public class RescheduleRequestService
+    public class RescheduleRequestService : IRescheduleRequestService
     {
-        private readonly OccupiedDateRepository _occupiedDateRepository;
-        private readonly RescheduleRequestRepository _rescheduleRequestRepository;
-        private readonly AccommodationRepository _accommodationRepository;
+        private readonly IOccupiedDateRepository _occupiedDateRepository;
+        private readonly IRescheduleRequestRepository _rescheduleRequestRepository;
+        private readonly IAccommodationRepository _accommodationRepository;
 
-        public RescheduleRequestService(OccupiedDateRepository occupiedDateRepository, RescheduleRequestRepository rescheduleRequestRepository, AccommodationRepository accommodationRepository)
+        public RescheduleRequestService(IOccupiedDateRepository occupiedDateRepository, IRescheduleRequestRepository rescheduleRequestRepository, IAccommodationRepository accommodationRepository)
         {
             _occupiedDateRepository = occupiedDateRepository;
             _rescheduleRequestRepository = rescheduleRequestRepository;

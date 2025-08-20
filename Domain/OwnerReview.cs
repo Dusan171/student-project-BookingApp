@@ -1,22 +1,17 @@
 ﻿using System;
-
-//using System.ComponentModel;
 using BookingApp.Serializer;
 
 namespace BookingApp.Domain
 {
-
     public class OwnerReview : ISerializable
     {
         public int Id { get; set; }
         public int ReservationId { get; set; }
-
         public int CleanlinessRating { get; set; }
         public int OwnerRating { get; set; }
         public string Comment { get; set; }
         public string ImagePaths { get; set; }
         public DateTime CreatedAt { get; set; }
-
 
         public OwnerReview() { }
 
@@ -57,9 +52,8 @@ namespace BookingApp.Domain
             ImagePaths = values.Length > 5 ? values[5] : string.Empty;
 
             CreatedAt = values.Length > 6 ? DateTime.Parse(values[6]) : DateTime.Now;
-
         }
-
+        //nigdje se ne koristi
         public int ImageCount
         {
             get

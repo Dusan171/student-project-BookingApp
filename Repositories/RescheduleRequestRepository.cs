@@ -5,15 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Domain;
 using BookingApp.Serializer;
+using BookingApp.Domain.Interfaces;
 using System.IO;
 
 
 namespace BookingApp.Repositories
 {
-    public class RescheduleRequestRepository
+    public class RescheduleRequestRepository : IRescheduleRequestRepository
     {
         private const string FilePath = "../../../Resources/Data/rescheduleRequests.csv";
         private readonly Serializer<RescheduleRequest> _serializer;
+        //kaze da treba ovo da se ukloni i malo izmijene metode koje ga koriste
+        //da bi stalno radili sa "svjezim" podacima
         private List<RescheduleRequest> _requests;
 
         public RescheduleRequestRepository()

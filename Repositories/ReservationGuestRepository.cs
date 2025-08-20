@@ -4,11 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 
 namespace BookingApp.Repositories
 {
-    internal class ReservationGuestRepository
+    internal class ReservationGuestRepository //: IReservationGuestRepository
     {
         private const string FilePath = "C:/Users/PC/Desktop/5 semestar/sims-projekat/sims-ra-2025-group-7-team-b/Resources/Data/reservationGuests.csv";
 

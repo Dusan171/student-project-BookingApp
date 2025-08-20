@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain;
-using BookingApp.Presentation.ViewModels;
+using BookingApp.Presentation.ViewModel.Guest;
 using BookingApp.Repositories;
 using BookingApp.Utilities;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Services
 {
-    public class ReservationDisplayService
+    public class ReservationDisplayService : IReservationDisplayService
     {
-        private readonly ReservationRepository _reservationRepository;
-        private readonly AccommodationRepository _accommodationRepository;
-        private readonly RescheduleRequestRepository _rescheduleRequestRepository;
+        private readonly IReservationRepository _reservationRepository;
+        private readonly IAccommodationRepository _accommodationRepository;
+        private readonly IRescheduleRequestRepository _rescheduleRequestRepository;
 
-        public ReservationDisplayService(ReservationRepository reservationRepository, AccommodationRepository accommodationRepository, RescheduleRequestRepository rescheduleRequestRepository)
+        public ReservationDisplayService(IReservationRepository reservationRepository, IAccommodationRepository accommodationRepository, IRescheduleRequestRepository rescheduleRequestRepository)
         {
             _reservationRepository = reservationRepository;
             _accommodationRepository = accommodationRepository;

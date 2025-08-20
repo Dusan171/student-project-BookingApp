@@ -8,21 +8,23 @@ using BookingApp.Repositories;
 using BookingApp.View;
 using BookingApp.Services;
 using BookingApp.Services.DTOs;
+using BookingApp.Domain.Interfaces;
 
-namespace BookingApp.Presentation.Guest
+namespace BookingApp.Presentation.View.Guest
 {
     /// <summary>
     /// Interaction logic for AccommodationLookup.xaml
     /// </summary>
     public partial class AccommodationLookup : Window
     {
-        private readonly AccommodationRepository _accommodationRepository;
-        private readonly AccommodationFilterService _filterService;
+        private readonly IAccommodationRepository _accommodationRepository;
+        private readonly IAccommodationFilterService _filterService;
         public AccommodationLookup()
         {
             InitializeComponent();
-            _accommodationRepository = new AccommodationRepository();
-            _filterService = new AccommodationFilterService(_accommodationRepository);
+            _accommodationRepository = Injector.CreateInstance<IAccommodationRepository>();
+            _filterService = Injector.CreateInstance<IAccommodationFilterService>();
+
             AccommodationsDataGrid.ItemsSource = _accommodationRepository.GetAll();
         }
      
@@ -34,8 +36,8 @@ namespace BookingApp.Presentation.Guest
                 Country = CountryTextBox.Text.Trim(), 
                 City = CityTextBox.Text.Trim(),
                 Type = (TypeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString(),
-                MaxGuests = int.TryParse(MaxGuestsTextBox.Text,out int days) ? days : 0,
-                MinDays = int.TryParse(MinDaysTextBox.Text, out int day) ? day : 0
+                MaxGuests = int.TryParse(MaxGuestsTextBox.Text,out int guests) ? guests : 0,
+                MinDays = int.TryParse(MinDaysTextBox.Text, out int days) ? days : 0
             };
 
             var  filteredAccommodations = _filterService.Filter(searchParams);

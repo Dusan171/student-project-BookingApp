@@ -1,7 +1,7 @@
 ﻿using System;
 using BookingApp.Domain;
 
-namespace BookingApp.Presentation.ViewModels
+namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class MyReservationViewModel
     {

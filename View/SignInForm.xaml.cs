@@ -1,6 +1,6 @@
 ﻿using BookingApp.Utilities;
 using BookingApp.Presentation.Owner;
-using BookingApp.Presentation.Guest;
+using BookingApp.Presentation.View.Guest;
 using BookingApp.View.Guide;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;

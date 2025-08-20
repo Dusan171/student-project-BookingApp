@@ -5,22 +5,23 @@ using System.Windows;
 using BookingApp.Utilities;
 using BookingApp.Domain;
 using BookingApp.Repositories;
-using BookingApp.Presentation.ViewModels;
+using BookingApp.Presentation.ViewModel.Guest;
 using BookingApp.Services;
+using BookingApp.Domain.Interfaces;
 
-namespace BookingApp.Presentation.Guest
+namespace BookingApp.Presentation.View.Guest
 {
     /// <summary>
     /// Interaction logic for MyReservationsView.xaml
     /// </summary>
     public partial class MyReservationsView : Window
     {
-        private readonly GuestReviewRepository _guestReviewRepository;
-        private readonly OwnerReviewRepository _ownerReviewRepository;
+        //private readonly IGuestReviewRepository _guestReviewRepository;
+        //private readonly IOwnerReviewRepository _ownerReviewRepository;
 
-        private readonly ReviewService _reviewService;
+        private readonly IReviewService _reviewService;
 
-        private readonly ReservationDisplayService _reservationDisplayService;
+        private readonly IReservationDisplayService _reservationDisplayService;
 
        // private List<Reservation> _myReservations;
         //private List<Accommodation> _myAccommodations; //dobra zamisao ali ne treba ucitavati sve smjestaje, vec samo ove koje imaju Id guEST
@@ -31,16 +32,18 @@ namespace BookingApp.Presentation.Guest
             InitializeComponent();
             DataContext = this;
 
-            var reservationRepository = new ReservationRepository();
-            var accommodationRepository = new AccommodationRepository();
-            var rescheduleRequestRepository = new RescheduleRequestRepository();
-            var ownerReviewRepository = new OwnerReviewRepository();
+            /* var reservationRepository = new ReservationRepository();
+             var accommodationRepository = new AccommodationRepository();
+             var rescheduleRequestRepository = new RescheduleRequestRepository();
+             var ownerReviewRepository = new OwnerReviewRepository();
 
-            _reviewService = new ReviewService(ownerReviewRepository);
-            _guestReviewRepository = new GuestReviewRepository();
-            _ownerReviewRepository = new OwnerReviewRepository();
+             _reviewService = new ReviewService(ownerReviewRepository);
+             _guestReviewRepository = Injector.CreateInstance<GuestReviewRepository>();
+             _ownerReviewRepository = Injector.CreateInstance<OwnerReviewRepository>();
 
-            _reservationDisplayService = new ReservationDisplayService(reservationRepository, accommodationRepository, rescheduleRequestRepository);
+             _reservationDisplayService = new ReservationDisplayService(reservationRepository, accommodationRepository, rescheduleRequestRepository);*/
+            _reviewService = Injector.CreateInstance<IReviewService>();
+            _reservationDisplayService = Injector.CreateInstance<IReservationDisplayService>();
             LoadReservations();
 
         }
@@ -92,34 +95,34 @@ namespace BookingApp.Presentation.Guest
             var selectedViewModel = ReservationsDataGrid.SelectedItem as MyReservationViewModel;
             if (selectedViewModel == null)
             {
-                MessageBox.Show("Izaberite prvo smjestaj.", "Obavestenje", MessageBoxButton.OK,MessageBoxImage.Information);
+                MessageBox.Show("Please select a reservation.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            // USLOV: Proveravamo da li je gost već ocenio vlasnika za ovu rezervaciju
-            // VAŽNO: Morate imati metodu kao što je "HasGuestRated" u vašem AccommodationReviewRepository
             Reservation selectedReservation = selectedViewModel.OriginalReservation;
 
-            bool guestHasRated = _ownerReviewRepository.HasGuestRated(selectedReservation.Id);
-
-            if (!guestHasRated)
+            try
             {
-                MessageBox.Show("Morate prvo vi oceniti boravak da biste mogli da vidite recenziju vlasnika.", "Obaveštenje", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
+                // --- ISPRAVKA: Sva logika je sada u servisu ---
+                if (!_reviewService.HasGuestRated(selectedReservation.Id))
+                {
+                    MessageBox.Show("You must first rate your stay to see the owner's review.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                GuestReview reviewFromOwner = _reviewService.GetReviewFromOwner(selectedReservation);
+                if (reviewFromOwner == null)
+                {
+                    MessageBox.Show("The owner has not yet left a review for your stay.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                OwnerReviewDetailsView detailsWindow = new OwnerReviewDetailsView(reviewFromOwner);
+                detailsWindow.ShowDialog();
             }
-
-            // Ako je uslov ispunjen, tražimo recenziju od vlasnika
-            //treba mi aleksandrino a ne moje
-            GuestReview reviewFromOwner = _guestReviewRepository.GetByReservationId(selectedReservation).FirstOrDefault();
-
-            if (reviewFromOwner == null)
+            catch (Exception ex)
             {
-                MessageBox.Show("Vlasnik još uvek nije ostavio recenziju za vaš boravak.", "Obaveštenje", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-            // Ako sve prođe, otvaramo prozor za prikaz recenzije
-            OwnerReviewDetailsView detailsWindow = new OwnerReviewDetailsView(reviewFromOwner);
-            detailsWindow.ShowDialog();
         }
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {

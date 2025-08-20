@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BookingApp.Services
 {
-    public class AccommodationService
+    public class AccommodationService : IAccommodationService
     {
         private readonly IAccommodationRepository _repository;
 

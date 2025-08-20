@@ -1,17 +1,21 @@
 ﻿using System;
+using System.Linq;
 using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
 using BookingApp.Repositories;
 
 namespace BookingApp.Services
 {
-    public class ReviewService
+    public class ReviewService : IReviewService
     {
-        private readonly OwnerReviewRepository _ownerReviewRepository;
+        private readonly IOwnerReviewRepository _ownerReviewRepository;
+        private readonly IGuestReviewRepository _guestReviewRepository;
         private const int DaysToLeaveReview = 5; //sta???
 
-        public ReviewService(OwnerReviewRepository ownerReviewRepository)
+        public ReviewService(IOwnerReviewRepository ownerReviewRepository, IGuestReviewRepository guestReviewRepository)
         {
             _ownerReviewRepository = ownerReviewRepository;
+            _guestReviewRepository = guestReviewRepository;
         }
         //provjera da li je rok za ostavljenje recenzije vlasniku prosao
         public bool IsReviewPeriodExpired(Reservation reservation)
@@ -41,6 +45,15 @@ namespace BookingApp.Services
 
             // 3. Čuvanje
             _ownerReviewRepository.Save(review);
+        }
+        public bool HasGuestRated(int reservationId)
+        {
+            return _ownerReviewRepository.HasGuestRated(reservationId);
+        }
+        public GuestReview GetReviewFromOwner(Reservation reservation)
+        {
+            // Pretpostavka da GuestReviewRepository ima metodu GetByReservationId
+            return _guestReviewRepository.GetByReservationId(reservation).FirstOrDefault();
         }
     }
   }

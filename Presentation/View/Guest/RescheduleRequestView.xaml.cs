@@ -6,8 +6,9 @@ using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Utilities;
 using BookingApp.Services;
+using BookingApp.Domain.Interfaces;
 
-namespace BookingApp.Presentation.Guest
+namespace BookingApp.Presentation.View.Guest
 {
     /// <summary>
     /// Interaction logic for RescheduleRequestView.xaml
@@ -16,7 +17,8 @@ namespace BookingApp.Presentation.Guest
     {
         private readonly Reservation _reservation;
         private readonly Accommodation _accommodation;
-        private readonly RescheduleRequestService _rescheduleRequestService;
+        private readonly IRescheduleRequestService _rescheduleRequestService;
+        private readonly IAccommodationRepository _accommodationRepository;
         //private readonly OccupiedDateRepository _occupiedDateRepository;
         //private readonly RescheduleRequestRepository _rescheduleRequestRepository;
         //private readonly AccommodationRepository _accommodationRepository;
@@ -26,7 +28,7 @@ namespace BookingApp.Presentation.Guest
             InitializeComponent();
             _reservation = reservatiion;
 
-            var occupiedDateRepository = new OccupiedDateRepository();
+            /*var occupiedDateRepository = new OccupiedDateRepository();
             var rescheduleRequestRepository = new RescheduleRequestRepository();
             var accommodationRepository = new AccommodationRepository();
             _rescheduleRequestService = new RescheduleRequestService(occupiedDateRepository, rescheduleRequestRepository, accommodationRepository);
@@ -40,6 +42,20 @@ namespace BookingApp.Presentation.Guest
                 MessageBox.Show("Could not find accommodation details. The window will close.");
                 this.Close();
                 return;
+            }*/
+            // --- ISPRAVKA: Dobijamo SVE zavisnosti od Injector-a ---
+            _rescheduleRequestService = Injector.CreateInstance<IRescheduleRequestService>();
+            _accommodationRepository = Injector.CreateInstance<IAccommodationRepository>();
+
+            // Dohvatanje smeštaja se sada radi preko interfejsa koji smo dobili
+            _accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == _reservation.AccommodationId);
+
+            // Provera da li je smeštaj pronađen
+            if (_accommodation == null)
+            {
+                MessageBox.Show("Could not find accommodation details. The window will close.");
+                this.Close();
+                return; // Važno je prekinuti izvršavanje konstruktora
             }
             LoadInitialData();
         }
