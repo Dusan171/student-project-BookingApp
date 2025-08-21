@@ -1,11 +1,11 @@
 ﻿<Window x:Class="BookingApp.Presentation.View.Guest.AccommodationReservationView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:utilities="clr-namespace:BookingApp.Utilities"
         Title="Reserve Accommodation" Height="350" Width="450"
         WindowStartupLocation="CenterScreen" MinHeight="300" MinWidth="350">
 
     <Window.Resources>
-        <!-- Stil za zauzete dane u kalendaru -->
         <Style TargetType="CalendarDayButton">
             <Style.Triggers>
                 <Trigger Property="IsBlackedOut" Value="True">
@@ -15,8 +15,6 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
-        <!-- Opšti stilovi za konzistentnost -->
         <Style TargetType="TextBlock">
             <Setter Property="Margin" Value="0,0,0,3"/>
         </Style>
@@ -26,41 +24,36 @@
         </Style>
     </Window.Resources>
 
-    <!-- DockPanel je idealan za ovakav raspored (dugmići na dnu, ostatak iznad) -->
     <DockPanel Margin="15">
-
-        <!-- DUGME ZA REZERVACIJU: "Zalepljeno" za dno panela -->
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="Reserve" IsDefault="True" Click="Reserve_Click"/>
+            <!-- Povezujemo dugme sa ReserveCommand iz ViewModel-a -->
+            <Button Content="Reserve" IsDefault="True" Command="{Binding ReserveCommand}"/>
             <Button Content="Cancel" IsCancel="True"/>
         </StackPanel>
 
-        <!-- GLAVNI SADRŽAJ: Zauzima sav preostali prostor -->
         <StackPanel>
-
-            <!-- GRUPA ZA DATUME -->
             <GroupBox Header="Select Stay Period" Padding="5">
-                <!-- UniformGrid osigurava da su obe kolone jednake širine -->
                 <UniformGrid Columns="2" Rows="1">
                     <StackPanel Margin="5">
                         <TextBlock Text="Start Date"/>
-                        <DatePicker x:Name="StartDatePicker"/>
+                        <!-- Povezujemo DatePicker sa svojstvima i BlackoutDates iz ViewModel-a -->
+                        <DatePicker SelectedDate="{Binding StartDate}" utilities:DatePickerHelper.BlackoutDatesSource="{Binding BlackoutDates}"/>
+
                     </StackPanel>
                     <StackPanel Margin="5">
                         <TextBlock Text="End Date"/>
-                        <DatePicker x:Name="EndDatePicker"/>
+                        <DatePicker SelectedDate="{Binding EndDate}" utilities:DatePickerHelper.BlackoutDatesSource="{Binding BlackoutDates}"/>
                     </StackPanel>
                 </UniformGrid>
             </GroupBox>
 
-            <!-- GRUPA ZA GOSTE -->
             <GroupBox Header="Guest Information" Padding="5" Margin="0,10,0,0">
                 <StackPanel Margin="5">
                     <TextBlock Text="Number of guests:"/>
-                    <TextBox x:Name="GuestsTextBox" MaxWidth="150"/>
+                    <!-- Povezujemo TextBox sa GuestsNumber svojstvom -->
+                    <TextBox Text="{Binding GuestsNumber, UpdateSourceTrigger=PropertyChanged}" MaxWidth="150"/>
                 </StackPanel>
             </GroupBox>
-
         </StackPanel>
     </DockPanel>
 </Window>

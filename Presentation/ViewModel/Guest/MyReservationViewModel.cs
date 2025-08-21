@@ -1,9 +1,10 @@
 ﻿using System;
 using BookingApp.Domain;
+using BookingApp.Utilities;
 
 namespace BookingApp.Presentation.ViewModel.Guest
 {
-    public class MyReservationViewModel
+    public class MyReservationViewModel : ViewModelBase
     {
         //podaci iz Reservation modela
         public int ReservationId { get; set; }

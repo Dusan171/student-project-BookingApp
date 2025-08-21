@@ -3,16 +3,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="My Reservations" Height="450" Width="800"
         WindowStartupLocation="CenterScreen">
+
+    <!-- DataContext se postavlja u code-behind-u na instancu MyReservationsViewModel -->
+
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <DataGrid x:Name="ReservationsDataGrid" Grid.Row="0" AutoGenerateColumns="False" IsReadOnly="True"
-                  SelectionMode="Single" ItemsSource="{Binding MyReservationsDisplay}">
+        <DataGrid Grid.Row="0" AutoGenerateColumns="False" IsReadOnly="True"
+                  SelectionMode="Single" 
+                  ItemsSource="{Binding Reservations}"
+                  SelectedItem="{Binding SelectedReservation}">
             <DataGrid.Columns>
-                <!-- Ažurirane i nove kolone -->
                 <DataGridTextColumn Header="Accommodation" Binding="{Binding AccommodationName}" Width="*"/>
                 <DataGridTextColumn Header="Start Date" Binding="{Binding StartDate, StringFormat='dd.MM.yyyy'}" Width="Auto"/>
                 <DataGridTextColumn Header="End Date" Binding="{Binding EndDate, StringFormat='dd.MM.yyyy'}" Width="Auto"/>
@@ -20,26 +24,19 @@
                 <DataGridTextColumn Header="Reschedule Status" Binding="{Binding RequestStatusText}" Width="*"/>
                 <DataGridTextColumn Header="Owner's Comment" Binding="{Binding OwnerComment}" Width="*"/>
 
-                <!-- Kolona sa dugmetom za pomeranje -->
-                <DataGridTemplateColumn Header="Actions" Width="Auto">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Button Content="Reschedule" 
-                                    Click="RescheduleButton_Click"
-                                    IsEnabled="{Binding IsRescheduleEnabled}"
-                                    ToolTip="Request to change reservation dates"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
+                <!-- Umesto dugmeta unutar reda, koristimo dugmiće ispod tabele, što je čistije -->
+                <!-- Ako želite dugme u redu, Command se može povezati ovako: -->
+                <!-- <Button Command="{Binding DataContext.RescheduleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" ... /> -->
             </DataGrid.Columns>
         </DataGrid>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <Button Content="Rate" Width="100" Margin="5" Click="RateButton_Click"/>
-            <Button x:Name="ViewReview" Content="View Review" Width="120" Margin="5" Click="ViewReviewButton_Click"/>
-            <Button Content="Close" Width="100" Margin="5" Click="CloseButton_Click"/>
+            <!-- Povezujemo dugmiće sa komandama iz ViewModel-a -->
+            <!-- Dugmići su automatski onemogućeni ako ništa nije selektovano, zahvaljujući CanExecuteActions -->
+            <Button Content="Reschedule" Width="120" Margin="5" Command="{Binding RescheduleCommand}"/>
+            <Button Content="Rate" Width="100" Margin="5" Command="{Binding RateCommand}"/>
+            <Button Content="View Review" Width="120" Margin="5" Command="{Binding ViewReviewCommand}"/>
+            <Button Content="Close" Width="100" Margin="5" Command="{Binding CloseCommand}"/>
         </StackPanel>
-
     </Grid>
 </Window>

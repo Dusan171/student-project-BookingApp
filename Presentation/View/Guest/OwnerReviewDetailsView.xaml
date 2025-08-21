@@ -7,11 +7,9 @@
         ResizeMode="NoResize">
 
     <Window.Resources>
-        <!-- Definišemo stilove za konzistentnost i lakše održavanje -->
         <Style x:Key="LabelStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Margin" Value="0,0,10,0"/>
-            <!-- Razmak sa desne strane -->
         </Style>
         <Style x:Key="ValueStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Bold"/>
@@ -22,11 +20,9 @@
         <StackPanel MinWidth="300">
             <TextBlock Text="Owner's Review" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center"/>
 
-            <!-- Jedan Grid za sve ocene, lakši za proširenje -->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
-                    <!-- Širina se prilagođava najširem labelu -->
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
@@ -34,23 +30,21 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Red za čistoću -->
+                <!-- Povezujemo TextBlock-ove sa svojstvima iz ViewModel-a -->
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Cleanliness:" Style="{StaticResource LabelStyle}"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CleanlinessRating}" Style="{StaticResource ValueStyle}"/>
 
-                <!-- Red za poštovanje pravila -->
                 <TextBlock Grid.Row="1" Grid.Column="0" Text="Rule Respecting:" Style="{StaticResource LabelStyle}" Margin="0,5,10,0"/>
                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding RuleRespectingRating}" Style="{StaticResource ValueStyle}" Margin="0,5,0,0"/>
             </Grid>
 
-            <!-- Komentar -->
             <TextBlock Text="Comment:" FontWeight="Medium" Margin="0,15,0,5"/>
             <Border Background="#f0f0f0" CornerRadius="3" Padding="8">
                 <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" MinHeight="60"/>
             </Border>
 
-            <!-- Dugme -->
-            <Button Content="OK" IsDefault="True" Click="OkButton_Click" HorizontalAlignment="Right" Margin="0,20,0,0" Padding="20,5"/>
+            <!-- Povezujemo dugme sa OkCommand iz ViewModel-a -->
+            <Button Content="OK" IsDefault="True" Command="{Binding OkCommand}" HorizontalAlignment="Right" Margin="0,20,0,0" Padding="20,5"/>
         </StackPanel>
     </Border>
 </Window>
