@@ -7,12 +7,12 @@ using BookingApp.Domain;
 
 namespace BookingApp.Domain.Interfaces
 {
-    public interface IOwnerReviewRepository
+    public interface IAccommodationReviewRepository
     {
-        List<OwnerReview> GetAll();
-        List<OwnerReview> GetByReservationId(int reservationId);
+        List<AccommodationReview> GetAll();
+        List<AccommodationReview> GetByReservationId(int reservationId);
         bool HasGuestRated(int reservationId);
-        OwnerReview Save(OwnerReview review);
+        AccommodationReview Save(AccommodationReview review);
         int NextId();
     }
 }

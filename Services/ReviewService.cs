@@ -8,11 +8,11 @@ namespace BookingApp.Services
 {
     public class ReviewService : IReviewService
     {
-        private readonly IOwnerReviewRepository _ownerReviewRepository;
+        private readonly IAccommodationReviewRepository _ownerReviewRepository;
         private readonly IGuestReviewRepository _guestReviewRepository;
         private const int DaysToLeaveReview = 5; //sta???
 
-        public ReviewService(IOwnerReviewRepository ownerReviewRepository, IGuestReviewRepository guestReviewRepository)
+        public ReviewService(IAccommodationReviewRepository ownerReviewRepository, IGuestReviewRepository guestReviewRepository)
         {
             _ownerReviewRepository = ownerReviewRepository;
             _guestReviewRepository = guestReviewRepository;
@@ -32,7 +32,7 @@ namespace BookingApp.Services
             }
 
             // 2. Kreiranje objekta
-            var review = new OwnerReview
+            var review = new AccommodationReview
             {
                 // ID se sada dodeljuje unutar Save metode repozitorijuma
                 ReservationId = reservation.Id,
@@ -50,10 +50,10 @@ namespace BookingApp.Services
         {
             return _ownerReviewRepository.HasGuestRated(reservationId);
         }
-        public GuestReview GetReviewFromOwner(Reservation reservation)
+       /* public GuestReview GetReviewFromOwner(Reservation reservation)
         {
             // Pretpostavka da GuestReviewRepository ima metodu GetByReservationId
             return _guestReviewRepository.GetByReservationId(reservation).FirstOrDefault();
-        }
+        }*/
     }
   }

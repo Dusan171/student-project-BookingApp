@@ -65,10 +65,23 @@ namespace BookingApp.Repositories
             return review;
         }
 
+       /* public List<GuestReview> GetByReservationId(Reservation reservation)
+        {
+            return GetByReservationId(reservation.Id);
+        }*/
+
+        // Implementacija NOVE metode
+        public List<GuestReview> GetByReservationId(int reservationId)
+        {
+            // Uvek ponovo ?itamo fajl da bismo imali sveže podatke
+            _reviews = _serializer.FromCSV(FilePath);
+            return _reviews.FindAll(review => review.ReservationId == reservationId);
+        }
+        // --- DODAJEMO PONOVO METODU ZA KOLEGU ---
+        // Implementacija je jednostavna, samo poziva gornju metodu.
         public List<GuestReview> GetByReservationId(Reservation reservation)
         {
-            _reviews = _serializer.FromCSV(FilePath);
-            return _reviews.FindAll(c => c.ReservationId == reservation.Id);
+            return GetByReservationId(reservation.Id);
         }
     }
 }

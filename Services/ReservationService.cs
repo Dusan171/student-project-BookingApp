@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain;
-using BookingApp.Repositories;
 using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Services.DTOs;
 
 namespace BookingApp.Services
 {
@@ -12,37 +12,46 @@ namespace BookingApp.Services
     {
         private readonly IReservationRepository _reservationRepository;
         private readonly IOccupiedDateRepository _occupiedDateRepository;
+        private readonly IAccommodationRepository _accommodationRepository;
 
         //Dependency Injection (to ce vjerovatno trebati prebaciti u posebnu klasu ili gdje vec)
 
-        public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository)
+        public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository, IAccommodationRepository accommodationRepository)
         {
             _reservationRepository = reservationRepository;
             _occupiedDateRepository = occupiedDateRepository;
+            _accommodationRepository = accommodationRepository;
         }
         //logika rezervacije koja je prije bila u reservationRepository
-        public Reservation Create(Accommodation accommodation, DateTime startDate, DateTime endDate, int guestNumber)
+        public Reservation Create(CreateReservationDTO reservationDto)
         {
+            // Moramo dobiti Accommodation objekat da bismo proverili pravila
+            var accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == reservationDto.AccommodationId);
+            if (accommodation == null)
+            {
+                throw new Exception("Cannot create reservation for an unknown accommodation.");
+            }
+
             // Validacija poslovnih pravila
-            ValidateReservationRules(accommodation, startDate, endDate, guestNumber);
+            ValidateReservationRules(accommodation, reservationDto.StartDate, reservationDto.EndDate, reservationDto.GuestsNumber);
 
             // Provera dostupnosti
-            CheckForOverlappingDates(accommodation.Id, startDate, endDate);
+            CheckForOverlappingDates(accommodation.Id, reservationDto.StartDate, reservationDto.EndDate);
 
-            // Kreiranje i čuvanje rezervacije
+            // Kreiranje domenskog modela iz DTO-a
             var reservation = new Reservation
             {
-                AccommodationId = accommodation.Id,
+                AccommodationId = reservationDto.AccommodationId,
                 GuestId = Session.CurrentUser.Id,
-                StartDate = startDate,
-                EndDate = endDate,
-                GuestsNumber = guestNumber,
+                StartDate = reservationDto.StartDate,
+                EndDate = reservationDto.EndDate,
+                GuestsNumber = reservationDto.GuestsNumber,
                 Status = ReservationStatus.Active
             };
             _reservationRepository.Save(reservation);
 
-            // Kreiranje i čuvanje zauzetih datuma
-            CreateOccupiedDates(accommodation.Id, reservation.Id, startDate, endDate);
+            // Kreiranje zauzetih datuma
+            CreateOccupiedDates(accommodation.Id, reservation.Id, reservationDto.StartDate, reservationDto.EndDate);
 
             return reservation;
         }
@@ -84,6 +93,16 @@ namespace BookingApp.Services
                 });
             }
             _occupiedDateRepository.Save(occupiedDatesToSave);
+        }
+        public List<DateTime> GetOccupiedDatesForAccommodation(int accommodationId)
+        {
+            // 1. Pozivamo repozitorijum da dobavimo listu ZAUZETIH DATUMA
+            var occupiedDateObjects = _occupiedDateRepository.GetByAccommodationId(accommodationId);
+
+            // 2. Koristimo LINQ (.Select) da iz svakog 'OccupiedDate' objekta
+            //    izvučemo samo 'Date' svojstvo (koje je tipa DateTime).
+            // 3. .ToList() pretvara rezultat u listu koju vraćamo.
+            return occupiedDateObjects.Select(occupiedDate => occupiedDate.Date).ToList();
         }
     }
 }

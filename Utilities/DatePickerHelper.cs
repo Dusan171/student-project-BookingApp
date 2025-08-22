@@ -1,6 +1,7 @@
-﻿using System.Collections.Specialized;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Collections.Generic;
 
 namespace BookingApp.Utilities // Proverite namespace
 {
@@ -9,16 +10,16 @@ namespace BookingApp.Utilities // Proverite namespace
         public static readonly DependencyProperty BlackoutDatesSourceProperty =
             DependencyProperty.RegisterAttached(
                 "BlackoutDatesSource",
-                typeof(CalendarBlackoutDatesCollection),
+                typeof(List<DateTime>),
                 typeof(DatePickerHelper),
                 new PropertyMetadata(null, OnBlackoutDatesSourceChanged));
 
-        public static CalendarBlackoutDatesCollection GetBlackoutDatesSource(DependencyObject obj)
+        public static List<DateTime> GetBlackoutDatesSource(DependencyObject obj)
         {
-            return (CalendarBlackoutDatesCollection)obj.GetValue(BlackoutDatesSourceProperty);
+            return (List<DateTime>)obj.GetValue(BlackoutDatesSourceProperty);
         }
 
-        public static void SetBlackoutDatesSource(DependencyObject obj, CalendarBlackoutDatesCollection value)
+        public static void SetBlackoutDatesSource(DependencyObject obj, List<DateTime> value)
         {
             obj.SetValue(BlackoutDatesSourceProperty, value);
         }
@@ -27,7 +28,7 @@ namespace BookingApp.Utilities // Proverite namespace
         {
             if (d is DatePicker datePicker)
             {
-                var newDates = e.NewValue as CalendarBlackoutDatesCollection;
+                var newDates = e.NewValue as List<DateTime>;
 
                 // Očistimo stare datume
                 datePicker.BlackoutDates.Clear();
@@ -35,9 +36,9 @@ namespace BookingApp.Utilities // Proverite namespace
                 if (newDates != null)
                 {
                     // Dodamo nove datume
-                    foreach (var range in newDates)
+                    foreach (var date in newDates)
                     {
-                        datePicker.BlackoutDates.Add(range);
+                        datePicker.BlackoutDates.Add(new CalendarDateRange(date));
                     }
                 }
             }

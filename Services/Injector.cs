@@ -21,7 +21,7 @@ namespace BookingApp.Services
             IReservationRepository reservationRepository = new ReservationRepository();
             IOccupiedDateRepository occupiedDateRepository = new OccupiedDateRepository();
             IRescheduleRequestRepository rescheduleRequestRepository = new RescheduleRequestRepository();
-            IOwnerReviewRepository ownerReviewRepository = new OwnerReviewRepository();
+            IAccommodationReviewRepository accommodationReviewRepository = new AccommodationReviewRepository();
             IGuestReviewRepository guestReviewRepository = new GuestReviewRepository();
 
             // --- FAZA 2: Kreiranje instanci servisa, prosleđujući im repozitorijume ---
@@ -33,10 +33,11 @@ namespace BookingApp.Services
 
             // Vaši servisi
             IAccommodationFilterService accommodationFilterService = new AccommodationFilterService(accommodationRepository);
-            IReservationService reservationService = new ReservationService(reservationRepository, occupiedDateRepository);
-            IReviewService reviewService = new ReviewService(ownerReviewRepository, guestReviewRepository);
-            IReservationDisplayService reservationDisplayService = new ReservationDisplayService(reservationRepository, accommodationRepository, rescheduleRequestRepository);
-            IRescheduleRequestService rescheduleRequestService = new RescheduleRequestService(occupiedDateRepository, rescheduleRequestRepository, accommodationRepository);
+            IReservationService reservationService = new ReservationService(reservationRepository, occupiedDateRepository,accommodationRepository);
+            IAccommodationReviewService accommodationReviewService = new AccommodationReviewService(accommodationReviewRepository);
+            IGuestReviewService guestReviewService = new GuestReviewService(guestReviewRepository);
+            IReservationDisplayService reservationDisplayService = new ReservationDisplayService(reservationRepository, accommodationRepository, rescheduleRequestRepository, accommodationReviewService, guestReviewService);
+            IRescheduleRequestService rescheduleRequestService = new RescheduleRequestService(occupiedDateRepository, rescheduleRequestRepository, accommodationRepository, reservationRepository);
 
             // --- FAZA 3: Popunjavanje rečnika sa već kreiranim instancama ---
             // Repozitorijumi
@@ -48,7 +49,7 @@ namespace BookingApp.Services
             _implementations.Add(typeof(IReservationRepository), reservationRepository);
             _implementations.Add(typeof(IOccupiedDateRepository), occupiedDateRepository);
             _implementations.Add(typeof(IRescheduleRequestRepository), rescheduleRequestRepository);
-            _implementations.Add(typeof(IOwnerReviewRepository), ownerReviewRepository);
+            _implementations.Add(typeof(IAccommodationReviewRepository), accommodationReviewRepository);
             _implementations.Add(typeof(IGuestReviewRepository), guestReviewRepository);
 
             // Servisi
@@ -59,7 +60,8 @@ namespace BookingApp.Services
             _implementations.Add(typeof(ILocationService), locationService);
             _implementations.Add(typeof(IAccommodationFilterService), accommodationFilterService);
             _implementations.Add(typeof(IReservationService), reservationService);
-            _implementations.Add(typeof(IReviewService), reviewService);
+            _implementations.Add(typeof(IAccommodationReviewService), accommodationReviewService);
+            _implementations.Add(typeof(IGuestReviewService), guestReviewService);
             _implementations.Add(typeof(IReservationDisplayService), reservationDisplayService);
             _implementations.Add(typeof(IRescheduleRequestService), rescheduleRequestService);
         }

@@ -1,12 +1,14 @@
-﻿using BookingApp.Domain;
-using BookingApp.Domain.Interfaces;
-using BookingApp.Services;
-using BookingApp.Utilities;
-using System;
+﻿using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Collections.Generic;
 using System.Windows.Input;
+using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Services;
+using BookingApp.Services.DTOs;
+using BookingApp.Utilities;
 
 namespace BookingApp.Presentation.ViewModel
 {
@@ -42,7 +44,7 @@ namespace BookingApp.Presentation.ViewModel
         }
 
         // Svojstvo za BlackoutDates
-        public CalendarBlackoutDatesCollection BlackoutDates { get; } = new CalendarBlackoutDatesCollection(null);
+        public List<DateTime> BlackoutDates { get; set; }
 
         #endregion
 
@@ -77,11 +79,14 @@ namespace BookingApp.Presentation.ViewModel
 
         private void LoadInitialData()
         {
+            // Dobijamo listu od servisa (ovo već radite ispravno)
             var blackoutDates = _rescheduleRequestService.GetBlackoutDatesForReschedule(_reservation);
-            foreach (var date in blackoutDates)
-            {
-                BlackoutDates.Add(new CalendarDateRange(date));
-            }
+
+            // Postavljamo vrednost našeg svojstva
+            this.BlackoutDates = blackoutDates;
+
+            // Obaveštavamo XAML da je svojstvo dobilo novu vrednost
+            OnPropertyChanged(nameof(BlackoutDates));
         }
 
         private void SendRequest(object obj)
@@ -101,7 +106,14 @@ namespace BookingApp.Presentation.ViewModel
             // --- Poziv servisa ---
             try
             {
-                _rescheduleRequestService.CreateRequest(_reservation, NewStartDate.Value.Date, NewEndDate.Value.Date);
+                // --- KORAK 1: Kreiramo DTO koji servis očekuje ---
+                var requestDto = new CreateRescheduleRequestDTO
+                {
+                    ReservationId = _reservation.Id, // Servisu treba samo ID, ne ceo objekat
+                    NewStartDate = NewStartDate.Value.Date,
+                    NewEndDate = NewEndDate.Value.Date
+                };
+                _rescheduleRequestService.CreateRequest(requestDto);
                 MessageBox.Show("Your request has been sent to the owner.", "Request Sent", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Signaliziramo uspešno zatvaranje

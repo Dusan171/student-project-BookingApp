@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain;
-using BookingApp.Repositories;
 using BookingApp.Services.DTOs;
 using BookingApp.Domain.Interfaces;
 
@@ -17,10 +16,14 @@ namespace BookingApp.Services
             _accommodationRepository = accommodationRepository;
         }
 
-        public List<Accommodation> Filter(AccommodationSearchParameters parameters)
+        public List<AccommodationDTO> Filter(AccommodationSearchParameters parameters)
         {
             var allAccommodations = _accommodationRepository.GetAll();
-            return allAccommodations.Where(acc => MatchesFilter(acc,parameters)).ToList();
+            var filteredAccommodations = allAccommodations.Where(acc => MatchesFilter(acc, parameters));
+
+            //prevod(mapiranje) filtriranih domenskih modela u DTO
+            var dtoList = filteredAccommodations.Select(acc => new AccommodationDTO(acc)).ToList();
+            return dtoList;
         }
         //prebaceno iz AccommodationLookup.xaml.cs
         private bool MatchesFilter(Accommodation acc, AccommodationSearchParameters parameters)

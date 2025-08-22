@@ -7,20 +7,20 @@ using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Repositories
 {
-    public class OwnerReviewRepository : IOwnerReviewRepository
+    public class AccommodationReviewRepository : IAccommodationReviewRepository
     {
         private const string FilePath = "../../../Resources/Data/guestReviewsD.csv";
-        private readonly Serializer<OwnerReview> _serializer;
+        private readonly Serializer<AccommodationReview> _serializer;
 
-        public OwnerReviewRepository()
+        public AccommodationReviewRepository()
         {
-            _serializer = new Serializer<OwnerReview>();
+            _serializer = new Serializer<AccommodationReview>();
         }
-        public List<OwnerReview> GetAll()
+        public List<AccommodationReview> GetAll()
         {
             return _serializer.FromCSV(FilePath);
         }
-        public List<OwnerReview> GetByReservationId(int reservationId)
+        public List<AccommodationReview> GetByReservationId(int reservationId)
         {
             var allReviews = GetAll();
             return allReviews.Where(r=>r.ReservationId == reservationId).ToList();
@@ -30,7 +30,7 @@ namespace BookingApp.Repositories
             var allReviews = GetAll();
             return allReviews.Any(r => r.ReservationId == reservationId);
         }
-        public OwnerReview Save(OwnerReview review)
+        public AccommodationReview Save(AccommodationReview review)
         {
             var allReviews = GetAll();
             review.Id = NextId();

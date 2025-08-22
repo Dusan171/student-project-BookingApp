@@ -66,11 +66,11 @@ namespace BookingApp.Presentation.ViewModel
 
         // Kolekcija za prikaz u DataGrid-u. Koristimo ObservableCollection
         // da bi se DataGrid automatski osvežio kada se kolekcija promeni.
-        public ObservableCollection<Accommodation> Accommodations { get; set; }
+        public ObservableCollection<AccommodationDTO> Accommodations { get; set; }
 
         // Svojstvo za praćenje selektovanog smeštaja u DataGrid-u
-        private Accommodation _selectedAccommodation;
-        public Accommodation SelectedAccommodation
+        private AccommodationDTO _selectedAccommodation;
+        public AccommodationDTO SelectedAccommodation
         {
             get => _selectedAccommodation;
             set { _selectedAccommodation = value; OnPropertyChanged(); }
@@ -98,7 +98,7 @@ namespace BookingApp.Presentation.ViewModel
             ResetSearchCommand = new RelayCommand(ResetSearch);
 
             // Učitavanje početnih podataka
-            Accommodations = new ObservableCollection<Accommodation>(_accommodationRepository.GetAll());
+            Accommodations = new ObservableCollection<AccommodationDTO>(_filterService.Filter(new AccommodationSearchParameters()));
         }
 
         #region Logika Komandi
@@ -134,7 +134,7 @@ namespace BookingApp.Presentation.ViewModel
             MinDaysSearch = string.Empty;
 
             // Ponovo učitavamo sve smeštaje
-            var result = _accommodationRepository.GetAll();
+            var result = _filterService.Filter(new AccommodationSearchParameters());
             Accommodations.Clear();
             foreach (var item in result)
             {
@@ -144,8 +144,22 @@ namespace BookingApp.Presentation.ViewModel
 
         private void Reserve(object obj)
         {
-            var reservationWindow = new AccommodationReservationView(SelectedAccommodation);
-            reservationWindow.ShowDialog();
+            // Selektovana stavka je sada DTO, npr. AccommodationDTO
+            if (SelectedAccommodation == null) return;
+
+            // --- PROMENA #5: Dobavljamo pun domenski model na osnovu ID-a iz DTO-a ---
+            var fullAccommodation = _accommodationRepository.GetById(SelectedAccommodation.Id); // Pretpostavka da DTO ima 'Id' i repo ima 'GetById'
+
+            if (fullAccommodation != null)
+            {
+                // Prosleđujemo pun objekat novom prozoru
+                var reservationWindow = new AccommodationReservationView(fullAccommodation);
+                reservationWindow.ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Could not find details for the selected accommodation.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private bool CanReserve(object obj)

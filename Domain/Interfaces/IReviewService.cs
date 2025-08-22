@@ -11,6 +11,6 @@ namespace BookingApp.Domain.Interfaces
         public bool IsReviewPeriodExpired(Reservation reservation);
         public void CreateOwnerReview(Reservation reservation, int cleanliness, int ownerRating, string comment, string imagePaths);
         bool HasGuestRated(int reservationId);
-        GuestReview GetReviewFromOwner(Reservation reservation);
+        //GuestReview GetReviewFromOwner(Reservation reservation);
     }
 }

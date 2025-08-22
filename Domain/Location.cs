@@ -5,10 +5,6 @@ using BookingApp.Serializer;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
-using System.Net.Mail;
-using System.Net;
-using System.Reflection;
-using System.Xml.Linq;
 using System.ComponentModel;
 
 namespace BookingApp.Domain
@@ -33,6 +29,10 @@ namespace BookingApp.Domain
         public Location ToLocation()
         {
             return new Location(Id, City, Country);
+        }
+        public override string ToString()
+        {
+            return $"{City}, {Country}";
         }
         public string[] ToCSV()
         {

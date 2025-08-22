@@ -1,12 +1,12 @@
-﻿using BookingApp.Domain;
+﻿using System;
+using System.Windows;
+using System.Windows.Input;
+using System.Collections.Generic;
+using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
+using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
-using System;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace BookingApp.Presentation.ViewModel
 {
@@ -14,8 +14,7 @@ namespace BookingApp.Presentation.ViewModel
     {
         private readonly Accommodation _accommodation;
         private readonly IReservationService _reservationService;
-        private readonly IOccupiedDateRepository _occupiedDateRepository;
-
+        
         // Akcija za zatvaranje prozora, koju će View postaviti
         public Action CloseAction { get; set; }
 
@@ -43,7 +42,7 @@ namespace BookingApp.Presentation.ViewModel
         }
 
         // Svojstvo za povezivanje sa BlackoutDates u XAML-u
-        public CalendarBlackoutDatesCollection BlackoutDates { get; } = new CalendarBlackoutDatesCollection(null);
+        public List<DateTime> OccupiedDates { get; set; }
 
         #endregion
 
@@ -57,7 +56,6 @@ namespace BookingApp.Presentation.ViewModel
 
             // Dobijanje zavisnosti
             _reservationService = Injector.CreateInstance<IReservationService>();
-            _occupiedDateRepository = Injector.CreateInstance<IOccupiedDateRepository>();
 
             // Inicijalizacija komandi
             ReserveCommand = new RelayCommand(Reserve);
@@ -69,11 +67,7 @@ namespace BookingApp.Presentation.ViewModel
 
         private void LoadOccupiedDates()
         {
-            var occupiedDates = _occupiedDateRepository.GetByAccommodationId(_accommodation.Id);
-            foreach (var date in occupiedDates)
-            {
-                BlackoutDates.Add(new CalendarDateRange(date.Date));
-            }
+            OccupiedDates = _reservationService.GetOccupiedDatesForAccommodation(_accommodation.Id);
         }
 
         private void Reserve(object obj)
@@ -103,7 +97,16 @@ namespace BookingApp.Presentation.ViewModel
             // --- Poziv servisa ---
             try
             {
-                _reservationService.Create(_accommodation, StartDate.Value, EndDate.Value, guestNumber);
+                // --- KORAK 1: Kreiramo DTO koji servis očekuje ---
+                // Pakujemo sve potrebne podatke u jedan objekat.
+                var reservationDto = new CreateReservationDTO
+                {
+                    AccommodationId = _accommodation.Id, // Servisu treba samo ID
+                    StartDate = StartDate.Value.Date,
+                    EndDate = EndDate.Value.Date,
+                    GuestsNumber = guestNumber
+                };
+                _reservationService.Create(reservationDto);
                 MessageBox.Show("Reservation successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Pozivamo akciju da zatvori prozor

@@ -1,10 +1,11 @@
-﻿using BookingApp.Domain;
-using BookingApp.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Repositories;
 
 namespace BookingApp.Utilities
 {
@@ -16,6 +17,7 @@ namespace BookingApp.Utilities
 
             foreach (var reservation in reservations)
             {
+                // IsReservationRated sada ponovo radi jer guestReviewRepository opet ima metodu koja prima ceo 'reservation'
                 if (IsReservationFinished(reservation) &&
                     !IsReservationRated(reservation, guestReviewRepository) &&
                     IsWithinRatingPeriod(reservation))
@@ -48,7 +50,5 @@ namespace BookingApp.Utilities
                 IsRead = false
             };
         }
-
-
     }
 }

@@ -37,12 +37,12 @@
                     <StackPanel Margin="5">
                         <TextBlock Text="Start Date"/>
                         <!-- Povezujemo DatePicker sa svojstvima i BlackoutDates iz ViewModel-a -->
-                        <DatePicker SelectedDate="{Binding StartDate}" utilities:DatePickerHelper.BlackoutDatesSource="{Binding BlackoutDates}"/>
+                        <DatePicker SelectedDate="{Binding StartDate}" utilities:DatePickerHelper.BlackoutDatesSource="{Binding OccupiedDates}"/>
 
                     </StackPanel>
                     <StackPanel Margin="5">
                         <TextBlock Text="End Date"/>
-                        <DatePicker SelectedDate="{Binding EndDate}" utilities:DatePickerHelper.BlackoutDatesSource="{Binding BlackoutDates}"/>
+                        <DatePicker SelectedDate="{Binding EndDate}" utilities:DatePickerHelper.BlackoutDatesSource="{Binding OccupiedDates}"/>
                     </StackPanel>
                 </UniformGrid>
             </GroupBox>

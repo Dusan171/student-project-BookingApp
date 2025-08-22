@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain;
-using BookingApp.Repositories;
 using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Services.DTOs;
 
 namespace BookingApp.Services
 {
@@ -13,12 +13,14 @@ namespace BookingApp.Services
         private readonly IOccupiedDateRepository _occupiedDateRepository;
         private readonly IRescheduleRequestRepository _rescheduleRequestRepository;
         private readonly IAccommodationRepository _accommodationRepository;
+        private readonly IReservationRepository _reservationRepository;
 
-        public RescheduleRequestService(IOccupiedDateRepository occupiedDateRepository, IRescheduleRequestRepository rescheduleRequestRepository, IAccommodationRepository accommodationRepository)
+        public RescheduleRequestService(IOccupiedDateRepository occupiedDateRepository, IRescheduleRequestRepository rescheduleRequestRepository, IAccommodationRepository accommodationRepository, IReservationRepository reservationRepository)
         {
             _occupiedDateRepository = occupiedDateRepository;
             _rescheduleRequestRepository = rescheduleRequestRepository;
             _accommodationRepository = accommodationRepository;
+            _reservationRepository = reservationRepository;
         }
         //prebaceno iz RescheduleRequestView.xaml.cs
 
@@ -37,25 +39,32 @@ namespace BookingApp.Services
         }
         /// Kreira i čuva zahtev za pomeranje, nakon provere svih poslovnih pravila.
         /// 
-        public void CreateRequest(Reservation reservation, DateTime newStartDate, DateTime newEndDate)
+        public void CreateRequest(CreateRescheduleRequestDTO requestDto)
         {
+            // Dobijamo originalnu rezervaciju iz baze na osnovu ID-a iz DTO-a
+            var reservation = _reservationRepository.GetAll().FirstOrDefault(r => r.Id == requestDto.ReservationId);
+            if (reservation == null)
+            {
+                throw new Exception("Reservation to reschedule could not be found.");
+            }
+
             var accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == reservation.AccommodationId);
             if (accommodation == null)
             {
                 throw new Exception("Associated accommodation could not be found.");
             }
 
-            // 1. Validacija poslovnih pravila
-            int stayLength = (newEndDate - newStartDate).Days;
+            //Validacija poslovnih pravila (koristimo podatke iz DTO-a)
+            int stayLength = (requestDto.NewEndDate - requestDto.NewStartDate).Days;
             if (stayLength < accommodation.MinReservationDays)
             {
                 throw new Exception($"Minimum stay is {accommodation.MinReservationDays} days.");
             }
 
-            // 2. Provera dostupnosti
+            //Provera dostupnosti
             var blackoutDates = GetBlackoutDatesForReschedule(reservation);
             bool isOverlap = Enumerable.Range(0, stayLength)
-                .Select(offset => newStartDate.AddDays(offset).Date)
+                .Select(offset => requestDto.NewStartDate.AddDays(offset).Date)
                 .Any(date => blackoutDates.Contains(date));
 
             if (isOverlap)
@@ -63,13 +72,13 @@ namespace BookingApp.Services
                 throw new Exception("Selected period overlaps with another reservation and is not available.");
             }
 
-            // 3. Kreiranje i čuvanje
+            //Kreiranje domenskog modela iz DTO-a i čuvanje
             var newRequest = new RescheduleRequest
             {
-                ReservationId = reservation.Id,
+                ReservationId = requestDto.ReservationId,
                 GuestId = Session.CurrentUser.Id,
-                NewStartDate = newStartDate,
-                NewEndDate = newEndDate,
+                NewStartDate = requestDto.NewStartDate,
+                NewEndDate = requestDto.NewEndDate,
                 Status = RequestStatus.Pending,
                 IsSeenByGuest = false
             };

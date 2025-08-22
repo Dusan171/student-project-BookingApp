@@ -76,12 +76,6 @@ namespace BookingApp.Repositories
             _accommodations = _serializer.FromCSV(FilePath);
             return _accommodations.FindAll(c => c.GeoLocation.Id == location.Id);
         }
-
-        Accommodation IAccommodationRepository.GetById(int id)
-        {
-            throw new NotImplementedException();
-        }
-
     }
     }
 

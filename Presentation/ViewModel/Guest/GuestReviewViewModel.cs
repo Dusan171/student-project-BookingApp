@@ -11,7 +11,7 @@ namespace BookingApp.Presentation.ViewModel
     public class GuestReviewViewModel : ViewModelBase
     {
         private readonly Reservation _reservation;
-        private readonly IReviewService _reviewService;
+        private readonly IAccommodationReviewService _accommodationReviewService;
 
         // Akcija za zatvaranje prozora
         public Action CloseAction { get; set; }
@@ -57,7 +57,7 @@ namespace BookingApp.Presentation.ViewModel
             _reservation = reservation ?? throw new ArgumentNullException(nameof(reservation));
 
             // Dobijanje zavisnosti
-            _reviewService = Injector.CreateInstance<IReviewService>();
+            _accommodationReviewService = Injector.CreateInstance<IAccommodationReviewService>();
 
             // Inicijalizacija komandi
             SubmitCommand = new RelayCommand(Submit);
@@ -69,7 +69,7 @@ namespace BookingApp.Presentation.ViewModel
 
         private void CheckIfReviewIsAllowed()
         {
-            if (_reviewService.IsReviewPeriodExpired(_reservation))
+            if (_accommodationReviewService.IsReviewPeriodExpired(_reservation))
             {
                 MessageBox.Show("The period for leaving a review has expired (5 days). The window will now close.", "Review Period Expired", MessageBoxButton.OK, MessageBoxImage.Warning);
                 CloseAction?.Invoke();
@@ -93,11 +93,9 @@ namespace BookingApp.Presentation.ViewModel
             // --- Poziv servisa ---
             try
             {
-                _reviewService.CreateOwnerReview(_reservation, cleanliness, ownerRating, Comment, ImagePaths);
+                _accommodationReviewService.Create(_reservation, cleanliness, ownerRating, Comment, ImagePaths);
                 MessageBox.Show("Thank you for your review!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // Signaliziramo View-u da je operacija uspela (ako je otvoren kao Dialog)
-                // Ovu logiku je teže prebaciti, pa za sada ostavljamo samo zatvaranje
                 CloseAction?.Invoke();
             }
             catch (Exception ex)
