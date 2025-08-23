@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text; // Potrebno za StringBuilder
 using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain;
@@ -17,7 +18,6 @@ namespace BookingApp.Presentation.ViewModel
         private readonly IReservationDisplayService _reservationDisplayService;
         private readonly IAccommodationReviewService _accommodationReviewService;
         private readonly IGuestReviewService _guestReviewService;
-        
 
         #region Svojstva
         public ObservableCollection<ReservationDetailsDTO> Reservations { get; set; }
@@ -39,98 +39,55 @@ namespace BookingApp.Presentation.ViewModel
 
         public MyReservationsViewModel()
         {
+            // --- ZAVISNOSTI I KOMANDE (BEZ PROMENA) ---
             _reservationDisplayService = Injector.CreateInstance<IReservationDisplayService>();
             _accommodationReviewService = Injector.CreateInstance<IAccommodationReviewService>();
             _guestReviewService = Injector.CreateInstance<IGuestReviewService>();
 
-            // --- ISPRAVNA INICIJALIZACIJA ZA OVAJ XAML ---
-            // SVE akcije zavise od selektovanog reda
             RescheduleCommand = new RelayCommand(Reschedule, CanReschedule);
             RateCommand = new RelayCommand(Rate, CanRate);
             ViewReviewCommand = new RelayCommand(ViewReview, CanViewReview);
             CloseCommand = new RelayCommand(Close);
 
+            // Inicijalno učitavanje podataka
             LoadReservations();
         }
 
-        #region Logika
-        public void LoadReservations()
-        {
-            var reservationsList = _reservationDisplayService.GetReservationsForGuest(Session.CurrentUser.Id);
-            Reservations = new ObservableCollection<ReservationDetailsDTO>(reservationsList);
-            OnPropertyChanged(nameof(Reservations));
-        }
-        // --- NOVA CanReschedule METODA ---
-        private bool CanReschedule(object obj)
-        {
-            // Dugme je omogućeno samo ako je red selektovan I ako je IsRescheduleEnabled za taj red true
-            return SelectedReservation != null && SelectedReservation.IsRescheduleEnabled;
-        }
-        // --- PROMENA #4: Nova, specifična CanExecute metoda za "Rate" ---
-        private bool CanRate(object obj)
-        {
-            // Logika je sada trivijalna jer se oslanja na pripremljen DTO
-            return SelectedReservation != null && SelectedReservation.IsRatingEnabled;
-        }
+        #region Logika Komandi
 
-        // --- PROMENA #5: Nova, specifična CanExecute metoda za "View Review" ---
-        private bool CanViewReview(object obj)
-        {
-            return SelectedReservation != null && SelectedReservation.IsGuestReviewVisible;
-        }
-
-        // --- ISPRAVLJENA RESCHEDULE METODA ---
         private void Reschedule(object obj)
         {
-            // Metoda sada radi sa `SelectedReservation` svojstvom, kao i ostale
             if (SelectedReservation == null) return;
 
+            // --- PROMENA: Koristimo pomoćnu metodu ---
             var rescheduleWindow = new RescheduleRequestView(SelectedReservation.OriginalReservation);
-            rescheduleWindow.ShowDialog();
-            LoadReservations();
+            ShowDialogAndRefresh(rescheduleWindow);
         }
 
         private void Rate(object obj)
         {
             if (SelectedReservation == null) return;
 
-            // Kreiramo View za ocenjivanje i prosleđujemo mu originalnu rezervaciju
+            // --- PROMENA: Koristimo pomoćnu metodu ---
             var rateWindow = new GuestReviewView(SelectedReservation.OriginalReservation);
-            rateWindow.ShowDialog();
-
-            // Nakon što se prozor za ocenjivanje zatvori, osvežavamo listu
-            // Ovo će ažurirati DTO i onemogućiti "Rate" i omogućiti "View Review" (ako su uslovi ispunjeni)
-            LoadReservations();
+            ShowDialogAndRefresh(rateWindow);
         }
 
         private void ViewReview(object obj)
         {
-            // 1. Provera da li je nešto selektovano
             if (SelectedReservation == null) return;
 
-            // 2. Dobavljanje recenzije od vlasnika pomoću servisa
             GuestReview reviewFromOwner = _guestReviewService.GetReviewForReservation(SelectedReservation.OriginalReservation.Id);
 
-            // 3. Provera da li recenzija postoji
             if (reviewFromOwner != null)
             {
-                // Ako postoji, prikazujemo njene detalje koristeći MessageBox.Show
-                MessageBox.Show(
-                    $"Rating for cleanliness: {reviewFromOwner.CleanlinessRating}\n" +
-                    $"Rating for rule following: {reviewFromOwner.RuleRespectingRating}\n" +
-                    $"Comment: {reviewFromOwner.Comment}",
-                    "Review from Owner",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
+                // --- PROMENA: Logika za kreiranje poruke je sada u pomoćnoj metodi ---
+                string message = FormatReviewMessage(reviewFromOwner);
+                MessageBox.Show(message, "Review from Owner", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                // Ako ne postoji, prikazujemo poruku o grešci
-                MessageBox.Show(
-                    "Review from the owner could not be found.",
-                    "Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBox.Show("Review from the owner could not be found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -138,6 +95,53 @@ namespace BookingApp.Presentation.ViewModel
         {
             Application.Current.Windows.OfType<MyReservationsView>().FirstOrDefault()?.Close();
         }
+
+        #endregion
+
+        #region Pomoćne metode
+
+        // --- CanExecute metode (BEZ PROMENA) ---
+        private bool CanReschedule(object obj)
+        {
+            return SelectedReservation != null && SelectedReservation.IsRescheduleEnabled;
+        }
+
+        private bool CanRate(object obj)
+        {
+            return SelectedReservation != null && SelectedReservation.IsRatingEnabled;
+        }
+
+        private bool CanViewReview(object obj)
+        {
+            return SelectedReservation != null && SelectedReservation.IsGuestReviewVisible;
+        }
+
+        // --- Metoda za učitavanje (BEZ PROMENA) ---
+        public void LoadReservations()
+        {
+            var reservationsList = _reservationDisplayService.GetReservationsForGuest(Session.CurrentUser.Id);
+            Reservations = new ObservableCollection<ReservationDetailsDTO>(reservationsList);
+            OnPropertyChanged(nameof(Reservations));
+        }
+
+        // --- NOVO: Pomoćna metoda za prikazivanje prozora i osvežavanje (DRY princip) ---
+        private void ShowDialogAndRefresh(Window dialogWindow)
+        {
+            dialogWindow.ShowDialog();
+            LoadReservations();
+        }
+
+        // --- NOVO: Pomoćna metoda koja samo formatira string poruke ---
+        private string FormatReviewMessage(GuestReview review)
+        {
+            // Korišćenje StringBuilder-a je dobra praksa za spajanje više delova teksta
+            var sb = new StringBuilder();
+            sb.AppendLine($"Rating for cleanliness: {review.CleanlinessRating}");
+            sb.AppendLine($"Rating for rule following: {review.RuleRespectingRating}");
+            sb.AppendLine($"Comment: {review.Comment}");
+            return sb.ToString();
+        }
+
         #endregion
     }
 }
