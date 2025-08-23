@@ -62,37 +62,31 @@ namespace BookingApp.Presentation.ViewModel
             // Inicijalizacija komandi
             SubmitCommand = new RelayCommand(Submit);
 
-            CheckIfReviewIsAllowed();
+            //CheckIfReviewIsAllowed();
         }
 
         #region Logika
 
-        private void CheckIfReviewIsAllowed()
+        /*private void CheckIfReviewIsAllowed()
         {
             if (_accommodationReviewService.IsReviewPeriodExpired(_reservation))
             {
                 MessageBox.Show("The period for leaving a review has expired (5 days). The window will now close.", "Review Period Expired", MessageBoxButton.OK, MessageBoxImage.Warning);
                 CloseAction?.Invoke();
             }
-        }
+        }*/
 
         private void Submit(object obj)
         {
-            // --- Validacija unosa ---
-            if (!int.TryParse(CleanlinessRating, out int cleanliness) || cleanliness < 1 || cleanliness > 5)
+            // Koristimo pomoćnu metodu za validaciju
+            if (!IsInputValid(out int cleanliness, out int ownerRating))
             {
-                MessageBox.Show("Enter a valid cleanliness rating (1-5).");
-                return;
-            }
-            if (!int.TryParse(OwnerRating, out int ownerRating) || ownerRating < 1 || ownerRating > 5)
-            {
-                MessageBox.Show("Enter a valid owner rating (1-5).");
-                return;
+                return; // Prekini ako unos nije validan
             }
 
-            // --- Poziv servisa ---
             try
             {
+                // Servis će baciti izuzetak ako je period istekao, što je ispravno.
                 _accommodationReviewService.Create(_reservation, cleanliness, ownerRating, Comment, ImagePaths);
                 MessageBox.Show("Thank you for your review!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -102,6 +96,28 @@ namespace BookingApp.Presentation.ViewModel
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private bool IsInputValid(out int cleanliness, out int ownerRating)
+        {
+            // Inicijalizujemo 'out' parametre
+            cleanliness = 0;
+            ownerRating = 0;
+
+            if (!int.TryParse(CleanlinessRating, out cleanliness) || cleanliness < 1 || cleanliness > 5)
+            {
+                MessageBox.Show("Enter a valid cleanliness rating (1-5).");
+                return false;
+            }
+            if (!int.TryParse(OwnerRating, out ownerRating) || ownerRating < 1 || ownerRating > 5)
+            {
+                MessageBox.Show("Enter a valid owner rating (1-5).");
+                return false;
+            }
+
+            // Možemo dodati i druge validacije, npr. da komentar nije predugačak.
+
+            return true;
         }
 
         #endregion
