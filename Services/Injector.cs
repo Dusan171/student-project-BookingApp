@@ -38,6 +38,7 @@ namespace BookingApp.Services
             IGuestReviewService guestReviewService = new GuestReviewService(guestReviewRepository);
             IReservationDisplayService reservationDisplayService = new ReservationDisplayService(reservationRepository, accommodationRepository, rescheduleRequestRepository, accommodationReviewService, guestReviewService);
             IRescheduleRequestService rescheduleRequestService = new RescheduleRequestService(occupiedDateRepository, rescheduleRequestRepository, accommodationRepository, reservationRepository);
+            INavigationService navigationService = new NavigationService();
 
             // --- FAZA 3: Popunjavanje rečnika sa već kreiranim instancama ---
             // Repozitorijumi
@@ -64,6 +65,7 @@ namespace BookingApp.Services
             _implementations.Add(typeof(IGuestReviewService), guestReviewService);
             _implementations.Add(typeof(IReservationDisplayService), reservationDisplayService);
             _implementations.Add(typeof(IRescheduleRequestService), rescheduleRequestService);
+            _implementations.Add(typeof(INavigationService), navigationService);
         }
 
         public static T CreateInstance<T>()

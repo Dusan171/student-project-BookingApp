@@ -1,11 +1,14 @@
 ﻿using BookingApp.Presentation.View.Guest; // Potrebno za otvaranje prozora
 using BookingApp.Utilities;
+using BookingApp.Domain.Interfaces;
 using System.Windows.Input;
+using BookingApp.Services;
 
 namespace BookingApp.Presentation.ViewModel
 {
     public class GuestMainViewModel : ViewModelBase
     {
+        private readonly INavigationService _navigationService;
         #region Komande
         public ICommand OpenAccommodationsCommand { get; }
         public ICommand OpenMyReservationsCommand { get; }
@@ -13,6 +16,7 @@ namespace BookingApp.Presentation.ViewModel
 
         public GuestMainViewModel()
         {
+            _navigationService = Injector.CreateInstance<INavigationService>();
             // Inicijalizacija komandi
             OpenAccommodationsCommand = new RelayCommand(OpenAccommodations);
             OpenMyReservationsCommand = new RelayCommand(OpenMyReservations);
@@ -22,14 +26,12 @@ namespace BookingApp.Presentation.ViewModel
 
         private void OpenAccommodations(object obj)
         {
-            var accommodationsWindow = new AccommodationLookup();
-            accommodationsWindow.ShowDialog();
+            _navigationService.ShowAccommodations();
         }
 
         private void OpenMyReservations(object obj)
         {
-            var myReservationsWindow = new MyReservationsView();
-            myReservationsWindow.ShowDialog();
+            _navigationService.ShowMyReservations();
         }
 
         #endregion
