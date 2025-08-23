@@ -72,50 +72,59 @@ namespace BookingApp.Presentation.ViewModel
 
         private void Reserve(object obj)
         {
-            // --- Validacija unosa ---
-            if (!StartDate.HasValue)
+            // --- PROMENA #1: Koristimo pomoćnu metodu za validaciju ---
+            // 'out int guestNumber' nam omogućava da dobijemo parsiranu vrednost iz metode
+            if (!IsInputValid(out int guestNumber))
             {
-                MessageBox.Show("Please select a start date.");
-                return;
-            }
-            if (!EndDate.HasValue)
-            {
-                MessageBox.Show("Please select an end date.");
-                return;
-            }
-            if (EndDate.Value <= StartDate.Value)
-            {
-                MessageBox.Show("End date must be after the start date.");
-                return;
-            }
-            if (!int.TryParse(GuestsNumber, out int guestNumber) || guestNumber <= 0)
-            {
-                MessageBox.Show("Please enter a valid number of guests.");
-                return;
+                return; // Ako nije validno, prekini izvršavanje
             }
 
-            // --- Poziv servisa ---
             try
             {
-                // --- KORAK 1: Kreiramo DTO koji servis očekuje ---
-                // Pakujemo sve potrebne podatke u jedan objekat.
+                // --- Logika ostaje ista, ali je metoda sada kraća ---
                 var reservationDto = new CreateReservationDTO
                 {
-                    AccommodationId = _accommodation.Id, // Servisu treba samo ID
+                    AccommodationId = _accommodation.Id,
                     StartDate = StartDate.Value.Date,
                     EndDate = EndDate.Value.Date,
-                    GuestsNumber = guestNumber
+                    GuestsNumber = guestNumber // Koristimo vrednost dobijenu iz validacije
                 };
                 _reservationService.Create(reservationDto);
-                MessageBox.Show("Reservation successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // Pozivamo akciju da zatvori prozor
+                MessageBox.Show("Reservation successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 CloseAction?.Invoke();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Reservation Failed", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+        private bool IsInputValid(out int parsedGuestNumber)
+        {
+            parsedGuestNumber = 0; // Inicijalizujemo 'out' parametar
+
+            if (!StartDate.HasValue)
+            {
+                MessageBox.Show("Please select a start date.");
+                return false;
+            }
+            if (!EndDate.HasValue)
+            {
+                MessageBox.Show("Please select an end date.");
+                return false;
+            }
+            if (EndDate.Value <= StartDate.Value)
+            {
+                MessageBox.Show("End date must be after the start date.");
+                return false;
+            }
+            if (!int.TryParse(GuestsNumber, out parsedGuestNumber) || parsedGuestNumber <= 0)
+            {
+                MessageBox.Show("Please enter a valid number of guests.");
+                return false;
+            }
+
+            return true; // Sve provere su prošle
         }
 
         #endregion
