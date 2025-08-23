@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace BookingApp.Presentation.ViewModel
 {
-    public class GuestReviewViewModel : ViewModelBase
+    public class AccommodationReviewViewModel : ViewModelBase
     {
         private readonly Reservation _reservation;
         private readonly IAccommodationReviewService _accommodationReviewService;
@@ -52,7 +52,7 @@ namespace BookingApp.Presentation.ViewModel
         public ICommand SubmitCommand { get; }
         #endregion
 
-        public GuestReviewViewModel(Reservation reservation)
+        public AccommodationReviewViewModel(Reservation reservation)
         {
             _reservation = reservation ?? throw new ArgumentNullException(nameof(reservation));
 

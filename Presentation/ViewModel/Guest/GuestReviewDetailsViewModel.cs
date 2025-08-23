@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain;
@@ -7,7 +8,7 @@ using BookingApp.Utilities;
 
 namespace BookingApp.Presentation.ViewModel
 {
-    public class OwnerReviewDetailsViewModel : ViewModelBase
+    public class GuestReviewDetailsViewModel : ViewModelBase
     {
         #region Svojstva za prikaz
 
@@ -24,24 +25,23 @@ namespace BookingApp.Presentation.ViewModel
         public ICommand OkCommand { get; }
         #endregion
 
-        public OwnerReviewDetailsViewModel(GuestReview review)
-        {
-            if (review != null)
-            {
-                // Popunjavamo svojstva na osnovu modela
-                CleanlinessRating = review.CleanlinessRating;
-                RuleRespectingRating = review.RuleRespectingRating;
-                Comment = review.Comment;
-            }
+        public Action CloseAction { get; set; }
 
-            // Inicijalizacija komande
+        public GuestReviewDetailsViewModel(GuestReview review)
+        {
+            if (review == null)
+                throw new ArgumentNullException(nameof(review), "Review cannot be null.");
+
+            CleanlinessRating = review.CleanlinessRating;
+            RuleRespectingRating = review.RuleRespectingRating;
+            Comment = review.Comment;
+
             OkCommand = new RelayCommand(CloseWindow);
         }
 
         private void CloseWindow(object obj)
         {
-            // Zatvaramo prozor koji je trenutno aktivan i pripada ovom tipu
-            Application.Current.Windows.OfType<OwnerReviewDetailsView>().FirstOrDefault()?.Close();
+            CloseAction?.Invoke();
         }
     }
 }

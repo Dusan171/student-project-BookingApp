@@ -4,14 +4,14 @@ using System.Windows;
 
 namespace BookingApp.Presentation.View.Guest
 {
-    public partial class GuestReviewView : Window
+    public partial class AccommodationReviewView : Window
     {
-        public GuestReviewView(Reservation reservation)
+        public AccommodationReviewView(Reservation reservation)
         {
             InitializeComponent();
 
             // Kreiramo ViewModel i prosleđujemo mu podatke
-            var viewModel = new GuestReviewViewModel(reservation);
+            var viewModel = new AccommodationReviewViewModel(reservation);
 
             // Povezujemo View sa ViewModel-om
             DataContext = viewModel;

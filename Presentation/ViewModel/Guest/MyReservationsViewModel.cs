@@ -69,7 +69,7 @@ namespace BookingApp.Presentation.ViewModel
             if (SelectedReservation == null) return;
 
             // --- PROMENA: Koristimo pomoćnu metodu ---
-            var rateWindow = new GuestReviewView(SelectedReservation.OriginalReservation);
+            var rateWindow = new AccommodationReviewView(SelectedReservation.OriginalReservation);
             ShowDialogAndRefresh(rateWindow);
         }
 

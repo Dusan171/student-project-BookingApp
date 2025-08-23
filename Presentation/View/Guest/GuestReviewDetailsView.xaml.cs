@@ -4,13 +4,13 @@ using System.Windows;
 
 namespace BookingApp.Presentation.View.Guest
 {
-    public partial class OwnerReviewDetailsView : Window
+    public partial class GuestReviewDetailsView : Window
     {
-        public OwnerReviewDetailsView(GuestReview review)
+        public GuestReviewDetailsView(GuestReview review)
         {
             InitializeComponent();
             // Kreiramo ViewModel, prosleđujemo mu podatke i postavljamo ga kao DataContext
-            DataContext = new OwnerReviewDetailsViewModel(review);
+            DataContext = new GuestReviewDetailsViewModel(review);
         }
     }
 }
