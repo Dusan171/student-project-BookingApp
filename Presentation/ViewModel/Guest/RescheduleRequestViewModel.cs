@@ -17,7 +17,7 @@ namespace BookingApp.Presentation.ViewModel
         private readonly Reservation _reservation;
         private readonly Accommodation _accommodation;
         private readonly IRescheduleRequestService _rescheduleRequestService;
-        private readonly IAccommodationRepository _accommodationRepository;
+        private readonly IAccommodationService _accommodationService;
 
         // Akcija za zatvaranje prozora
         public Action CloseAction { get; set; }
@@ -58,10 +58,10 @@ namespace BookingApp.Presentation.ViewModel
 
             // Dobijanje zavisnosti
             _rescheduleRequestService = Injector.CreateInstance<IRescheduleRequestService>();
-            _accommodationRepository = Injector.CreateInstance<IAccommodationRepository>();
+            _accommodationService = Injector.CreateInstance<IAccommodationService>();
 
             // Dohvatanje smeštaja
-            _accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == _reservation.AccommodationId);
+            _accommodation = _accommodationService.GetById(_reservation.AccommodationId);
             if (_accommodation == null)
             {
                 MessageBox.Show("Could not find accommodation details. The window will close.");
@@ -91,39 +91,43 @@ namespace BookingApp.Presentation.ViewModel
 
         private void SendRequest(object obj)
         {
-            // --- Validacija unosa ---
-            if (!NewStartDate.HasValue || !NewEndDate.HasValue)
+            // --- PROMENA #4: Koristimo pomoćnu metodu za validaciju ---
+            if (!IsInputValid())
             {
-                MessageBox.Show("Please select both new start and end dates.");
-                return;
-            }
-            if (NewEndDate.Value <= NewStartDate.Value)
-            {
-                MessageBox.Show("End date must be after start date.");
-                return;
+                return; // Prekini ako unos nije validan
             }
 
-            // --- Poziv servisa ---
             try
             {
-                // --- KORAK 1: Kreiramo DTO koji servis očekuje ---
                 var requestDto = new CreateRescheduleRequestDTO
                 {
-                    ReservationId = _reservation.Id, // Servisu treba samo ID, ne ceo objekat
+                    ReservationId = _reservation.Id,
                     NewStartDate = NewStartDate.Value.Date,
                     NewEndDate = NewEndDate.Value.Date
                 };
                 _rescheduleRequestService.CreateRequest(requestDto);
-                MessageBox.Show("Your request has been sent to the owner.", "Request Sent", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // Signaliziramo uspešno zatvaranje
-                // (Ovu logiku ćemo povezati u code-behind-u)
+                MessageBox.Show("Your request has been sent to the owner.", "Request Sent", MessageBoxButton.OK, MessageBoxImage.Information);
                 CloseAction?.Invoke();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+        private bool IsInputValid()
+        {
+            if (!NewStartDate.HasValue || !NewEndDate.HasValue)
+            {
+                MessageBox.Show("Please select both new start and end dates.");
+                return false;
+            }
+            if (NewEndDate.Value <= NewStartDate.Value)
+            {
+                MessageBox.Show("End date must be after start date.");
+                return false;
+            }
+            return true;
         }
 
         #endregion
