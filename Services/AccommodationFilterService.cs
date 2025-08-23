@@ -18,12 +18,10 @@ namespace BookingApp.Services
 
         public List<AccommodationDTO> Filter(AccommodationSearchParameters parameters)
         {
-            var allAccommodations = _accommodationRepository.GetAll();
-            var filteredAccommodations = allAccommodations.Where(acc => MatchesFilter(acc, parameters));
-
-            //prevod(mapiranje) filtriranih domenskih modela u DTO
-            var dtoList = filteredAccommodations.Select(acc => new AccommodationDTO(acc)).ToList();
-            return dtoList;
+          return _accommodationRepository.GetAll()
+                 .Where(acc => MatchesFilter(acc, parameters))
+                 .Select(acc => new AccommodationDTO(acc))
+                 .ToList();
         }
         //prebaceno iz AccommodationLookup.xaml.cs
         private bool MatchesFilter(Accommodation acc, AccommodationSearchParameters parameters)
@@ -36,22 +34,22 @@ namespace BookingApp.Services
                    MinDaysMatches(acc, parameters.MinDays);
         }
 
-        private bool NameMatches(Accommodation acc, string name) =>
+        private static bool NameMatches(Accommodation acc, string name) =>
             string.IsNullOrEmpty(name) || acc.Name.Contains(name, StringComparison.OrdinalIgnoreCase);
 
-        private bool CountryMatches(Accommodation acc, string country) =>
+        private static bool CountryMatches(Accommodation acc, string country) =>
             string.IsNullOrEmpty(country) || acc.GeoLocation.Country.Contains(country, StringComparison.OrdinalIgnoreCase);
 
-        private bool CityMatches(Accommodation acc, string city) =>
+        private static bool CityMatches(Accommodation acc, string city) =>
             string.IsNullOrEmpty(city) || acc.GeoLocation.City.Contains(city, StringComparison.OrdinalIgnoreCase);
 
-        private bool TypeMatches(Accommodation acc, string type) =>
+        private static bool TypeMatches(Accommodation acc, string type) =>
             string.IsNullOrEmpty(type) || type == "All" || acc.Type.ToString() == type;
 
-        private bool MaxGuestsMatches(Accommodation acc, int maxGuests) =>
+        private static bool MaxGuestsMatches(Accommodation acc, int maxGuests) =>
             maxGuests == 0 || acc.MaxGuests <= maxGuests; 
 
-        private bool MinDaysMatches(Accommodation acc, int minDays) =>
+        private static bool MinDaysMatches(Accommodation acc, int minDays) =>
             minDays == 0 || acc.MinReservationDays >= minDays; 
     }
 }

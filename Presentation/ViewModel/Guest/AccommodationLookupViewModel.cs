@@ -16,7 +16,7 @@ namespace BookingApp.Presentation.ViewModel
     public class AccommodationLookupViewModel : ViewModelBase
     {
         // Servisi i repozitorijumi dobijeni preko Injector-a
-        private readonly IAccommodationRepository _accommodationRepository;
+        private readonly IAccommodationService _accommodationService;
         private readonly IAccommodationFilterService _filterService;
 
         #region Svojstva za povezivanje (Binding)
@@ -88,7 +88,7 @@ namespace BookingApp.Presentation.ViewModel
         public AccommodationLookupViewModel()
         {
             // Dobijanje zavisnosti od Injector-a
-            _accommodationRepository = Injector.CreateInstance<IAccommodationRepository>();
+            _accommodationService = Injector.CreateInstance<IAccommodationService>();
             _filterService = Injector.CreateInstance<IAccommodationFilterService>();
 
             // Inicijalizacija komandi
@@ -98,48 +98,23 @@ namespace BookingApp.Presentation.ViewModel
             ResetSearchCommand = new RelayCommand(ResetSearch);
 
             // Učitavanje početnih podataka
-            Accommodations = new ObservableCollection<AccommodationDTO>(_filterService.Filter(new AccommodationSearchParameters()));
+            Accommodations = new ObservableCollection<AccommodationDTO>();
+            InitializeAccommodations();
         }
 
         #region Logika Komandi
 
         private void Search(object obj)
         {
-            var searchParams = new AccommodationSearchParameters
-            {
-                Name = NameSearch,
-                Country = CountrySearch,
-                City = CitySearch,
-                Type = TypeSearch,
-                MaxGuests = int.TryParse(MaxGuestsSearch, out int guests) ? guests : 0,
-                MinDays = int.TryParse(MinDaysSearch, out int days) ? days : 0
-            };
-
+            var searchParams = CreateSearchParameters(); // Koristimo novu pomoćnu metodu
             var result = _filterService.Filter(searchParams);
-            Accommodations.Clear();
-            foreach (var item in result)
-            {
-                Accommodations.Add(item);
-            }
+            UpdateAccommodations(result);
         }
 
         private void ResetSearch(object obj)
         {
-            // Resetujemo polja za pretragu
-            NameSearch = string.Empty;
-            CountrySearch = string.Empty;
-            CitySearch = string.Empty;
-            TypeSearch = null; // Ili "All" ako je to podrazumevana vrednost
-            MaxGuestsSearch = string.Empty;
-            MinDaysSearch = string.Empty;
-
-            // Ponovo učitavamo sve smeštaje
-            var result = _filterService.Filter(new AccommodationSearchParameters());
-            Accommodations.Clear();
-            foreach (var item in result)
-            {
-                Accommodations.Add(item);
-            }
+            ClearSearchFields(); // Koristimo novu pomoćnu metodu
+            InitializeAccommodations();
         }
 
         private void Reserve(object obj)
@@ -148,7 +123,7 @@ namespace BookingApp.Presentation.ViewModel
             if (SelectedAccommodation == null) return;
 
             // --- PROMENA #5: Dobavljamo pun domenski model na osnovu ID-a iz DTO-a ---
-            var fullAccommodation = _accommodationRepository.GetById(SelectedAccommodation.Id); // Pretpostavka da DTO ima 'Id' i repo ima 'GetById'
+            var fullAccommodation = _accommodationService.GetById(SelectedAccommodation.Id); // Pretpostavka da DTO ima 'Id' i repo ima 'GetById'
 
             if (fullAccommodation != null)
             {
@@ -180,6 +155,42 @@ namespace BookingApp.Presentation.ViewModel
                 // Zatvaranje prozora je odgovornost View-a
                 Application.Current.Windows.OfType<AccommodationLookup>().FirstOrDefault()?.Close();
             }
+        }
+        #endregion
+        #region Pomocne (privatne) metode - Ciste Funkcije
+        private void InitializeAccommodations()
+        {
+            var allAccommodations = _filterService.Filter(new AccommodationSearchParameters());
+            UpdateAccommodations(allAccommodations);
+        }
+        private AccommodationSearchParameters CreateSearchParameters()
+        {
+            return new AccommodationSearchParameters
+            {
+                Name = NameSearch,
+                Country = CountrySearch,
+                City = CitySearch,
+                Type = TypeSearch,
+                MaxGuests = int.TryParse(MaxGuestsSearch, out int guests) ? guests : 0,
+                MinDays = int.TryParse(MinDaysSearch, out int days) ? days : 0
+            };
+        }
+        private void UpdateAccommodations(List<AccommodationDTO> accommodations)
+        {
+            Accommodations.Clear();
+            foreach (var accommodation in accommodations)
+            {
+                Accommodations.Add(accommodation);
+            }
+        }
+        private void ClearSearchFields()
+        {
+            NameSearch = string.Empty;
+            CountrySearch = string.Empty;
+            CitySearch = string.Empty;
+            TypeSearch = null;
+            MaxGuestsSearch = string.Empty;
+            MinDaysSearch = string.Empty;
         }
         #endregion
     }

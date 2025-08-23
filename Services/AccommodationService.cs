@@ -23,7 +23,7 @@ namespace BookingApp.Services
             return _repository.GetAll();
         }
 
-        public Accommodation GetAccommodationById(int id)
+        public Accommodation GetById(int id)
         {
             return _repository.GetById(id);
         }
