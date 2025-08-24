@@ -7,6 +7,7 @@ using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Presentation.View.Guest; // Potrebno za otvaranje novog prozora
 using BookingApp.Services;
+using BookingApp.Services.DTO;
 using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
 using BookingApp.View;

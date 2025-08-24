@@ -5,6 +5,7 @@ using BookingApp.Domain;
 using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTOs;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Services
 {
@@ -23,7 +24,7 @@ namespace BookingApp.Services
             _accommodationRepository = accommodationRepository;
         }
         //logika rezervacije koja je prije bila u reservationRepository
-        public Reservation Create(CreateReservationDTO reservationDto)
+        public Reservation Create(ReservationDTO reservationDto)
         {
             // Moramo dobiti Accommodation objekat da bismo proverili pravila
             var accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == reservationDto.AccommodationId);

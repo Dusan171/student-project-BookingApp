@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain;
-using BookingApp.Services.DTOs;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Services
 {

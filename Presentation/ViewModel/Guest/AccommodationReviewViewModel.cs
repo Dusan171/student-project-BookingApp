@@ -5,6 +5,7 @@ using BookingApp.Utilities;
 using System;
 using System.Windows;
 using System.Windows.Input;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Presentation.ViewModel
 {
@@ -87,7 +88,7 @@ namespace BookingApp.Presentation.ViewModel
             try
             {
                 // Servis će baciti izuzetak ako je period istekao, što je ispravno.
-                _accommodationReviewService.Create(_reservation, cleanliness, ownerRating, Comment, ImagePaths);
+                _accommodationReviewService.Create(new ReservationDTO(_reservation), cleanliness, ownerRating, Comment, ImagePaths);
                 MessageBox.Show("Thank you for your review!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 CloseAction?.Invoke();

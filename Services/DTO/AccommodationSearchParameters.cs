@@ -1,4 +1,4 @@
-﻿namespace BookingApp.Services.DTOs
+﻿namespace BookingApp.Services.DTO
 {
     public class AccommodationSearchParameters
     {

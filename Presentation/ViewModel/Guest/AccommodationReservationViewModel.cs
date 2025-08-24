@@ -7,6 +7,7 @@ using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
 using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Presentation.ViewModel
 {
@@ -19,6 +20,8 @@ namespace BookingApp.Presentation.ViewModel
         public Action CloseAction { get; set; }
 
         #region Svojstva za povezivanje (Binding)
+
+       
 
         private DateTime? _startDate;
         public DateTime? StartDate
@@ -82,7 +85,7 @@ namespace BookingApp.Presentation.ViewModel
             try
             {
                 // --- Logika ostaje ista, ali je metoda sada kraća ---
-                var reservationDto = new CreateReservationDTO
+                var reservationDto = new ReservationDTO
                 {
                     AccommodationId = _accommodation.Id,
                     StartDate = StartDate.Value.Date,

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BookingApp.Services.DTOs
+namespace BookingApp.Services.DTO
 {
     public class AccommodationDTO
     {

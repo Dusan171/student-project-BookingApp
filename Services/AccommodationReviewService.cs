@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
+using BookingApp.DTO;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Services
 {
@@ -19,19 +21,19 @@ namespace BookingApp.Services
             _accommodationReviewRepository = accommodationReviewRepository;
         }
 
-        public bool IsReviewPeriodExpired(Reservation reservation)
+        public bool IsReviewPeriodExpired(ReservationDTO reservation)
         {
             return (DateTime.Now - reservation.EndDate).TotalDays > DaysToLeaveReview;
         }
 
-        public void Create(Reservation reservation, int cleanliness, int ownerRating, string comment, string imagePaths)
+        public void Create(ReservationDTO reservation, int cleanliness, int ownerRating, string comment, string imagePaths)
         {
             if (IsReviewPeriodExpired(reservation))
             {
                 throw new Exception($"You can only leave a review within {DaysToLeaveReview} days after your stay.");
             }
 
-            var review = new AccommodationReview
+            var review = new AccommodationReviewDTO
             {
                 ReservationId = reservation.Id,
                 CleanlinessRating = cleanliness,
@@ -41,7 +43,7 @@ namespace BookingApp.Services
                 CreatedAt = DateTime.Now
             };
 
-            _accommodationReviewRepository.Save(review);
+            _accommodationReviewRepository.Save(review.ToReview());
         }
 
         public bool HasGuestRated(int reservationId)
