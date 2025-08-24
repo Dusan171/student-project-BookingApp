@@ -45,6 +45,7 @@ namespace BookingApp.Domain
             };
             return csvValues;
         }
+        //i ovo treba u servisni sloj
 
         public bool IsValid(out string errorMessage)
         {

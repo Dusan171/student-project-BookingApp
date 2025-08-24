@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BookingApp.Services
 {
-    public class AccommodationService
+    public class AccommodationService : IAccommodationService
     {
         private readonly IAccommodationRepository _repository;
 
@@ -23,7 +23,7 @@ namespace BookingApp.Services
             return _repository.GetAll();
         }
 
-        public Accommodation GetAccommodationById(int id)
+        public Accommodation GetById(int id)
         {
             return _repository.GetById(id);
         }

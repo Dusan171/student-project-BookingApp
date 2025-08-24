@@ -1,0 +1,50 @@
+﻿<Window x:Class="BookingApp.Presentation.View.Guest.GuestReviewDetailsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Owner's Review" 
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="WidthAndHeight" 
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="0,0,10,0"/>
+        </Style>
+        <Style x:Key="ValueStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+    </Window.Resources>
+
+    <Border Padding="20">
+        <StackPanel MinWidth="300">
+            <TextBlock Text="Owner's Review" FontSize="18" FontWeight="Bold" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Povezujemo TextBlock-ove sa svojstvima iz ViewModel-a -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Cleanliness:" Style="{StaticResource LabelStyle}"/>
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CleanlinessRating}" Style="{StaticResource ValueStyle}"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Rule Respecting:" Style="{StaticResource LabelStyle}" Margin="0,5,10,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding RuleRespectingRating}" Style="{StaticResource ValueStyle}" Margin="0,5,0,0"/>
+            </Grid>
+
+            <TextBlock Text="Comment:" FontWeight="Medium" Margin="0,15,0,5"/>
+            <Border Background="#f0f0f0" CornerRadius="3" Padding="8">
+                <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" MinHeight="60"/>
+            </Border>
+
+            <!-- Povezujemo dugme sa OkCommand iz ViewModel-a -->
+            <Button Content="OK" IsDefault="True" Command="{Binding OkCommand}" HorizontalAlignment="Right" Margin="0,20,0,0" Padding="20,5"/>
+        </StackPanel>
+    </Border>
+</Window>

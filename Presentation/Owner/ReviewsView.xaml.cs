@@ -14,20 +14,20 @@ namespace BookingApp.Presentation.Owner
     public partial class ReviewsView : UserControl
     {
         public ObservableCollection<GuestReview> HostToGuestReviews { get; set; }
-        public ObservableCollection<OwnerReview> GuestToHostReviews {  get; set; }
+        public ObservableCollection<AccommodationReview> GuestToHostReviews {  get; set; }
         private readonly GuestReviewRepository _guestReviewRepository;
-        private readonly OwnerReviewRepository _hostReviewRepository;
+        private readonly AccommodationReviewRepository _hostReviewRepository;
 
         public ReviewsView()
         {
             InitializeComponent();
             _guestReviewRepository = new GuestReviewRepository();
-            _hostReviewRepository = new OwnerReviewRepository();
+            _hostReviewRepository = new AccommodationReviewRepository();
             var reviews = _guestReviewRepository.GetAll();
             var hostReviews = _hostReviewRepository.GetAll();
 
             HostToGuestReviews = new ObservableCollection<GuestReview>(reviews);
-            GuestToHostReviews = new ObservableCollection<OwnerReview>(hostReviews);
+            GuestToHostReviews = new ObservableCollection<AccommodationReview>(hostReviews);
 
 
             HostToGuestGrid.ItemsSource = HostToGuestReviews; 
@@ -39,7 +39,7 @@ namespace BookingApp.Presentation.Owner
 
             if (filteredGuestToHost.Count > 0)
             {
-                GuestToHostReviews = new ObservableCollection<OwnerReview>(filteredGuestToHost);
+                GuestToHostReviews = new ObservableCollection<AccommodationReview>(filteredGuestToHost);
                 GuestToHostGrid.ItemsSource = GuestToHostReviews;
                
             }
@@ -54,7 +54,7 @@ namespace BookingApp.Presentation.Owner
         }
         private void ImagesButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button btn && btn.DataContext is OwnerReview review)
+            if (sender is Button btn && btn.DataContext is AccommodationReview review)
             {
                 var images = review.ImagePaths?
     .Split(';', StringSplitOptions.RemoveEmptyEntries)
