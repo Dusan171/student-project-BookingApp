@@ -56,6 +56,7 @@ public class Tour : ISerializable
         Location.Id.ToString(),
         Language,
         MaxTourists.ToString(),
+        ReservedSpots.ToString(),
         DurationHours.ToString(),
         keyPointIds,
         startTimeIds,
@@ -68,43 +69,71 @@ public class Tour : ISerializable
 
     public void FromCSV(string[] values)
     {
-        Id = int.Parse(values[0]);
-        Name = values[1];
-        Location = new Location { Id = int.Parse(values[2]) };
-        Language = values[3];
-        MaxTourists = int.Parse(values[4]);
-        DurationHours = double.Parse(values[5]);
-
-        KeyPoints = new List<KeyPoint>();
-        if (!string.IsNullOrEmpty(values[6]))
+        if (values == null || values.Length < 7)
         {
-            var keyPointIds = values[6].Split('|');
+            throw new ArgumentException("Invalid CSV data for Tour");
+        }
+
+        Id = int.Parse(values[0]);                
+        Name = values[1] ?? string.Empty;            
+        Location = new Location { Id = int.Parse(values[2]) }; 
+        Language = values[3] ?? string.Empty;         
+        MaxTourists = int.Parse(values[4]);          
+        ReservedSpots = int.Parse(values[5]);        
+        DurationHours = double.Parse(values[6]);      
+
+        
+        KeyPoints = new List<KeyPoint>();
+        StartTimes = new List<StartTourTime>();
+        Images = new List<Images>();
+
+        
+        if (values.Length > 7 && !string.IsNullOrEmpty(values[7]))
+        {
+            var keyPointIds = values[7].Split('|');
             foreach (var id in keyPointIds)
             {
-                KeyPoints.Add(new KeyPoint { Id = int.Parse(id) });
+                if (int.TryParse(id, out int keyPointId))
+                {
+                    KeyPoints.Add(new KeyPoint { Id = keyPointId });
+                }
             }
         }
 
-        StartTimes = new List<StartTourTime>();
-        if (!string.IsNullOrEmpty(values[7]))
+        
+        if (values.Length > 8 && !string.IsNullOrEmpty(values[8]))
         {
-            var startTimeIds = values[7].Split('|');
+            var startTimeIds = values[8].Split('|');
             foreach (var id in startTimeIds)
             {
-                StartTimes.Add(new StartTourTime { Id = int.Parse(id) });
+                if (int.TryParse(id, out int startTimeId))
+                {
+                    StartTimes.Add(new StartTourTime { Id = startTimeId });
+                }
             }
         }
 
-        Images = new List<Images>();
-        if (!string.IsNullOrEmpty(values[8]))
+        
+        if (values.Length > 9 && !string.IsNullOrEmpty(values[9]))
         {
-            var imageIds = values[8].Split('|');
+            var imageIds = values[9].Split('|');
             foreach (var id in imageIds)
             {
-                Images.Add(new Images { Id = int.Parse(id) });
+                if (int.TryParse(id, out int imageId))
+                {
+                    Images.Add(new Images { Id = imageId });
+                }
             }
         }
     }
 
+    public int AvailableSpots
+    {
+        get
+        {
+            int available = MaxTourists - ReservedSpots;
+            return available < 0 ? 0 : available;
+        }
+    }
 
 }

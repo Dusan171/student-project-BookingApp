@@ -7,43 +7,58 @@ using BookingApp.Serializer;
 
 namespace BookingApp.Domain
 {
+    public enum TourReservationStatus
+    {
+        ACTIVE,
+        COMPLETED,
+        CANCELLED
+    }
+
     public class TourReservation : ISerializable
     {
         public int Id { get; set; }
         public int TourId { get; set; }
+        public int StartTourTimeId { get; set; }
         public int TouristId { get; set; }
-        public DateTime ReservationTime { get; set; }
-        public bool IsActive { get; set; }
-
-
-        public Tour Tour { get; set; }
-        public Tourist Tourist { get; set; }
+        public int NumberOfGuests { get; set; }
+        public DateTime ReservationDate { get; set; }
+        public TourReservationStatus Status { get; set; }
         public List<ReservationGuest> Guests { get; set; }
 
         public TourReservation()
         {
             Guests = new List<ReservationGuest>();
+            Status = TourReservationStatus.ACTIVE;
+            ReservationDate = DateTime.Now;
         }
 
-        public TourReservation(int id, int tourId, int touristId, DateTime reservationTime, bool isActive)
+        public TourReservation(int id, int tourId, int startTourTimeId, int touristId,
+                              int numberOfGuests, DateTime reservationDate, TourReservationStatus status)
         {
             Id = id;
             TourId = tourId;
+            StartTourTimeId = startTourTimeId;
             TouristId = touristId;
-            ReservationTime = reservationTime;
-            IsActive = isActive;
+            NumberOfGuests = numberOfGuests;
+            ReservationDate = reservationDate;
+            Status = status;
             Guests = new List<ReservationGuest>();
         }
 
         public string[] ToCSV()
         {
+            string guestIds = string.Join("|", Guests.Select(g => g.Id));
+
             return new string[]
             {
                 Id.ToString(),
                 TourId.ToString(),
+                StartTourTimeId.ToString(),
                 TouristId.ToString(),
-                ReservationTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                IsActive.ToString()
+                NumberOfGuests.ToString(),
+                ReservationDate.ToString("dd-MM-yyyy HH:mm:ss"),
+                Status.ToString(),
+                guestIds
             };
         }
 
@@ -51,10 +66,22 @@ namespace BookingApp.Domain
         {
             Id = int.Parse(values[0]);
             TourId = int.Parse(values[1]);
-            TouristId = int.Parse(values[2]);
-            ReservationTime = DateTime.Parse(values[3]);
-            IsActive = bool.Parse(values[4]);
-            Guests = new List<ReservationGuest>(); // Odrvojeno učitavanje iz posebnog CSV-a ako treba
+            StartTourTimeId = int.Parse(values[2]);
+            TouristId = int.Parse(values[3]);
+            NumberOfGuests = int.Parse(values[4]);
+            ReservationDate = DateTime.ParseExact(values[5], "dd-MM-yyyy HH:mm:ss",
+                                                 System.Globalization.CultureInfo.InvariantCulture);
+            Status = (TourReservationStatus)Enum.Parse(typeof(TourReservationStatus), values[6]);
+
+            Guests = new List<ReservationGuest>();
+            if (!string.IsNullOrEmpty(values[7]))
+            {
+                var guestIds = values[7].Split('|');
+                foreach (var id in guestIds)
+                {
+                    Guests.Add(new ReservationGuest { Id = int.Parse(id) });
+                }
+            }
         }
     }
 }
