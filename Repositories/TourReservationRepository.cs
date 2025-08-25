@@ -1,76 +1,85 @@
-﻿using System;
+﻿using BookingApp.Domain;
+using BookingApp.Repositories;
+using BookingApp.Serializer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BookingApp.Domain;
-using BookingApp.Serializer;
 
 namespace BookingApp.Repositories
 {
-    internal class TourReservationRepository
+    public class TourReservationRepository
     {
-        private const string FilePath = "C:/Users/PC/Desktop/5 semestar/sims-projekat/sims-ra-2025-group-7-team-b/Resources/Data/tourReservation.csv";
+        private const string FilePath = "../../Resources/Data/tourReservations.csv";
         private readonly Serializer<TourReservation> _serializer;
-        private List<TourReservation> _reservations;
+        private List<TourReservation> _tourReservations;
+        private readonly ReservationGuestRepository _guestRepository;
 
         public TourReservationRepository()
         {
             _serializer = new Serializer<TourReservation>();
-            _reservations = _serializer.FromCSV(FilePath);
+            _tourReservations = _serializer.FromCSV(FilePath);
+            _guestRepository = new ReservationGuestRepository();
+            LoadGuests();
+        }
+
+        private void LoadGuests()
+        {
+            foreach (var reservation in _tourReservations)
+            {
+                reservation.Guests = _guestRepository.GetByReservationId(reservation.Id);
+            }
+        }
+
+        // DODANA metoda za generisanje ID-a
+        public int NextId()
+        {
+            if (_tourReservations.Count < 1)
+                return 1;
+            return _tourReservations.Max(r => r.Id) + 1;
         }
 
         public List<TourReservation> GetAll()
         {
-            return _serializer.FromCSV(FilePath);
+            return _tourReservations;
         }
 
-        public TourReservation Save(TourReservation reservation)
+        public List<TourReservation> GetByTouristId(int touristId)
+        {
+            return _tourReservations.Where(tr => tr.TouristId == touristId).ToList();
+        }
+
+        // DODANA metoda koju traži TourSearch.xaml.cs
+        public List<TourReservation> GetReservationsByTourist(int touristId)
+        {
+            return GetByTouristId(touristId);
+        }
+
+        public List<TourReservation> GetTodaysReservations()
+        {
+            var today = DateTime.Today;
+            return _tourReservations
+                .Where(tr => tr.ReservationDate.Date == today)
+                .ToList();
+        }
+
+        // IZMENA: Dodato generisanje ID-a pre dodavanja
+        public TourReservation Add(TourReservation reservation)
         {
             reservation.Id = NextId();
-            _reservations = _serializer.FromCSV(FilePath);
-            _reservations.Add(reservation);
-            _serializer.ToCSV(FilePath, _reservations);
+            _tourReservations.Add(reservation);
+            _serializer.ToCSV(FilePath, _tourReservations);
+
+            foreach (var guest in reservation.Guests)
+            {
+                guest.ReservationId = reservation.Id;
+                _guestRepository.Add(guest);
+            }
             return reservation;
         }
 
-        public int NextId()
+        public void SaveAll()
         {
-            _reservations = _serializer.FromCSV(FilePath);
-            if (_reservations.Count < 1)
-                return 1;
-            return _reservations.Max(r => r.Id) + 1;
-        }
-
-        public void Delete(TourReservation reservation)
-        {
-            _reservations = _serializer.FromCSV(FilePath);
-            TourReservation found = _reservations.Find(r => r.Id == reservation.Id);
-            _reservations.Remove(found);
-            _serializer.ToCSV(FilePath, _reservations);
-        }
-
-        public TourReservation Update(TourReservation reservation)
-        {
-            _reservations = _serializer.FromCSV(FilePath);
-            TourReservation current = _reservations.Find(r => r.Id == reservation.Id);
-            int index = _reservations.IndexOf(current);
-            _reservations.Remove(current);
-            _reservations.Insert(index, reservation);
-            _serializer.ToCSV(FilePath, _reservations);
-            return reservation;
-        }
-
-        public List<TourReservation> GetByTourist(int touristId)
-        {
-            _reservations = _serializer.FromCSV(FilePath);
-            return _reservations.Where(r => r.TouristId == touristId).ToList();
-        }
-
-        public List<TourReservation> GetByTour(int tourId)
-        {
-            _reservations = _serializer.FromCSV(FilePath);
-            return _reservations.Where(r => r.TourId == tourId).ToList();
+            _serializer.ToCSV(FilePath, _tourReservations);
         }
     }
 }

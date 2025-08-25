@@ -29,6 +29,12 @@ namespace BookingApp.Repositories
             return _serializer.FromCSV(FilePath);
         }
 
+        public Location GetById(int id)
+        {
+            _locations = _serializer.FromCSV(FilePath) ?? new List<Location>();
+            return _locations.FirstOrDefault(l => l.Id == id);
+        }
+
         public Location Save(Location location)
         {
             Location current = _locations.Find(c => c.City == location.City && c.Country == location.Country);
