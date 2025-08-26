@@ -12,5 +12,6 @@ namespace BookingApp.Domain.Interfaces
         public int NextId();
         public Reservation Save(Reservation reservation);
         public List<Reservation> GetByGuestId(int guestId);
+        void Update(Reservation reservation);
     }
 }

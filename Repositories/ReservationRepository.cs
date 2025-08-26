@@ -51,5 +51,16 @@ namespace BookingApp.Repositories
             _serializer.ToCSV(FilePath, _reservations);
             return reservation;
         }
+        public void Update(Reservation reservation)
+        {
+            var allReservations = GetAll();
+            var existingReservationIndex = allReservations.FindIndex(r => r.Id == reservation.Id);
+
+            if (existingReservationIndex != -1)
+            {
+                allReservations[existingReservationIndex] = reservation;
+                _serializer.ToCSV(FilePath, allReservations);
+            }
+        }
     }
 }

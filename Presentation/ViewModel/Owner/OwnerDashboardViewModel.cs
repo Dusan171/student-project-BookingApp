@@ -53,7 +53,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
                         CurrentViewModel = Injector.CreateRegisterAccommodationViewModel();
                         break;
                     case "Requests":
-                       // CurrentViewModel = Injector.CreateRequestsViewModel(); 
+                        CurrentViewModel = Injector.CreateRequestsViewModel(); 
                         break;
                     case "Statistic":
                       //  CurrentViewModel = Injector.CreateStatisticViewModel(); 

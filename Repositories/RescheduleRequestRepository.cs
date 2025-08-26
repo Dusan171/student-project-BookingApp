@@ -15,8 +15,6 @@ namespace BookingApp.Repositories
     {
         private const string FilePath = "../../../Resources/Data/rescheduleRequests.csv";
         private readonly Serializer<RescheduleRequest> _serializer;
-        //kaze da treba ovo da se ukloni i malo izmijene metode koje ga koriste
-        //da bi stalno radili sa "svjezim" podacima
         private List<RescheduleRequest> _requests;
 
         public RescheduleRequestRepository()
@@ -41,19 +39,22 @@ namespace BookingApp.Repositories
             _requests = GetAll();
             return _requests.Any() ? _requests.Max(r => r.Id) + 1 : 1;
         }
-        //korisne metode
-        //pronalazak zahtjeva za odredjenu rezervaciju
+        
 
         public RescheduleRequest GetByReservationId(int reservationId)
         {
             return GetAll().FirstOrDefault(r => r.ReservationId == reservationId);
         }
-        //provjera da li postoji aktivna rezervacija
+       
         public bool HasPendingRequest(int reservationId)
         {
             var request = GetByReservationId(reservationId);
             return request != null && request.Status == RequestStatus.Pending;
 
+        }
+        public void SaveAll(List<RescheduleRequest> requests)
+        {
+            _serializer.ToCSV(FilePath, requests);
         }
     }
 }

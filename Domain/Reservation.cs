@@ -14,8 +14,8 @@ namespace BookingApp.Domain
         public int GuestId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public int GuestsNumber { get; set; } //broj gostiju koji dolaze
-        public ReservationStatus Status { get; set; }//nije podeseno, pise da je uvijek aktivno
+        public int GuestsNumber { get; set; } 
+        public ReservationStatus Status { get; set; }
 
         public Reservation() { }
 

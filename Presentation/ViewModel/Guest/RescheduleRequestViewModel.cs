@@ -9,6 +9,7 @@ using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
 using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Presentation.ViewModel
 {
@@ -99,7 +100,7 @@ namespace BookingApp.Presentation.ViewModel
 
             try
             {
-                var requestDto = new CreateRescheduleRequestDTO
+                var requestDto = new RescheduleRequestDTO
                 {
                     ReservationId = _reservation.Id,
                     NewStartDate = NewStartDate.Value.Date,
