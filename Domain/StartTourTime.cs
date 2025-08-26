@@ -30,5 +30,9 @@ public class StartTourTime : ISerializable
         Id = int.Parse(values[0]);
         Time = DateTime.ParseExact(values[1], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
     }
+    public override string ToString()
+    {
+        return Time.ToString("yyyy-MM-dd HH:mm:ss");
+    }
 }
 

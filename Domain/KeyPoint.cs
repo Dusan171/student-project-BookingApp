@@ -13,11 +13,11 @@ using System.ComponentModel;
 
 public class KeyPoint : ISerializable
 {
-	public int Id { get; set; }
-	public string Name { get; set; }
+    public int Id { get; set; }
+    public string Name { get; set; }
 
-	public KeyPoint()
-	{
+    public KeyPoint()
+    {
     }
     public KeyPoint(int id, string name)
     {
