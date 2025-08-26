@@ -11,30 +11,42 @@ namespace BookingApp.Repositories
         private const string FilePath = "../../../Resources/Data/tours.csv";
         private readonly Serializer<Tour> _serializer;
         private readonly LocationRepository _locationRepository;
+        private readonly UserRepository _userRepository;
         private List<Tour> _tours;
 
         public TourRepository()
         {
             _serializer = new Serializer<Tour>();
             _locationRepository = new LocationRepository();
-            _tours = LoadToursWithLocations();
+            _userRepository = new UserRepository();
+            _tours = LoadToursWithLocationsAndGuides();
         }
 
-        private List<Tour> LoadToursWithLocations()
+        private List<Tour> LoadToursWithLocationsAndGuides()
         {
             try
             {
                 var tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
 
-                // Popuni Location objekte sa podacima iz LocationRepository
                 foreach (var tour in tours)
                 {
+                    // ➡️ Učitaj lokaciju
                     if (tour.Location != null && tour.Location.Id > 0)
                     {
                         var fullLocation = _locationRepository.GetById(tour.Location.Id);
                         if (fullLocation != null)
                         {
                             tour.Location = fullLocation;
+                        }
+                    }
+
+                    // ➡️ Učitaj vodiča (User)
+                    if (tour.Guide != null && tour.Guide.Id > 0)
+                    {
+                        var fullGuide = _userRepository.GetById(tour.Guide.Id);
+                        if (fullGuide != null)
+                        {
+                            tour.Guide = fullGuide;
                         }
                     }
                 }
@@ -50,25 +62,23 @@ namespace BookingApp.Repositories
 
         public List<Tour> GetAll()
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
             return _tours;
         }
 
         public List<Tour> GetAvailableTours()
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
             return _tours.Where(t => t.ReservedSpots < t.MaxTourists).ToList();
         }
 
         public List<Tour> SearchTours(string city = null, string country = null,
             string language = null, int? maxPeople = null, double? duration = null)
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
 
             if (_tours == null || _tours.Count == 0)
-            {
                 return new List<Tour>();
-            }
 
             var query = _tours.AsQueryable();
 
@@ -115,7 +125,7 @@ namespace BookingApp.Repositories
 
         public bool ReserveSpots(int tourId, int numberOfSpots)
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
             var tour = _tours?.FirstOrDefault(t => t.Id == tourId);
 
             if (tour != null && tour.AvailableSpots >= numberOfSpots)
@@ -127,11 +137,9 @@ namespace BookingApp.Repositories
             return false;
         }
 
-        // KLJUČNA METODA ZA ALTERNATIVNE TURE
         public List<Tour> GetAlternativeTours(int originalTourId, int requiredSpots)
         {
-            _tours = LoadToursWithLocations();
-
+            _tours = LoadToursWithLocationsAndGuides();
             if (_tours == null || _tours.Count == 0)
                 return new List<Tour>();
 
@@ -139,30 +147,26 @@ namespace BookingApp.Repositories
             if (originalTour?.Location == null)
                 return new List<Tour>();
 
-            // Pronađi sve ture koje:
-            // 1. Nisu originalna tura
-            // 2. Imaju istu lokaciju (grad i državu)  
-            // 3. Imaju dovoljno slobodnih mesta
             return _tours.Where(t =>
-                t.Id != originalTourId && // Nije originalna tura
-                t.Location != null && // Ima lokaciju
-                t.Location.City != null && t.Location.Country != null && // Lokacija ima grad i državu
-                originalTour.Location.City != null && originalTour.Location.Country != null && // Originalna lokacija je validna
-                t.Location.City.Trim().Equals(originalTour.Location.City.Trim(), StringComparison.OrdinalIgnoreCase) && // Isti grad
-                t.Location.Country.Trim().Equals(originalTour.Location.Country.Trim(), StringComparison.OrdinalIgnoreCase) && // Ista država
-                t.AvailableSpots >= requiredSpots // Ima dovoljno mesta
+                t.Id != originalTourId &&
+                t.Location != null &&
+                t.Location.City != null && t.Location.Country != null &&
+                originalTour.Location.City != null && originalTour.Location.Country != null &&
+                t.Location.City.Trim().Equals(originalTour.Location.City.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                t.Location.Country.Trim().Equals(originalTour.Location.Country.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                t.AvailableSpots >= requiredSpots
             ).ToList();
         }
 
         public Tour GetById(int id)
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
             return _tours?.FirstOrDefault(t => t.Id == id);
         }
 
         public Tour Save(Tour tour)
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
             tour.Id = NextId();
             _tours.Add(tour);
             _serializer.ToCSV(FilePath, _tours);
@@ -171,7 +175,7 @@ namespace BookingApp.Repositories
 
         public int NextId()
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
             if (_tours == null || _tours.Count < 1)
             {
                 return 1;
@@ -181,7 +185,7 @@ namespace BookingApp.Repositories
 
         public void Delete(Tour tour)
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
             if (_tours == null) return;
 
             Tour found = _tours.Find(c => c.Id == tour.Id);
@@ -194,7 +198,7 @@ namespace BookingApp.Repositories
 
         public Tour Update(Tour tour)
         {
-            _tours = LoadToursWithLocations();
+            _tours = LoadToursWithLocationsAndGuides();
             if (_tours == null) return tour;
 
             Tour current = _tours.Find(c => c.Id == tour.Id);

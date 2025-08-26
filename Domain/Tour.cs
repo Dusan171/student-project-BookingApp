@@ -5,9 +5,7 @@ using BookingApp.Serializer;
 using System.Windows;
 using BookingApp.Domain;
 
-
 public class Tour : ISerializable
-
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -21,6 +19,10 @@ public class Tour : ISerializable
     public double DurationHours { get; set; }
     public List<Images> Images { get; set; }
     public bool IsFinished { get; set; }
+
+    
+    public User Guide { get; set; }
+
     public Tour()
     {
         KeyPoints = new List<KeyPoint>();
@@ -29,7 +31,7 @@ public class Tour : ISerializable
     }
 
     public Tour(int id, string name, Location location, string description, string language,
-                 int maxTourists, int reservedSpots, double durationHours, bool isFinished = false)
+                 int maxTourists, int reservedSpots, double durationHours, bool isFinished = false, User guide = null)
     {
         Id = id;
         Name = name;
@@ -40,6 +42,8 @@ public class Tour : ISerializable
         ReservedSpots = reservedSpots;
         DurationHours = durationHours;
         IsFinished = isFinished;
+        Guide = guide;
+
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
         Images = new List<Images>();
@@ -52,22 +56,22 @@ public class Tour : ISerializable
         string imageIds = string.Join("|", Images.Select(img => img.Id));
 
         string[] csvValues = {
-        Id.ToString(),
-        Name,
-        Location.Id.ToString(),
-        Language,
-        MaxTourists.ToString(),
-        ReservedSpots.ToString(),
-        DurationHours.ToString(),
-        IsFinished.ToString(),
-        keyPointIds,
-        startTimeIds,
-        imageIds
+            Id.ToString(),
+            Name,
+            Location.Id.ToString(),
+            Language,
+            MaxTourists.ToString(),
+            ReservedSpots.ToString(),
+            DurationHours.ToString(),
+            IsFinished.ToString(),
+            keyPointIds,
+            startTimeIds,
+            imageIds,
+            Guide != null ? Guide.Id.ToString() : ""   
         };
 
         return csvValues;
     }
-
 
     public void FromCSV(string[] values)
     {
@@ -76,12 +80,12 @@ public class Tour : ISerializable
             throw new ArgumentException("Invalid CSV data for Tour");
         }
 
-        Id = int.Parse(values[0]);                
-        Name = values[1] ?? string.Empty;            
-        Location = new Location { Id = int.Parse(values[2]) }; 
-        Language = values[3] ?? string.Empty;         
-        MaxTourists = int.Parse(values[4]);          
-        ReservedSpots = int.Parse(values[5]);        
+        Id = int.Parse(values[0]);
+        Name = values[1] ?? string.Empty;
+        Location = new Location { Id = int.Parse(values[2]) };
+        Language = values[3] ?? string.Empty;
+        MaxTourists = int.Parse(values[4]);
+        ReservedSpots = int.Parse(values[5]);
         DurationHours = double.Parse(values[6]);
         IsFinished = bool.Parse(values[7]);
 
@@ -89,10 +93,9 @@ public class Tour : ISerializable
         StartTimes = new List<StartTourTime>();
         Images = new List<Images>();
 
-        
-        if (values.Length > 7 && !string.IsNullOrEmpty(values[8]))
+        if (values.Length > 8 && !string.IsNullOrEmpty(values[8]))
         {
-            var keyPointIds = values[8].Split(',');
+            var keyPointIds = values[8].Split('|');
             foreach (var id in keyPointIds)
             {
                 if (int.TryParse(id, out int keyPointId))
@@ -102,10 +105,9 @@ public class Tour : ISerializable
             }
         }
 
-        
         if (values.Length > 9 && !string.IsNullOrEmpty(values[9]))
         {
-            var startTimeIds = values[9].Split(',');
+            var startTimeIds = values[9].Split('|');
             foreach (var id in startTimeIds)
             {
                 if (int.TryParse(id, out int startTimeId))
@@ -115,10 +117,9 @@ public class Tour : ISerializable
             }
         }
 
-        
         if (values.Length > 10 && !string.IsNullOrEmpty(values[10]))
         {
-            var imageIds = values[10].Split(',');
+            var imageIds = values[10].Split('|');
             foreach (var id in imageIds)
             {
                 if (int.TryParse(id, out int imageId))
@@ -126,6 +127,13 @@ public class Tour : ISerializable
                     Images.Add(new Images { Id = imageId });
                 }
             }
+        }
+
+        
+        if (values.Length > 11 && int.TryParse(values[11], out int guideId))
+        {
+            Guide = new User { Id = guideId };
+           
         }
     }
 
@@ -137,5 +145,4 @@ public class Tour : ISerializable
             return available < 0 ? 0 : available;
         }
     }
-
 }

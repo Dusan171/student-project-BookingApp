@@ -47,18 +47,17 @@ namespace BookingApp.Domain
 
         public string[] ToCSV()
         {
-            string guestIds = string.Join("|", Guests.Select(g => g.Id));
-
+            string guestIds = string.Join(",", Guests.Select(g => g.Id)); // koristi zarez umesto |
             return new string[]
             {
-                Id.ToString(),
-                TourId.ToString(),
-                StartTourTimeId.ToString(),
-                TouristId.ToString(),
-                NumberOfGuests.ToString(),
-                ReservationDate.ToString("dd-MM-yyyy HH:mm:ss"),
-                Status.ToString(),
-                guestIds
+        Id.ToString(),
+        TourId.ToString(),
+        StartTourTimeId.ToString(),
+        TouristId.ToString(),
+        NumberOfGuests.ToString(),
+        ReservationDate.ToString("dd-MM-yyyy HH:mm:ss"),
+        Status.ToString(),
+        guestIds
             };
         }
 
@@ -72,14 +71,18 @@ namespace BookingApp.Domain
             ReservationDate = DateTime.ParseExact(values[5], "dd-MM-yyyy HH:mm:ss",
                                                  System.Globalization.CultureInfo.InvariantCulture);
             Status = (TourReservationStatus)Enum.Parse(typeof(TourReservationStatus), values[6]);
-
             Guests = new List<ReservationGuest>();
-            if (!string.IsNullOrEmpty(values[7]))
+
+            // ISPRAVKA - proverava da li postoji 8. kolona i da li nije prazna
+            if (values.Length > 7 && !string.IsNullOrEmpty(values[7]))
             {
-                var guestIds = values[7].Split('|');
+                var guestIds = values[7].Split(','); // koristi zarez umesto |
                 foreach (var id in guestIds)
                 {
-                    Guests.Add(new ReservationGuest { Id = int.Parse(id) });
+                    if (!string.IsNullOrWhiteSpace(id) && int.TryParse(id.Trim(), out int guestId))
+                    {
+                        Guests.Add(new ReservationGuest { Id = guestId });
+                    }
                 }
             }
         }
