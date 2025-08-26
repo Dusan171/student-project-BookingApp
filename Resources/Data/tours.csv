@@ -1,6 +1,7 @@
-1|Ruma - Obilazak grada|1|srpski|20|3|25|1|1|1
-2|Zlatibor|2|engleski|4|3|15|3|2|2  
-3|Nis - Obilazak starog grada|3|srpski|2|8|10|8|3|3
-4|Pariz|4|engleski|20|3|3|4|5|5
-5|Nis - Muzej|3|srpski|12|2|10|8|3|3
-6|Nis - Tvrdjava|3|srpski|15|4|8|7|3|3
+1|Ruma - Obilazak grada|1|srpski|20|3|2.5|false|1|1|1
+2|Zlatibor|2|engleski|4|3|1.5|false|3|2|2
+3|Nis - Obilazak starog grada|3|srpski|2|8|1.0|false|8|3|3
+4|Pariz|4|engleski|20|3|3.0|false|4|5|5
+5|Nis - Muzej|3|srpski|12|2|1.0|false|8|3|3
+6|Nis - Tvrdjava|3|srpski|15|4|0.8|false|7|3|3
+7|Setnja po kampusu|6|srpski|10|2|1.0|false|5,6|6|1
