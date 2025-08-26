@@ -68,8 +68,12 @@ namespace BookingApp.View
                             guestView.Show();
                             break;
                         case UserRole.GUIDE:
-                            var guideView = new CreateTourForm();
-                            guideView.Show();
+                            Window guideWindow = new Window();
+                            guideWindow.Width = 430;
+                            guideWindow.Height = 750;
+                            var mainWindowContent = new MainWindow();
+                            guideWindow.Content = mainWindowContent.Content;
+                            guideWindow.Show();
                             break;
 
                         case UserRole.TOURIST:
