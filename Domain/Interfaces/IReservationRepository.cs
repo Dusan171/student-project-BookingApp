@@ -8,10 +8,9 @@ namespace BookingApp.Domain.Interfaces
 {
     public interface IReservationRepository
     {
-        List<Reservation> GetAll();
-        void Add(Reservation reservation);
-        List<Reservation> GetByGuestId(int guestId);
-        int NextId();
-        Reservation Save(Reservation reservation);
+        public List<Reservation> GetAll();
+        public int NextId();
+        public Reservation Save(Reservation reservation);
+        public List<Reservation> GetByGuestId(int guestId);
     }
 }

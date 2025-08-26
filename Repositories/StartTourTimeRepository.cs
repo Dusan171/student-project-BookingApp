@@ -24,6 +24,13 @@ namespace BookingApp.Repositories
             return _serializer.FromCSV(FilePath);
         }
 
+        public StartTourTime GetById(int id)
+        {
+            _startTourTimes = _serializer.FromCSV(FilePath);
+            return _startTourTimes.FirstOrDefault(st => st.Id == id);
+        }
+
+
         public StartTourTime Save(StartTourTime startTourTime)
         {
             startTourTime.Id = NextId();

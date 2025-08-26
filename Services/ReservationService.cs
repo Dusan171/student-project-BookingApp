@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain;
+using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Services.DTOs;
 using BookingApp.Repositories;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
@@ -13,37 +15,45 @@ namespace BookingApp.Services
     {
         private readonly IReservationRepository _reservationRepository;
         private readonly IOccupiedDateRepository _occupiedDateRepository;
+        private readonly IAccommodationRepository _accommodationRepository;
 
-        //Dependency Injection (to ce vjerovatno trebati prebaciti u posebnu klasu ili gdje vec)
 
-        public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository)
+        public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository, IAccommodationRepository accommodationRepository)
         {
             _reservationRepository = reservationRepository;
             _occupiedDateRepository = occupiedDateRepository;
+            _accommodationRepository = accommodationRepository;
         }
-        //logika rezervacije koja je prije bila u reservationRepository
-        public Reservation Create(Accommodation accommodation, DateTime startDate, DateTime endDate, int guestNumber)
+        
+        public Reservation Create(ReservationDTO reservationDto)
         {
-            // Validacija poslovnih pravila
-            ValidateReservationRules(accommodation, startDate, endDate, guestNumber);
+            
+            var accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == reservationDto.AccommodationId);
+            if (accommodation == null)
+            {
+                throw new Exception("Cannot create reservation for an unknown accommodation.");
+            }
 
-            // Provera dostupnosti
-            CheckForOverlappingDates(accommodation.Id, startDate, endDate);
+            
+            ValidateReservationRules(accommodation, reservationDto.StartDate, reservationDto.EndDate, reservationDto.GuestsNumber);
 
-            // Kreiranje i čuvanje rezervacije
+            
+            CheckForOverlappingDates(accommodation.Id, reservationDto.StartDate, reservationDto.EndDate);
+
+            
             var reservation = new Reservation
             {
-                AccommodationId = accommodation.Id,
+                AccommodationId = reservationDto.AccommodationId,
                 GuestId = Session.CurrentUser.Id,
-                StartDate = startDate,
-                EndDate = endDate,
-                GuestsNumber = guestNumber,
+                StartDate = reservationDto.StartDate,
+                EndDate = reservationDto.EndDate,
+                GuestsNumber = reservationDto.GuestsNumber,
                 Status = ReservationStatus.Active
             };
             _reservationRepository.Save(reservation);
 
-            // Kreiranje i čuvanje zauzetih datuma
-            CreateOccupiedDates(accommodation.Id, reservation.Id, startDate, endDate);
+            
+            CreateOccupiedDates(accommodation.Id, reservation.Id, reservationDto.StartDate, reservationDto.EndDate);
 
             return reservation;
         }
@@ -93,6 +103,13 @@ namespace BookingApp.Services
                                          .Select(reservation => new ReservationDTO(reservation))  // mapiranje u DTO
                                          .ToList();
         }
+        public List<DateTime> GetOccupiedDatesForAccommodation(int accommodationId)
+        { 
+            
+            var occupiedDateObjects = _occupiedDateRepository.GetByAccommodationId(accommodationId);
 
+            
+            return occupiedDateObjects.Select(occupiedDate => occupiedDate.Date).ToList();
+        }
     }
 }

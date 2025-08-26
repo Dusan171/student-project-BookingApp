@@ -10,21 +10,27 @@ namespace BookingApp.Repositories
     {
         private const string FilePath = "../../../Resources/Data/images.csv";
 
-        private readonly Serializer<ImagePaths> _serializer;
-        private List<ImagePaths> _images;
+        private readonly Serializer<Images> _serializer;
+        private List<Images> _images;
 
         public ImageRepository()
         {
-            _serializer = new Serializer<ImagePaths>();
+            _serializer = new Serializer<Images>();
             _images = _serializer.FromCSV(FilePath);
         }
 
-        public List<ImagePaths> GetAll()
+        public List<Images> GetAll()
         {
             return _serializer.FromCSV(FilePath);
         }
 
-        public ImagePaths Save(ImagePaths image)
+        public Images GetById(int id)
+        {
+            _images = _serializer.FromCSV(FilePath);
+            return _images.FirstOrDefault(img => img.Id == id);
+        }
+
+        public Images Save(Images image)
         {
             image.Id = NextId();
             _images = _serializer.FromCSV(FilePath);
@@ -43,18 +49,18 @@ namespace BookingApp.Repositories
             return _images.Max(c => c.Id) + 1;
         }
 
-        public void Delete(ImagePaths image)
+        public void Delete(Images image)
         {
             _images = _serializer.FromCSV(FilePath);
-            ImagePaths found = _images.Find(c => c.Id == image.Id);
+            Images found = _images.Find(c => c.Id == image.Id);
             _images.Remove(found);
             _serializer.ToCSV(FilePath, _images);
         }
 
-        public ImagePaths Update(ImagePaths image)
+        public Images Update(Images image)
         {
             _images = _serializer.FromCSV(FilePath);
-            ImagePaths current = _images.Find(c => c.Id == image.Id);
+            Images current = _images.Find(c => c.Id == image.Id);
             int index = _images.IndexOf(current);
             _images.Remove(current);
             _images.Insert(index, image);

@@ -75,7 +75,7 @@ namespace BookingApp.Domain
 
         }
 
-
+        //treba prebaciti u AccommodationService.cs i onda promijeniti svuda gdje se bila pozivala
         public bool IsValid()
         {
             if (string.IsNullOrWhiteSpace(Name))

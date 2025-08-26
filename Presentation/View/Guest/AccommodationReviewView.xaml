@@ -1,0 +1,63 @@
+﻿<Window x:Class="BookingApp.Presentation.View.Guest.AccommodationReviewView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Leave a Review" Height="450" Width="400"
+        WindowStartupLocation="CenterScreen" MinHeight="400" MinWidth="300">
+
+    <Window.Resources>
+        <!-- Stilovi ostaju isti -->
+        <Style TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="15,5"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Margin="15">
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <!-- Povezujemo dugme sa SubmitCommand iz ViewModel-a -->
+            <Button Content="Submit" IsDefault="True" Command="{Binding SubmitCommand}"/>
+            <Button Content="Cancel" IsCancel="True"/>
+        </StackPanel>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- OCENA ČISTOĆE -->
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="Cleanliness Rating (1-5):"/>
+                <!-- Povezujemo TextBox sa svojstvom iz ViewModel-a -->
+                <TextBox Text="{Binding CleanlinessRating, UpdateSourceTrigger=PropertyChanged}" MaxWidth="100"/>
+            </StackPanel>
+
+            <!-- OCENA VLASNIKA -->
+            <StackPanel Grid.Row="1">
+                <TextBlock Text="Owner Rating (1-5):"/>
+                <TextBox Text="{Binding OwnerRating, UpdateSourceTrigger=PropertyChanged}" MaxWidth="100"/>
+            </StackPanel>
+
+            <!-- KOMENTAR -->
+            <StackPanel Grid.Row="2">
+                <TextBlock Text="Comment:"/>
+                <TextBox Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+            </StackPanel >
+
+            <!-- SLIKE -->
+            <StackPanel Grid.Row="3">
+                <TextBlock Text="Image Paths (separated by ;):"/>
+                <TextBox Text="{Binding ImagePaths, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

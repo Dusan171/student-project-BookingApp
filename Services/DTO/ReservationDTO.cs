@@ -41,7 +41,7 @@ namespace BookingApp.Services.DTO
                 {
                     _accommodationId = value;
                     OnPropertyChanged();
-                }
+        }
             }
         }
 
@@ -54,7 +54,7 @@ namespace BookingApp.Services.DTO
                 {
                     _guestId = value;
                     OnPropertyChanged();
-                }
+        }
             }
         }
 

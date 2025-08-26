@@ -1,5 +1,6 @@
 ﻿using BookingApp.Utilities;
 using BookingApp.Presentation.Owner;
+using BookingApp.Presentation.View.Guest;
 using BookingApp.View.Guide;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -68,14 +69,18 @@ namespace BookingApp.View
                             guestView.Show();
                             break;
                         case UserRole.GUIDE:
-                            var guideView = new CreateTourForm();
-                            guideView.Show();
+                            Window guideWindow = new Window();
+                            guideWindow.Width = 430;
+                            guideWindow.Height = 750;
+                            var mainWindowContent = new MainWindow();
+                            guideWindow.Content = mainWindowContent.Content;
+                            guideWindow.Show();
                             break;
 
-                        /*case UserRole.TOURIST:
+                        case UserRole.TOURIST:
                             var touristView = new TourSearch();
                             touristView.Show();
-                            break;*/
+                            break;
 
                         default:
                             MessageBox.Show($"User role {user.Role} not implemented.");

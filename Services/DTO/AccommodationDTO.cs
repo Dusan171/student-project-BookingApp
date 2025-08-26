@@ -92,7 +92,7 @@ namespace BookingApp.Services.DTO
         {
             get => _minReservationDays;
             set
-            {
+    {
                 if (_minReservationDays != value)
                 {
                     _minReservationDays = value;
@@ -127,7 +127,7 @@ namespace BookingApp.Services.DTO
             }
         }
 
-       
+
         public AccommodationDTO()
         {
             GeoLocation = new LocationDTO();
@@ -145,7 +145,7 @@ namespace BookingApp.Services.DTO
             CancellationDeadlineDays = a.CancellationDeadlineDays;
             ImagePaths = a.Images.Select(i => new AccommodationImageDTO { Path = i.Path }).ToList();
         }
-      
+
         public Accommodation ToAccommodation()
         {
             var accommodation = new Accommodation

@@ -12,6 +12,7 @@ namespace BookingApp.Domain.Interfaces
         GuestReview Save(GuestReview review);
         void Delete(GuestReview review);
         GuestReview Update(GuestReview review);
+        List<GuestReview> GetByReservationId(int reservationId);
         List<GuestReview> GetByReservationId(Reservation reservation);
     }
 }

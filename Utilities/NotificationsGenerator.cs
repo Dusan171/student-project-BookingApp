@@ -7,6 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Repositories;
 
 namespace BookingApp.Utilities
 {
@@ -50,7 +53,5 @@ namespace BookingApp.Utilities
                 IsRead = false
             };
         }
-
-
     }
 }

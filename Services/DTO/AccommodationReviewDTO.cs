@@ -38,7 +38,7 @@ namespace BookingApp.DTO
                 {
                     _reservationId = value;
                     OnPropertyChanged();
-                }
+        }
             }
         }
 
@@ -51,7 +51,7 @@ namespace BookingApp.DTO
                 {
                     _cleanlinessRating = value;
                     OnPropertyChanged();
-                }
+        }
             }
         }
 
@@ -64,7 +64,7 @@ namespace BookingApp.DTO
                 {
                     _ownerRating = value;
                     OnPropertyChanged();
-                }
+        }
             }
         }
 
@@ -122,6 +122,7 @@ namespace BookingApp.DTO
                 }
             }
         }
+
         public AccommodationReviewDTO() { }
 
         public AccommodationReviewDTO(

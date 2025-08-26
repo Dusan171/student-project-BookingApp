@@ -1,0 +1,42 @@
+﻿<Window x:Class="BookingApp.Presentation.View.Guest.MyReservationsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="My Reservations" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen">
+
+    <!-- DataContext se postavlja u code-behind-u na instancu MyReservationsViewModel -->
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <DataGrid Grid.Row="0" AutoGenerateColumns="False" IsReadOnly="True"
+                  SelectionMode="Single" 
+                  ItemsSource="{Binding Reservations}"
+                  SelectedItem="{Binding SelectedReservation}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Accommodation" Binding="{Binding AccommodationName}" Width="*"/>
+                <DataGridTextColumn Header="Start Date" Binding="{Binding StartDate, StringFormat='dd.MM.yyyy'}" Width="Auto"/>
+                <DataGridTextColumn Header="End Date" Binding="{Binding EndDate, StringFormat='dd.MM.yyyy'}" Width="Auto"/>
+                <DataGridTextColumn Header="Guests" Binding="{Binding GuestsNumber}" Width="Auto"/>
+                <DataGridTextColumn Header="Reschedule Status" Binding="{Binding RequestStatusText}" Width="*"/>
+                <DataGridTextColumn Header="Owner's Comment" Binding="{Binding OwnerComment}" Width="*"/>
+
+                <!-- Umesto dugmeta unutar reda, koristimo dugmiće ispod tabele, što je čistije -->
+                <!-- Ako želite dugme u redu, Command se može povezati ovako: -->
+                <!-- <Button Command="{Binding DataContext.RescheduleCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" ... /> -->
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <!-- Povezujemo dugmiće sa komandama iz ViewModel-a -->
+            <!-- Dugmići su automatski onemogućeni ako ništa nije selektovano, zahvaljujući CanExecuteActions -->
+            <Button Content="Reschedule" Width="120" Margin="5" Command="{Binding RescheduleCommand}"/>
+            <Button Content="Rate" Width="100" Margin="5" Command="{Binding RateCommand}"/>
+            <Button Content="View Review" Width="120" Margin="5" Command="{Binding ViewReviewCommand}"/>
+            <Button Content="Close" Width="100" Margin="5" Command="{Binding CloseCommand}"/>
+        </StackPanel>
+    </Grid>
+</Window>
