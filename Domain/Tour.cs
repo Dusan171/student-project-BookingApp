@@ -20,7 +20,7 @@ public class Tour : ISerializable
     public List<StartTourTime> StartTimes { get; set; }
     public double DurationHours { get; set; }
     public List<Images> Images { get; set; }
-
+    public bool IsFinished { get; set; }
     public Tour()
     {
         KeyPoints = new List<KeyPoint>();
@@ -29,7 +29,7 @@ public class Tour : ISerializable
     }
 
     public Tour(int id, string name, Location location, string description, string language,
-                int maxTourists,int reservedSpots, double durationHours)
+                 int maxTourists, int reservedSpots, double durationHours, bool isFinished = false)
     {
         Id = id;
         Name = name;
@@ -39,6 +39,7 @@ public class Tour : ISerializable
         MaxTourists = maxTourists;
         ReservedSpots = reservedSpots;
         DurationHours = durationHours;
+        IsFinished = isFinished;
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
         Images = new List<Images>();
@@ -58,6 +59,7 @@ public class Tour : ISerializable
         MaxTourists.ToString(),
         ReservedSpots.ToString(),
         DurationHours.ToString(),
+        IsFinished.ToString(),
         keyPointIds,
         startTimeIds,
         imageIds
@@ -80,17 +82,17 @@ public class Tour : ISerializable
         Language = values[3] ?? string.Empty;         
         MaxTourists = int.Parse(values[4]);          
         ReservedSpots = int.Parse(values[5]);        
-        DurationHours = double.Parse(values[6]);      
+        DurationHours = double.Parse(values[6]);
+        IsFinished = bool.Parse(values[7]);
 
-        
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
         Images = new List<Images>();
 
         
-        if (values.Length > 7 && !string.IsNullOrEmpty(values[7]))
+        if (values.Length > 7 && !string.IsNullOrEmpty(values[8]))
         {
-            var keyPointIds = values[7].Split('|');
+            var keyPointIds = values[8].Split(',');
             foreach (var id in keyPointIds)
             {
                 if (int.TryParse(id, out int keyPointId))
@@ -101,9 +103,9 @@ public class Tour : ISerializable
         }
 
         
-        if (values.Length > 8 && !string.IsNullOrEmpty(values[8]))
+        if (values.Length > 9 && !string.IsNullOrEmpty(values[9]))
         {
-            var startTimeIds = values[8].Split('|');
+            var startTimeIds = values[9].Split(',');
             foreach (var id in startTimeIds)
             {
                 if (int.TryParse(id, out int startTimeId))
@@ -114,9 +116,9 @@ public class Tour : ISerializable
         }
 
         
-        if (values.Length > 9 && !string.IsNullOrEmpty(values[9]))
+        if (values.Length > 10 && !string.IsNullOrEmpty(values[10]))
         {
-            var imageIds = values[9].Split('|');
+            var imageIds = values[10].Split(',');
             foreach (var id in imageIds)
             {
                 if (int.TryParse(id, out int imageId))
