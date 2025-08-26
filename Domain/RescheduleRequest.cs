@@ -18,11 +18,11 @@ namespace BookingApp.Domain
         public DateTime NewEndDate { get; set; }
         public RequestStatus Status { get; set; }
         public string OwnerComment { get; set; }
-        public bool IsSeenByGuest { get; set; } //za notifikacije
+        public bool IsSeenByGuest { get; set; }
 
         public RescheduleRequest()
         {
-            OwnerComment = string.Empty; //inicijalizacija da ne bude null
+            OwnerComment = string.Empty; 
         }
         public string[] ToCSV()
         {

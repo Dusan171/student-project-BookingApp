@@ -5,6 +5,8 @@ using BookingApp.Domain;
 using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTOs;
+using BookingApp.Services.DTO;
+using BookingApp.Repositories;
 
 namespace BookingApp.Services
 {
@@ -22,26 +24,23 @@ namespace BookingApp.Services
             _accommodationRepository = accommodationRepository;
             _reservationRepository = reservationRepository;
         }
-        //prebaceno iz RescheduleRequestView.xaml.cs
 
-        // /// Dohvata sve zauzete datume za smeštaj, ISKLJUČUJUĆI datume trenutne rezervacije.
+
         public List<DateTime> GetBlackoutDatesForReschedule(Reservation reservation)
         {
             var allOccupiedDates = _occupiedDateRepository.GetByAccommodationId(reservation.AccommodationId);
             var currentReservationDates = Enumerable.Range(0, (reservation.EndDate - reservation.StartDate).Days)
                                                     .Select(offset => reservation.StartDate.AddDays(offset).Date)
-                                                    .ToHashSet(); // Korišćenje HashSet-a za brže pretrage
+                                                    .ToHashSet();
 
             return allOccupiedDates
                 .Where(od => !currentReservationDates.Contains(od.Date.Date))
                 .Select(od => od.Date)
                 .ToList();
         }
-        /// Kreira i čuva zahtev za pomeranje, nakon provere svih poslovnih pravila.
-        /// 
-        public void CreateRequest(CreateRescheduleRequestDTO requestDto)
+
+        public void CreateRequest(RescheduleRequestDTO requestDto)
         {
-            // Dobijamo originalnu rezervaciju iz baze na osnovu ID-a iz DTO-a
             var reservation = _reservationRepository.GetAll().FirstOrDefault(r => r.Id == requestDto.ReservationId);
             if (reservation == null)
             {
@@ -54,14 +53,12 @@ namespace BookingApp.Services
                 throw new Exception("Associated accommodation could not be found.");
             }
 
-            //Validacija poslovnih pravila (koristimo podatke iz DTO-a)
             int stayLength = (requestDto.NewEndDate - requestDto.NewStartDate).Days;
             if (stayLength < accommodation.MinReservationDays)
             {
                 throw new Exception($"Minimum stay is {accommodation.MinReservationDays} days.");
             }
 
-            //Provera dostupnosti
             var blackoutDates = GetBlackoutDatesForReschedule(reservation);
             bool isOverlap = Enumerable.Range(0, stayLength)
                 .Select(offset => requestDto.NewStartDate.AddDays(offset).Date)
@@ -72,7 +69,6 @@ namespace BookingApp.Services
                 throw new Exception("Selected period overlaps with another reservation and is not available.");
             }
 
-            //Kreiranje domenskog modela iz DTO-a i čuvanje
             var newRequest = new RescheduleRequest
             {
                 ReservationId = requestDto.ReservationId,
@@ -84,5 +80,30 @@ namespace BookingApp.Services
             };
             _rescheduleRequestRepository.Save(newRequest);
         }
+      
+
+            
+        public List<RescheduleRequestDTO> GetAll() 
+        {
+            return _rescheduleRequestRepository.GetAll().Select(r => new RescheduleRequestDTO(r)).ToList(); 
+        }
+      
+        public RescheduleRequestDTO GetById(int id) 
+        { 
+            return _rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id) == null ? null : new RescheduleRequestDTO(_rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id));
+        }
+        public void Update(RescheduleRequestDTO requestDto)
+        {
+            var request = requestDto.ToRequest();
+            var allRequests = _rescheduleRequestRepository.GetAll();
+            var existingRequestIndex = allRequests.FindIndex(r => r.Id == request.Id);
+
+            if (existingRequestIndex != -1)
+            {
+                allRequests[existingRequestIndex] = request;
+                _rescheduleRequestRepository.SaveAll(allRequests);
+            }
+        }
     }
+    
 }

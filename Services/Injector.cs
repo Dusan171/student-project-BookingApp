@@ -90,5 +90,13 @@ namespace BookingApp.Services
             
             return new HomeViewModel();
         }
+        public static RequestsViewModel CreateRequestsViewModel()
+        {
+            var rescheduleRequestService = CreateInstance<IRescheduleRequestService>();
+            var accommodationService = CreateInstance<IAccommodationService>();
+            var reservationService = CreateInstance<IReservationService>();
+
+            return new RequestsViewModel(rescheduleRequestService, accommodationService, reservationService);
+        }
     }
 }
