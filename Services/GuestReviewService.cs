@@ -48,9 +48,15 @@ namespace BookingApp.Services
 
         public GuestReviewDTO GetReviewForReservation(int reservationId)
         {
-            return new GuestReviewDTO(_repository.GetByReservationId(reservationId).FirstOrDefault());
-        }
+            var reviewModel = _repository.GetByReservationId(reservationId).FirstOrDefault();
 
+            if (reviewModel == null)
+            {
+                return null;
+            }
+
+            return new GuestReviewDTO(reviewModel);
+        }
 
     }
 }

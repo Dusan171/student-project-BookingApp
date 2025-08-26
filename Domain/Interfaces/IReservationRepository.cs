@@ -13,7 +13,7 @@ namespace BookingApp.Domain.Interfaces
         public List<Reservation> GetByGuestId(int guestId);
         public Reservation GetById(int id);
         public void Delete(Reservation reservation);
-        public Reservation Update(Reservation reservation);
+        public Reservation UpdateReservation(Reservation reservation);
         void Update(Reservation reservation);
     }
 }

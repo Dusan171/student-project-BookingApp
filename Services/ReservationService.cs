@@ -109,7 +109,7 @@ namespace BookingApp.Services
         public void Update(ReservationDTO reservationDto)
         {
             var reservation = reservationDto.ToReservation();
-            _reservationRepository.Update(reservation);
+            _reservationRepository.UpdateReservation(reservation);
         }
 
         public bool IsAccommodationAvailable(int accommodationId, DateTime newStartDate, DateTime newEndDate)

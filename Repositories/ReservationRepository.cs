@@ -67,5 +67,20 @@ namespace BookingApp.Repositories
         {
             return _reservations.Any() ? _reservations.Max(r => r.Id) + 1 : 1;
         }
+        public Reservation UpdateReservation(Reservation reservation)
+        {
+            var existing = GetById(reservation.Id);
+            if (existing == null)
+            {
+                return null;
+            }
+            existing.StartDate = reservation.StartDate;
+            existing.EndDate = reservation.EndDate;
+            existing.Status = reservation.Status;
+            existing.GuestsNumber = reservation.GuestsNumber;
+
+            _serializer.ToCSV(FilePath, _reservations);
+            return existing;
+        }
     }
 }
