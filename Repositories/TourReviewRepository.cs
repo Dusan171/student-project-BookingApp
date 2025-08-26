@@ -35,7 +35,7 @@ namespace BookingApp.Repositories
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
                 var parts = line.Split('|');
-                if (parts.Length >= 8) // Povećan broj kolona
+                if (parts.Length >= 8) 
                 {
                     try
                     {
@@ -52,7 +52,7 @@ namespace BookingApp.Repositories
                             IsValid = parts.Length > 8 ? bool.Parse(parts[8]) : true
                         };
 
-                        // Parse image paths if they exist
+                        
                         if (parts.Length > 9 && !string.IsNullOrWhiteSpace(parts[9]))
                         {
                             review.ImagePaths = parts[9].Split(';').Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
@@ -62,7 +62,7 @@ namespace BookingApp.Repositories
                     }
                     catch (Exception ex)
                     {
-                        // Skip invalid lines
+                        
                         Console.WriteLine($"Error parsing review line: {line}, Error: {ex.Message}");
                     }
                 }

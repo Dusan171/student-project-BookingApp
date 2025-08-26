@@ -63,14 +63,14 @@ namespace BookingApp.Domain
             Age = int.Parse(values[4]);
             if (values.Length > 7)
             {
-                // Nova struktura: Id, ReservationId, FirstName, LastName, Age, Email, HasAppeared, KeyPointJoinedAt
+                
                 Email = values[5];
                 HasAppeared = bool.Parse(values[6]);
                 KeyPointJoinedAt = int.Parse(values[7]);
             }
             else
             {
-                // Stara struktura: Id, ReservationId, FirstName, LastName, Age, HasAppeared, KeyPointJoinedAt
+                
                 Email = "";
                 HasAppeared = bool.Parse(values[5]);
                 KeyPointJoinedAt = int.Parse(values[6]);
