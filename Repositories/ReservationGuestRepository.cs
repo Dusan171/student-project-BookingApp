@@ -23,7 +23,6 @@ namespace BookingApp.Repositories
             _guests = _serializer.FromCSV(FilePath);
         }
 
-        // DODANA metoda za generisanje ID-a
         public int NextId()
         {
             if (_guests.Count < 1)
@@ -51,7 +50,6 @@ namespace BookingApp.Repositories
             _serializer.ToCSV(FilePath, _guests);
         }
 
-        // IZMENA: Dodato generisanje ID-a pre dodavanja
         public ReservationGuest Add(ReservationGuest guest)
         {
             guest.Id = NextId();

@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Collections.Generic;
 using System.Windows.Input;
 using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
-using BookingApp.Services.DTOs;
+using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.Services.DTO;
 
@@ -20,16 +18,13 @@ namespace BookingApp.Presentation.ViewModel
         private readonly IRescheduleRequestService _rescheduleRequestService;
         private readonly IAccommodationService _accommodationService;
 
-        // Akcija za zatvaranje prozora
         public Action CloseAction { get; set; }
 
         #region Svojstva za povezivanje (Binding)
 
-        // Svojstva samo za čitanje, za prikaz informacija
         public string AccommodationName => _accommodation?.Name;
         public string CurrentPeriod => $"{_reservation.StartDate:dd.MM.yyyy} - {_reservation.EndDate:dd.MM.yyyy}";
 
-        // Svojstva za unos novih datuma
         private DateTime? _newStartDate;
         public DateTime? NewStartDate
         {
@@ -44,7 +39,6 @@ namespace BookingApp.Presentation.ViewModel
             set { _newEndDate = value; OnPropertyChanged(); }
         }
 
-        // Svojstvo za BlackoutDates
         public List<DateTime> BlackoutDates { get; set; }
 
         #endregion
@@ -57,11 +51,9 @@ namespace BookingApp.Presentation.ViewModel
         {
             _reservation = reservation ?? throw new ArgumentNullException(nameof(reservation));
 
-            // Dobijanje zavisnosti
             _rescheduleRequestService = Injector.CreateInstance<IRescheduleRequestService>();
             _accommodationService = Injector.CreateInstance<IAccommodationService>();
 
-            // Dohvatanje smeštaja
             _accommodation = _accommodationService.GetAccommodationById(_reservation.AccommodationId).ToAccommodation();
             if (_accommodation == null)
             {
@@ -70,7 +62,6 @@ namespace BookingApp.Presentation.ViewModel
                 return;
             }
 
-            // Inicijalizacija komandi
             SendRequestCommand = new RelayCommand(SendRequest);
 
             LoadInitialData();
@@ -80,22 +71,20 @@ namespace BookingApp.Presentation.ViewModel
 
         private void LoadInitialData()
         {
-            // Dobijamo listu od servisa (ovo već radite ispravno)
-            var blackoutDates = _rescheduleRequestService.GetBlackoutDatesForReschedule(_reservation);
+            var reservationDto = new ReservationDTO(_reservation);
 
-            // Postavljamo vrednost našeg svojstva
+            var blackoutDates = _rescheduleRequestService.GetBlackoutDatesForReschedule(reservationDto);
+
             this.BlackoutDates = blackoutDates;
 
-            // Obaveštavamo XAML da je svojstvo dobilo novu vrednost
             OnPropertyChanged(nameof(BlackoutDates));
         }
 
         private void SendRequest(object obj)
         {
-            // --- PROMENA #4: Koristimo pomoćnu metodu za validaciju ---
             if (!IsInputValid())
             {
-                return; // Prekini ako unos nije validan
+                return;
             }
 
             try

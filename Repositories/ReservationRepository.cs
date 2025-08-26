@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO; //za koristenje File.Exits i File.Create
-using System.Linq; //za Where, Max, Any za filtriranje i obradu kolekcija
+﻿using System.Collections.Generic;
+using System.Linq;
 using BookingApp.Domain;
 using BookingApp.Serializer;
-using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Repositories
@@ -12,43 +9,38 @@ namespace BookingApp.Repositories
     public class ReservationRepository : IReservationRepository
     {
         private const string FilePath = "..//..//../Resources/Data/reservations.csv";
-        private readonly Serializer<Reservation> _serializer;//objekat koji zna da radi serijalizaciju i deserijalizaciju objekta
-        private List<Reservation> _reservations; //lokalna kopija svih rezervacija (tokom rada se koristi kao cache)
+        private readonly Serializer<Reservation> _serializer;
+
+        private List<Reservation> _reservations;
 
         public ReservationRepository()
         {
             _serializer = new Serializer<Reservation>();
-           // if (!File.Exists(FilePath))
-              //  File.Create(FilePath).Close();
-
-            _reservations = _serializer.FromCSV(FilePath); //ucitavanje svih rezervacija iz fajla u memoriju 
+            _reservations = _serializer.FromCSV(FilePath);
         }
 
         public List<Reservation> GetAll()
         {
-            //_reservations = _serializer.FromCSV(FilePath);
-            return _serializer.FromCSV(FilePath);
-        }
-        public List<Reservation> GetByGuestId(int guestId)
-        {
-            return GetAll().Where(r => r.GuestId == guestId).ToList();
+            return _reservations;
         }
 
-        public int NextId()
+        public List<Reservation> GetByGuestId(int guestId)
         {
-            // Osiguravam da uvek radim sa najsvežijim podacima pre generisanja ID-a
-            //_reservations = _serializer.FromCSV(FilePath);
-            _reservations = GetAll();
-            return _reservations.Any() ? _reservations.Max(r => r.Id) + 1 : 1;
+            return _reservations.Where(r => r.GuestId == guestId).ToList();
         }
-        //potrebna za obavljanje rezervacije
+
+        public Reservation GetById(int id)
+        {
+            return _reservations.FirstOrDefault(r => r.Id == id);
+        }
+
         public Reservation Save(Reservation reservation)
         {
-            _reservations = GetAll();
             reservation.Id = NextId();
-            //_reservations = _serializer.FromCSV(FilePath);
             _reservations.Add(reservation);
+
             _serializer.ToCSV(FilePath, _reservations);
+
             return reservation;
         }
         public void Update(Reservation reservation)
@@ -61,6 +53,34 @@ namespace BookingApp.Repositories
                 allReservations[existingReservationIndex] = reservation;
                 _serializer.ToCSV(FilePath, allReservations);
             }
+        }
+        public void Delete(Reservation reservation)
+        {
+            var existing = GetById(reservation.Id);
+            if (existing != null)
+            {
+                _reservations.Remove(existing);
+                _serializer.ToCSV(FilePath, _reservations);
+            }
+        }
+        private int NextId()
+        {
+            return _reservations.Any() ? _reservations.Max(r => r.Id) + 1 : 1;
+        }
+        public Reservation UpdateReservation(Reservation reservation)
+        {
+            var existing = GetById(reservation.Id);
+            if (existing == null)
+            {
+                return null;
+            }
+            existing.StartDate = reservation.StartDate;
+            existing.EndDate = reservation.EndDate;
+            existing.Status = reservation.Status;
+            existing.GuestsNumber = reservation.GuestsNumber;
+
+            _serializer.ToCSV(FilePath, _reservations);
+            return existing;
         }
     }
 }

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
-using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
 using BookingApp.Services.DTO;
 
@@ -16,7 +15,6 @@ namespace BookingApp.Presentation.ViewModel
         private readonly Accommodation _accommodation;
         private readonly IReservationService _reservationService;
         
-        // Akcija za zatvaranje prozora, koju će View postaviti
         public Action CloseAction { get; set; }
 
         #region Svojstva za povezivanje (Binding)
@@ -44,7 +42,6 @@ namespace BookingApp.Presentation.ViewModel
             set { _guestsNumber = value; OnPropertyChanged(); }
         }
 
-        // Svojstvo za povezivanje sa BlackoutDates u XAML-u
         public List<DateTime> OccupiedDates { get; set; }
 
         #endregion
@@ -57,10 +54,8 @@ namespace BookingApp.Presentation.ViewModel
         {
             _accommodation = accommodation ?? throw new ArgumentNullException(nameof(accommodation));
 
-            // Dobijanje zavisnosti
             _reservationService = Injector.CreateInstance<IReservationService>();
 
-            // Inicijalizacija komandi
             ReserveCommand = new RelayCommand(Reserve);
 
             LoadOccupiedDates();
@@ -75,22 +70,20 @@ namespace BookingApp.Presentation.ViewModel
 
         private void Reserve(object obj)
         {
-            // --- PROMENA #1: Koristimo pomoćnu metodu za validaciju ---
-            // 'out int guestNumber' nam omogućava da dobijemo parsiranu vrednost iz metode
             if (!IsInputValid(out int guestNumber))
             {
-                return; // Ako nije validno, prekini izvršavanje
+                return; 
             }
 
             try
             {
-                // --- Logika ostaje ista, ali je metoda sada kraća ---
                 var reservationDto = new ReservationDTO
                 {
                     AccommodationId = _accommodation.Id,
+                    GuestId = Session.CurrentUser.Id,
                     StartDate = StartDate.Value.Date,
                     EndDate = EndDate.Value.Date,
-                    GuestsNumber = guestNumber // Koristimo vrednost dobijenu iz validacije
+                    GuestsNumber = guestNumber 
                 };
                 _reservationService.Create(reservationDto);
 
@@ -104,7 +97,7 @@ namespace BookingApp.Presentation.ViewModel
         }
         private bool IsInputValid(out int parsedGuestNumber)
         {
-            parsedGuestNumber = 0; // Inicijalizujemo 'out' parametar
+            parsedGuestNumber = 0; 
 
             if (!StartDate.HasValue)
             {
@@ -127,7 +120,7 @@ namespace BookingApp.Presentation.ViewModel
                 return false;
             }
 
-            return true; // Sve provere su prošle
+            return true; 
         }
 
         #endregion

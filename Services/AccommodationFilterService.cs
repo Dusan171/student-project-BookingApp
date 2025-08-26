@@ -23,9 +23,12 @@ namespace BookingApp.Services
                  .Select(acc => new AccommodationDTO(acc))
                  .ToList();
         }
-        //prebaceno iz AccommodationLookup.xaml.cs
-        private bool MatchesFilter(Accommodation acc, AccommodationSearchParameters parameters)
+        private static bool MatchesFilter(Accommodation acc, AccommodationSearchParameters parameters)
         {
+            if (acc == null || acc.GeoLocation == null || parameters == null)
+            {
+                return false;
+            }
             return NameMatches(acc, parameters.Name) &&
                    CountryMatches(acc, parameters.Country) &&
                    CityMatches(acc, parameters.City) &&

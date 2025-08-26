@@ -4,7 +4,6 @@ using System.Linq;
 using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTO;
-using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
 
 namespace BookingApp.Services
