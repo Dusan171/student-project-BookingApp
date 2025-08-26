@@ -1,5 +1,6 @@
 ﻿using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Services.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,29 +18,33 @@ namespace BookingApp.Services
             _repository = repository;
         }
 
-        public List<GuestReview> GetAllReviews()
+        public List<GuestReviewDTO> GetAllReviews()
         {
-            return _repository.GetAll();
+            return _repository.GetAll()
+                      .Select(review => new GuestReviewDTO(review))
+                      .ToList();
         }
 
-        public GuestReview AddReview(GuestReview review)
+        public GuestReviewDTO AddReview(GuestReviewDTO review)
         {
-            return _repository.Save(review);
+            return new GuestReviewDTO(_repository.Save(review.ToGuestReview()));
         }
 
-        public void DeleteReview(GuestReview review)
+        public void DeleteReview(GuestReviewDTO review)
         {
-            _repository.Delete(review);
+            _repository.Delete(review.ToGuestReview());
         }
 
-        public GuestReview UpdateReview(GuestReview review)
+        public GuestReviewDTO UpdateReview(GuestReviewDTO review)
         {
-            return _repository.Update(review);
+            return new GuestReviewDTO(_repository.Update(review.ToGuestReview()));
         }
 
-        public List<GuestReview> GetReviewsByReservation(Reservation reservation)
+        public List<GuestReviewDTO> GetReviewsByReservation(ReservationDTO reservation)
         {
-            return _repository.GetByReservationId(reservation);
+            return _repository.GetByReservationId(reservation.ToReservation())
+                      .Select(review => new GuestReviewDTO(review))
+                      .ToList();
         }
     }
 }

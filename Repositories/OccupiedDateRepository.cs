@@ -3,10 +3,11 @@ using System.Linq;
 using BookingApp.Serializer;
 using System.IO;
 using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Repositories
 {
-    public class OccupiedDateRepository
+    public class OccupiedDateRepository : IOccupiedDateRepository
     {
         private const string FilePath = "../../../Resources/Data/occupiedDates.csv";
         private readonly Serializer<OccupiedDate> _serializer;

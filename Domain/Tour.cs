@@ -19,13 +19,13 @@ public class Tour : ISerializable
     public List<KeyPoint> KeyPoints { get; set; }
     public List<StartTourTime> StartTimes { get; set; }
     public double DurationHours { get; set; }
-    public List<Images> Images { get; set; }
+    public List<ImagePaths> Images { get; set; }
 
     public Tour()
     {
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
-        Images = new List<Images>();
+        Images = new List<ImagePaths>();
     }
 
     public Tour(int id, string name, Location location, string description, string language,
@@ -41,7 +41,7 @@ public class Tour : ISerializable
         DurationHours = durationHours;
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
-        Images = new List<Images>();
+        Images = new List<ImagePaths>();
     }
 
     public string[] ToCSV()
@@ -95,13 +95,13 @@ public class Tour : ISerializable
             }
         }
 
-        Images = new List<Images>();
+        Images = new List<ImagePaths>();
         if (!string.IsNullOrEmpty(values[8]))
         {
             var imageIds = values[8].Split('|');
             foreach (var id in imageIds)
             {
-                Images.Add(new Images { Id = int.Parse(id) });
+                Images.Add(new ImagePaths { Id = int.Parse(id) });
             }
         }
     }

@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using System.IO; //za koristenje File.Exits i File.Create
 using BookingApp.Serializer;
 using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Repositories
 {
-    public class ReservationRepository
+    public class ReservationRepository : IReservationRepository
     {
         private const string FilePath = "..//..//../Resources/Data/reservations.csv";
         private readonly Serializer<Reservation> _serializer;//objekat koji zna da radi serijalizaciju i deserijalizaciju objekta

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookingApp.Services.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,11 @@ namespace BookingApp.Domain.Interfaces
 {
     public interface IGuestReviewService
     {
-        List<GuestReview> GetAllReviews();
-        GuestReview AddReview(GuestReview review);
-        void DeleteReview(GuestReview review);
-        GuestReview UpdateReview(GuestReview review);
-        List<GuestReview> GetReviewsByReservation(Reservation reservation);
+        List<GuestReviewDTO> GetAllReviews();
+        GuestReviewDTO AddReview(GuestReviewDTO review);
+        void DeleteReview(GuestReviewDTO review);
+        GuestReviewDTO UpdateReview(GuestReviewDTO review);
+        List<GuestReviewDTO> GetReviewsByReservation(ReservationDTO reservation);
 
     }
 }
