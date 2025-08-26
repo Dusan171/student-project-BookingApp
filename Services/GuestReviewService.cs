@@ -27,7 +27,7 @@ namespace BookingApp.Services
 
         public GuestReviewDTO AddReview(GuestReviewDTO review)
         {
-            return _repository.Save(review);
+            return new GuestReviewDTO(_repository.Save(review.ToGuestReview()));
         }
 
         public void DeleteReview(GuestReviewDTO review)
@@ -40,11 +40,17 @@ namespace BookingApp.Services
             return new GuestReviewDTO(_repository.Update(review.ToGuestReview()));
         }
 
-        public List<GuestReview> GetReviewsByReservation(Reservation reservation)
+        public List<GuestReviewDTO> GetReviewsByReservation(ReservationDTO reservation)
         {
-            return _repository.GetByReservationId(reservation.ToReservation())
-                      .Select(review => new GuestReviewDTO(review))
-            return _repository.GetByReservationId(reservation);
+            return _repository.GetByReservationId(reservation.ToReservation().Id)
+                      .Select(review => new GuestReviewDTO(review)).ToList();
         }
+
+        public GuestReviewDTO GetReviewForReservation(int reservationId)
+        {
+            return new GuestReviewDTO(_repository.GetByReservationId(reservationId).FirstOrDefault());
+        }
+
+
     }
 }

@@ -99,7 +99,7 @@ namespace BookingApp.Services
 
         public List<ReservationDTO> GetAll()
         {
-            return _reservationRepository.GetAll()   // vraća listu entiteta Reservation
+            return _reservationRepository.GetAll()  
                                          .Select(reservation => new ReservationDTO(reservation))  // mapiranje u DTO
                                          .ToList();
         }

@@ -84,6 +84,9 @@
             <view:ReviewsView/>
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type viewModel:RequestsViewModel}">
+            <view:RequestsView/>
+        </DataTemplate>
     </Window.Resources>
     
     <Grid>

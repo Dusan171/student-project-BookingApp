@@ -21,22 +21,41 @@ namespace BookingApp.Services
             _implementations[typeof(IGuestReviewRepository)] = new GuestReviewRepository();
             _implementations[typeof(IReservationRepository)] = new ReservationRepository();
             _implementations[typeof(IOccupiedDateRepository)] = new OccupiedDateRepository();
-            _implementations[typeof(IGuestReviewRepository)] = new GuestReviewRepository();
             _implementations[typeof(IAccommodationReviewRepository)] = new AccommodationReviewRepository();
+            _implementations[typeof(IRescheduleRequestRepository)] = new RescheduleRequestRepository();
+
             // Services
             _implementations[typeof(IUserService)] = new UserService((IUserRepository)_implementations[typeof(IUserRepository)]);
             _implementations[typeof(IAccommodationService)] = new AccommodationService(
-                        (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
-                        (ILocationRepository)_implementations[typeof(ILocationRepository)],
-                        (IAccommodationImageRepository)_implementations[typeof(IAccommodationImageRepository)]
-                    );
+                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
+                (ILocationRepository)_implementations[typeof(ILocationRepository)],
+                (IAccommodationImageRepository)_implementations[typeof(IAccommodationImageRepository)]
+            );
             _implementations[typeof(IAccommodationImageService)] = new AccommodationImageService((IAccommodationImageRepository)_implementations[typeof(IAccommodationImageRepository)]);
             _implementations[typeof(ICommentService)] = new CommentService((ICommentRepository)_implementations[typeof(ICommentRepository)]);
             _implementations[typeof(ILocationService)] = new LocationService((ILocationRepository)_implementations[typeof(ILocationRepository)]);
             _implementations[typeof(IGuestReviewService)] = new GuestReviewService((IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)]);
-            _implementations[typeof(IReservationService)] = new ReservationService((IReservationRepository)_implementations[typeof(IReservationRepository)], (IOccupiedDateRepository)_implementations[typeof(IOccupiedDateRepository)]);
-            _implementations[typeof(IGuestReviewService)] = new GuestReviewService((IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)]);
+            _implementations[typeof(IReservationService)] = new ReservationService(
+                (IReservationRepository)_implementations[typeof(IReservationRepository)],
+                (IOccupiedDateRepository)_implementations[typeof(IOccupiedDateRepository)],
+                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)]
+            );
             _implementations[typeof(IAccommodationReviewService)] = new AccommodationReviewService((IAccommodationReviewRepository)_implementations[typeof(IAccommodationReviewRepository)]);
+            _implementations[typeof(IRescheduleRequestService)] = new RescheduleRequestService(
+                (IOccupiedDateRepository)_implementations[typeof(IOccupiedDateRepository)],
+                (IRescheduleRequestRepository)_implementations[typeof(IRescheduleRequestRepository)],
+                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
+                (IReservationRepository)_implementations[typeof(IReservationRepository)]
+            );
+            _implementations[typeof(IAccommodationFilterService)] = new AccommodationFilterService((IAccommodationRepository)_implementations[typeof(IAccommodationRepository)]);
+            _implementations[typeof(IReservationDisplayService)] = new ReservationDisplayService(
+                (IReservationRepository)_implementations[typeof(IReservationRepository)],
+                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
+                (IRescheduleRequestRepository)_implementations[typeof(IRescheduleRequestRepository)],
+                (IAccommodationReviewService)_implementations[typeof(IAccommodationReviewService)],
+                (IGuestReviewService)_implementations[typeof(IGuestReviewService)]
+            );
+            _implementations[typeof(INavigationService)] = new NavigationService();
         }
 
         public static T CreateInstance<T>()

@@ -28,7 +28,7 @@ namespace BookingApp.View.Guide
         private int _localStartTimeIdCounter = 0;
         private int _localImageIdCounter = 0;
 
-        private ObservableCollection<ImagePaths> images = new ObservableCollection<ImagePaths>();
+        private ObservableCollection<Images> images = new ObservableCollection<Images>();
 
 
         public CreateTourForm()
@@ -91,7 +91,7 @@ namespace BookingApp.View.Guide
                     }
                 }
 
-                images.Add(new ImagePaths
+                images.Add(new Images
                 {
                     Id = imageRepository.NextId() + _localImageIdCounter++,
                     Path = relativePath
@@ -107,7 +107,7 @@ namespace BookingApp.View.Guide
 
         private void RemoveImage_Click(object sender, RoutedEventArgs e)
         {
-            if (ImagesListBox.SelectedItem is ImagePaths selectedImage)
+            if (ImagesListBox.SelectedItem is Images selectedImage)
             {
                 images.Remove(selectedImage);
                 _localImageIdCounter--;
@@ -211,7 +211,7 @@ namespace BookingApp.View.Guide
                 DurationHours = duration,
                 StartTimes = new List<StartTourTime>(startTimes),
                 KeyPoints = new List<KeyPoint>(keyPoints),
-                Images = new List<ImagePaths>(images)
+                Images = new List<Images>(images)
             };
             try
             {

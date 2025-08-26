@@ -10,5 +10,6 @@ namespace BookingApp.Domain.Interfaces
     {
         public Reservation Create(ReservationDTO reservationDto);
         public List<DateTime> GetOccupiedDatesForAccommodation(int accommodationId);
+        List<ReservationDTO> GetAll();
     }
 }

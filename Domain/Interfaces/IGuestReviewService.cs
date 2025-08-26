@@ -14,6 +14,7 @@ namespace BookingApp.Domain.Interfaces
         void DeleteReview(GuestReviewDTO review);
         GuestReviewDTO UpdateReview(GuestReviewDTO review);
         List<GuestReviewDTO> GetReviewsByReservation(ReservationDTO reservation);
+        GuestReviewDTO GetReviewForReservation(int reservationId);
 
     }
 }

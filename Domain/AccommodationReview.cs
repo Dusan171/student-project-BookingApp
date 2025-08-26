@@ -16,8 +16,6 @@ namespace BookingApp.Domain
 
         public AccommodationReview() { }
 
-        public AccommodationReview() { }
-
         public AccommodationReview(int id, int reservationId, int cleanliness, int owner, string comment, string imagePaths)
         {
             Id = id;
