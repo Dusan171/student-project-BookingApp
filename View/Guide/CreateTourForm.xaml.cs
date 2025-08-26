@@ -4,14 +4,16 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using BookingApp.Domain;
+using BookingApp.Repositories;
 using System.Collections.ObjectModel;
 using System.IO;
-using BookingApp.Repositories;
+
 
 namespace BookingApp.View.Guide
 {
-    public partial class CreateTourForm : Window
+    public partial class CreateTourForm : Page
     {
+        public event EventHandler Cancelled;
         private List<KeyPoint> keyPoints = new();
         //private List<Images> images = new();
         private List<StartTourTime> startTimes = new();
@@ -41,7 +43,7 @@ namespace BookingApp.View.Guide
             string name = KeyPointTextBox.Text.Trim();
             if (!string.IsNullOrEmpty(name) && !keyPoints.Exists(kp => kp.Name == name))
             {
-                var newKeyPoint = new KeyPoint {Id = keyPointRepository.NextId() + _localKeyPointIdCounter++, Name = name };
+                var newKeyPoint = new KeyPoint { Id = keyPointRepository.NextId() + _localKeyPointIdCounter++, Name = name };
                 keyPoints.Add(newKeyPoint);
                 KeyPointsListBox.Items.Add(newKeyPoint);
                 KeyPointTextBox.Clear();
@@ -80,7 +82,6 @@ namespace BookingApp.View.Guide
 
             try
             {
-                // Proveri da li već postoji
                 foreach (var img in images)
                 {
                     if (img.Path == relativePath)
@@ -122,35 +123,47 @@ namespace BookingApp.View.Guide
 
         private void AddStartTime_Click(object sender, RoutedEventArgs e)
         {
-            if (StartDatePicker.SelectedDate == null) return;
-
-            if (!int.TryParse(StartTimeHourTextBox.Text, out int h)) return;
-            if (!int.TryParse(StartTimeMinuteTextBox.Text, out int m)) return;
-
-            DateTime date = StartDatePicker.SelectedDate.Value.Date + new TimeSpan(h, m, 0);
-
-            if (!startTimes.Exists(t => t.Time == date))
+            if (StartDatePicker.SelectedDate == null)
             {
-                var newStartTime = new StartTourTime { Id = startTimeRepository.NextId() + _localStartTimeIdCounter++, Time = date };
-                startTimes.Add(newStartTime);
-                StartTimesListBox.Items.Add(date.ToString("yyyy-MM-dd HH:mm"));
-                StartTimeHourTextBox.Clear();
-                StartTimeMinuteTextBox.Clear();
+                MessageBox.Show("Please select a date.");
+                return;
             }
+
+            if (!int.TryParse(StartTimeHourTextBox.Text, out int h) ||
+                !int.TryParse(StartTimeMinuteTextBox.Text, out int m))
+            {
+                MessageBox.Show("Enter valid hour and minute.");
+                return;
+            }
+
+            DateTime combined = StartDatePicker.SelectedDate.Value.Date + new TimeSpan(h, m, 0);
+
+            if (startTimes.Exists(t => t.Time == combined))
+            {
+                MessageBox.Show("This start time is already added.");
+                return;
+            }
+
+            var newStartTime = new StartTourTime
+            {
+                Id = startTimeRepository.NextId() + _localStartTimeIdCounter++,
+                Time = combined
+            };
+
+            startTimes.Add(newStartTime);
+
+            StartTimesListBox.Items.Add(combined.ToString("dd.MM.yyyy HH:mm"));
+
+            StartTimeHourTextBox.Clear();
+            StartTimeMinuteTextBox.Clear();
         }
 
-    private void RemoveStartTourTime_Click(object sender, RoutedEventArgs e)
+        private void RemoveStartTourTime_Click(object sender, RoutedEventArgs e)
         {
-            if (StartTimesListBox.SelectedItem == null) return;
-
-            string selectedString = StartTimesListBox.SelectedItem.ToString();
-            if (!DateTime.TryParse(selectedString, out DateTime selectedDate)) return;
-
-            var toRemove = startTimes.Find(t => t.Time == selectedDate);
-            if (toRemove != null)
+            if (StartTimesListBox.SelectedItem is StartTourTime selectedTime)
             {
-                startTimes.Remove(toRemove);
-                StartTimesListBox.Items.Remove(selectedString);
+                startTimes.Remove(selectedTime);
+                StartTimesListBox.Items.Remove(selectedTime);
                 _localStartTimeIdCounter--;
             }
         }
@@ -221,19 +234,19 @@ namespace BookingApp.View.Guide
                     imageRepository.Save(image);
                 }
 
-                this.Close();
+                NavigationService?.Navigate(new MainWindow());
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error saving tour: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
 
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Cancelled?.Invoke(this, EventArgs.Empty);
         }
     }
 }
