@@ -1,5 +1,6 @@
 ﻿using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Services.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,29 +18,33 @@ namespace BookingApp.Services
             _repository = repository;
         }
 
-        public List<Comment> GetAllComments()
+        public List<CommentDTO> GetAllComments()
         {
-            return _repository.GetAll();
+            return _repository.GetAll()
+                    .Select(comment => new CommentDTO(comment))
+                    .ToList();
         }
 
-        public Comment AddComment(Comment comment)
+        public CommentDTO AddComment(CommentDTO comment)
         {
-            return _repository.Save(comment);
+            return new CommentDTO(_repository.Save(comment.ToComment()));
         }
 
-        public void DeleteComment(Comment comment)
+        public void DeleteComment(CommentDTO comment)
         {
-            _repository.Delete(comment);
+            _repository.Delete(comment.ToComment());
         }
 
-        public Comment UpdateComment(Comment comment)
+        public CommentDTO UpdateComment(CommentDTO comment)
         {
-            return _repository.Update(comment);
+            return new CommentDTO(_repository.Update(comment.ToComment()));
         }
 
-        public List<Comment> GetCommentsByUser(User user)
+        public List<CommentDTO> GetCommentsByUser(UserDTO user)
         {
-            return _repository.GetByUser(user);
+            return _repository.GetByUser(user.ToUser())
+                      .Select(comment => new CommentDTO(comment))
+                      .ToList();
         }
     }
 }

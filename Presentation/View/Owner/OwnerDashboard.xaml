@@ -1,12 +1,14 @@
-﻿<Window x:Class="BookingApp.Presentation.Owner.OwnerDashboard"
+﻿<Window x:Class="BookingApp.Presentation.View.Owner.OwnerDashboard"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:BookingApp.Presentation.Owner"
+        xmlns:viewModel="clr-namespace:BookingApp.Presentation.ViewModel.Owner"
+        xmlns:view="clr-namespace:BookingApp.Presentation.View.Owner"
         mc:Ignorable="d"
         Title="Booking App" Background="#f2f4f8" WindowState="Maximized" ResizeMode="CanResize">
     <Window.Resources>
+        
         <Style x:Key="NavButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -68,7 +70,25 @@
         </Style>
 
         <DropShadowEffect x:Key="DropShadowEffect" Color="#444" Direction="270" ShadowDepth="3" Opacity="0.4" BlurRadius="10"/>
+
+
+        <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
+            <view:HomeView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModel:RegisterAccommodationViewModel}">
+            <view:RegisterAccommodationView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModel:ReviewsViewModel}">
+            <view:ReviewsView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModel:RequestsViewModel}">
+            <view:RequestsView/>
+        </DataTemplate>
     </Window.Resources>
+    
     <Grid>
         <!-- Gornja traka -->
         <Border Background="#003580" Height="132" CornerRadius="0,0,50,50" VerticalAlignment="Top" Padding="30,10" Panel.ZIndex="1">
@@ -80,7 +100,7 @@
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
                         <Button Content="Logout"
                                 Style="{StaticResource NavButtonStyle}"
-                                Click="Logout_Click"
+                                Command="{Binding LogoutCommand}"
                                 Padding="12,5"
                                 Margin="0,0,0,0"
                                 FontSize="16"
@@ -96,14 +116,14 @@
 
                 <!-- Donji deo: meni + dugme Demo -->
                 <DockPanel Margin="30,20,0,0" VerticalAlignment="Center">
-                    <Button Content="🎥 Demo" Style="{StaticResource NavButtonStyle}" Width="117" DockPanel.Dock="Right" />
+                    <Button Content="🎥 Demo" Style="{StaticResource NavButtonStyle}" Command="{Binding NavigateCommand}" CommandParameter="Demo" Width="117" DockPanel.Dock="Right" />
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Height="35" Width="1176">
-                        <Button Content="🏠 Home" Style="{StaticResource NavButtonStyle}" Click="HomeView_Click" Margin="0,0,17,0"/>
-                        <Button Content="➕Register accommodation" Style="{StaticResource NavButtonStyle}" Click="RegisterAccommodation_Click" Margin="0,0,17,0"/>
-                        <Button Content="❔Requests" Style="{StaticResource NavButtonStyle}" Click="Requests_Click"  Margin="0,0,17,0"/>
-                        <Button Content="📊 Statistic" Style="{StaticResource NavButtonStyle}"  Margin="0,0,17,0"/>
-                        <Button Content="📜 Reviews" Style="{StaticResource NavButtonStyle}" Click="Reviews_Click" Margin="0,0,17,0"/>
-                        <Button Content="📄 PDF Reports" Style="{StaticResource NavButtonStyle}"  Margin="0,0,17,0"/>
+                        <Button Content="🏠 Home" Style="{StaticResource NavButtonStyle}"  Command="{Binding NavigateCommand}" CommandParameter="Home" Margin="0,0,17,0"/>
+                        <Button Content="➕Register accommodation" Style="{StaticResource NavButtonStyle}" Command="{Binding NavigateCommand}"  CommandParameter="RegisterAccommodation" Margin="0,0,17,0"/>
+                        <Button Content="❔Requests" Style="{StaticResource NavButtonStyle}" Command="{Binding NavigateCommand}" CommandParameter="Requests"  Margin="0,0,17,0"/>
+                        <Button Content="📊 Statistic" Style="{StaticResource NavButtonStyle}" Command="{Binding NavigateCommand}" CommandParameter="Statistic"  Margin="0,0,17,0"/>
+                        <Button Content="📜 Reviews" Style="{StaticResource NavButtonStyle}" Command="{Binding NavigateCommand}"  CommandParameter="Reviews" Margin="0,0,17,0"/>
+                        <Button Content="📄 PDF Reports" Style="{StaticResource NavButtonStyle}" Command="{Binding NavigateCommand}" CommandParameter="PDFReports"  Margin="0,0,17,0"/>
 
                     </StackPanel>
                 </DockPanel>
@@ -111,7 +131,7 @@
         </Border>
         <!-- Glavni sadržaj -->
         <Border Margin="0,0,0,0"  Background="#f2f4f8" Effect="{StaticResource DropShadowEffect}">
-            <ContentControl x:Name="MainContentControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <ContentControl x:Name="MainContentControl" Content="{Binding CurrentViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         </Border>
     </Grid>
 </Window>

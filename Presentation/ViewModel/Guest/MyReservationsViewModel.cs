@@ -8,6 +8,7 @@ using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Presentation.View.Guest;
 using BookingApp.Services;
+using BookingApp.Services.DTO;
 using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
 
@@ -77,12 +78,12 @@ namespace BookingApp.Presentation.ViewModel
         {
             if (SelectedReservation == null) return;
 
-            GuestReview reviewFromOwner = _guestReviewService.GetReviewForReservation(SelectedReservation.OriginalReservation.Id);
+            GuestReviewDTO reviewFromOwner = _guestReviewService.GetReviewForReservation(SelectedReservation.OriginalReservation.Id);
 
             if (reviewFromOwner != null)
             {
                 // --- PROMENA: Logika za kreiranje poruke je sada u pomoćnoj metodi ---
-                string message = FormatReviewMessage(reviewFromOwner);
+                string message = FormatReviewMessage(reviewFromOwner.ToGuestReview());
                 MessageBox.Show(message, "Review from Owner", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else

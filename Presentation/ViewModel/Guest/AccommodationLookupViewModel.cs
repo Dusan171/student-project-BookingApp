@@ -124,12 +124,12 @@ namespace BookingApp.Presentation.ViewModel
             if (SelectedAccommodation == null) return;
 
             // --- PROMENA #5: Dobavljamo pun domenski model na osnovu ID-a iz DTO-a ---
-            var fullAccommodation = _accommodationService.GetById(SelectedAccommodation.Id); // Pretpostavka da DTO ima 'Id' i repo ima 'GetById'
+            var fullAccommodation = _accommodationService.GetAccommodationById(SelectedAccommodation.Id); // Pretpostavka da DTO ima 'Id' i repo ima 'GetById'
 
             if (fullAccommodation != null)
             {
                 // Prosleđujemo pun objekat novom prozoru
-                var reservationWindow = new AccommodationReservationView(fullAccommodation);
+                var reservationWindow = new AccommodationReservationView(fullAccommodation.ToAccommodation());
                 reservationWindow.ShowDialog();
             }
             else

@@ -3,6 +3,7 @@ using BookingApp.Serializer;
 
 namespace BookingApp.Domain
 {
+
     public class AccommodationReview : ISerializable
     {
         public int Id { get; set; }
@@ -53,7 +54,7 @@ namespace BookingApp.Domain
 
             CreatedAt = values.Length > 6 ? DateTime.Parse(values[6]) : DateTime.Now;
         }
-        //nigdje se ne koristi
+
         public int ImageCount
         {
             get

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookingApp.Services.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,9 @@ namespace BookingApp.Domain.Interfaces
 {
     public interface ILocationService
     {
-        List<Location> GetAllLocations();
-        Location AddLocation(Location location);
-        void DeleteLocation(Location location);
-        Location UpdateLocation(Location location);
+        List<LocationDTO> GetAllLocations();
+        LocationDTO AddLocation(LocationDTO location);
+        void DeleteLocation(LocationDTO location);
+        LocationDTO UpdateLocation(LocationDTO location);
     }
 }

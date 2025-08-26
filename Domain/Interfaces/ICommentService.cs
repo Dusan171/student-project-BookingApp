@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookingApp.Services.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,10 +9,10 @@ namespace BookingApp.Domain.Interfaces
 {
     public interface ICommentService
     {
-        List<Comment> GetAllComments();
-        Comment AddComment(Comment comment);
-        void DeleteComment(Comment comment);
-        Comment UpdateComment(Comment comment);
-        List<Comment> GetCommentsByUser(User user);
+        List<CommentDTO> GetAllComments();
+        CommentDTO AddComment(CommentDTO comment);
+        void DeleteComment(CommentDTO comment);
+        CommentDTO UpdateComment(CommentDTO comment);
+        List<CommentDTO> GetCommentsByUser(UserDTO user);
     }
 }

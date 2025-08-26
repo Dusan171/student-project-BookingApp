@@ -1,49 +1,43 @@
 ﻿using BookingApp.Domain;
+using BookingApp.Services.DTO; // Dodano: Moraš koristiti LocationDTO
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace BookingApp.Utilities
 {
     public class LocationConverter : IValueConverter
     {
-        // Converts Location object to string: "City, Country"
+        // Konvertuje LocationDTO objekat u string "City, Country"
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null) return string.Empty;
-
-            var location = value as Location;
-            if (location != null)
+            if (value is LocationDTO locationDto)
             {
-                if (string.IsNullOrWhiteSpace(location.City) && string.IsNullOrWhiteSpace(location.Country))
-                    return string.Empty;
-
-                return $"{location.City}, {location.Country}";
+                // Vraća formatiran string
+                return $"{locationDto.City}, {locationDto.Country}";
             }
-
             return string.Empty;
         }
 
-        // Converts string "City, Country" back to Location object
+        // Konvertuje string "City, Country" nazad u LocationDTO objekat
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null || string.IsNullOrWhiteSpace(value.ToString())) return null;
-
-            var locationString = value.ToString();
-            var parts = locationString.Split(',');
-
-            if (parts.Length < 2) return null; // Osiguraj da ima oba dela
-
-            return new Location
+            if (value is string locationString)
             {
-                City = parts[0].Trim(),
-                Country = parts[1].Trim()
-            };
+                // Razdvajanje stringa po zarezu
+                var parts = locationString.Split(new[] { ',' }, 2);
+
+                if (parts.Length == 2)
+                {
+                    // Vraća novi LocationDTO objekat
+                    return new LocationDTO
+                    {
+                        City = parts[0].Trim(),
+                        Country = parts[1].Trim()
+                    };
+                }
+            }
+            return null;
         }
     }
 }
-

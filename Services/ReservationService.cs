@@ -5,7 +5,9 @@ using BookingApp.Domain;
 using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTOs;
+using BookingApp.Repositories;
 using BookingApp.Services.DTO;
+using BookingApp.Utilities;
 
 namespace BookingApp.Services
 {
@@ -15,7 +17,6 @@ namespace BookingApp.Services
         private readonly IOccupiedDateRepository _occupiedDateRepository;
         private readonly IAccommodationRepository _accommodationRepository;
 
-        //Dependency Injection (to ce vjerovatno trebati prebaciti u posebnu klasu ili gdje vec)
 
         public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository, IAccommodationRepository accommodationRepository)
         {
@@ -23,23 +24,23 @@ namespace BookingApp.Services
             _occupiedDateRepository = occupiedDateRepository;
             _accommodationRepository = accommodationRepository;
         }
-        //logika rezervacije koja je prije bila u reservationRepository
+        
         public Reservation Create(ReservationDTO reservationDto)
         {
-            // Moramo dobiti Accommodation objekat da bismo proverili pravila
+            
             var accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == reservationDto.AccommodationId);
             if (accommodation == null)
             {
                 throw new Exception("Cannot create reservation for an unknown accommodation.");
             }
 
-            // Validacija poslovnih pravila
+            
             ValidateReservationRules(accommodation, reservationDto.StartDate, reservationDto.EndDate, reservationDto.GuestsNumber);
 
-            // Provera dostupnosti
+            
             CheckForOverlappingDates(accommodation.Id, reservationDto.StartDate, reservationDto.EndDate);
 
-            // Kreiranje domenskog modela iz DTO-a
+            
             var reservation = new Reservation
             {
                 AccommodationId = reservationDto.AccommodationId,
@@ -51,7 +52,7 @@ namespace BookingApp.Services
             };
             _reservationRepository.Save(reservation);
 
-            // Kreiranje zauzetih datuma
+            
             CreateOccupiedDates(accommodation.Id, reservation.Id, reservationDto.StartDate, reservationDto.EndDate);
 
             return reservation;
@@ -95,14 +96,19 @@ namespace BookingApp.Services
             }
             _occupiedDateRepository.Save(occupiedDatesToSave);
         }
-        public List<DateTime> GetOccupiedDatesForAccommodation(int accommodationId)
+
+        public List<ReservationDTO> GetAll()
         {
-            // 1. Pozivamo repozitorijum da dobavimo listu ZAUZETIH DATUMA
+            return _reservationRepository.GetAll()  
+                                         .Select(reservation => new ReservationDTO(reservation))  // mapiranje u DTO
+                                         .ToList();
+        }
+        public List<DateTime> GetOccupiedDatesForAccommodation(int accommodationId)
+        { 
+            
             var occupiedDateObjects = _occupiedDateRepository.GetByAccommodationId(accommodationId);
 
-            // 2. Koristimo LINQ (.Select) da iz svakog 'OccupiedDate' objekta
-            //    izvučemo samo 'Date' svojstvo (koje je tipa DateTime).
-            // 3. .ToList() pretvara rezultat u listu koju vraćamo.
+            
             return occupiedDateObjects.Select(occupiedDate => occupiedDate.Date).ToList();
         }
     }

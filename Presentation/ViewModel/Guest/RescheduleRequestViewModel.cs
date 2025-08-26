@@ -61,7 +61,7 @@ namespace BookingApp.Presentation.ViewModel
             _accommodationService = Injector.CreateInstance<IAccommodationService>();
 
             // Dohvatanje smeštaja
-            _accommodation = _accommodationService.GetById(_reservation.AccommodationId);
+            _accommodation = _accommodationService.GetAccommodationById(_reservation.AccommodationId).ToAccommodation();
             if (_accommodation == null)
             {
                 MessageBox.Show("Could not find accommodation details. The window will close.");

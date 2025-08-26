@@ -6,16 +6,16 @@ using BookingApp.Serializer;
 
 namespace BookingApp.Domain
 {
-    public class Images : ISerializable
+    public class ImagePaths : ISerializable
     {
         public int Id { get; set; }
         public string Path { get; set; }
 
-        public Images()
+        public ImagePaths()
         {
         }
 
-        public Images(int id, string path)
+        public ImagePaths(int id, string path)
         {
             Id = id;
             Path = path;

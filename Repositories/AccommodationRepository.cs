@@ -77,5 +77,5 @@ namespace BookingApp.Repositories
             return _accommodations.FindAll(c => c.GeoLocation.Id == location.Id);
         }
     }
-    }
+}
 

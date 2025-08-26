@@ -23,7 +23,7 @@ namespace BookingApp.Repositories
         public List<AccommodationReview> GetByReservationId(int reservationId)
         {
             var allReviews = GetAll();
-            return allReviews.Where(r=>r.ReservationId == reservationId).ToList();
+            return allReviews.Where(r => r.ReservationId == reservationId).ToList();
         }
         public bool HasGuestRated(int reservationId)
         {
