@@ -7,7 +7,7 @@ namespace BookingApp.Services.DTO
 {
     public class RescheduleRequestDTO : INotifyPropertyChanged
     {
-
+        
         private int _id;
         private int _reservationId;
         private int _guestId;
@@ -120,7 +120,10 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
-
+        public string AccommodationName { get; set; }
+        public DateTime OriginalStartDate { get; set; }
+        public DateTime OriginalEndDate { get; set; }
+        public string AvailabilityStatus { get; set; }
         public RescheduleRequestDTO()
         {
             OwnerComment = string.Empty;

@@ -43,23 +43,17 @@ namespace BookingApp.Repositories
 
             return reservation;
         }
-
-        public Reservation Update(Reservation reservation)
+        public void Update(Reservation reservation)
         {
-            var existing = GetById(reservation.Id);
-            if (existing == null)
+            var allReservations = GetAll();
+            var existingReservationIndex = allReservations.FindIndex(r => r.Id == reservation.Id);
+
+            if (existingReservationIndex != -1)
             {
-                return null;
+                allReservations[existingReservationIndex] = reservation;
+                _serializer.ToCSV(FilePath, allReservations);
             }
-
-            existing.StartDate = reservation.StartDate;
-            existing.EndDate = reservation.EndDate;
-            existing.Status = reservation.Status;
-
-            _serializer.ToCSV(FilePath, _reservations);
-            return existing;
         }
-
         public void Delete(Reservation reservation)
         {
             var existing = GetById(reservation.Id);

@@ -30,7 +30,12 @@ namespace BookingApp.Services
 
         public AccommodationDTO GetAccommodationById(int id)
         {
-            return new AccommodationDTO(accommodationRepository.GetById(id));
+            var accommodation = accommodationRepository.GetById(id);
+            if (accommodation == null)
+            {
+                return null;
+            }
+            return new AccommodationDTO(accommodation);
         }
 
         public AccommodationDTO AddAccommodation(AccommodationDTO accommodation)

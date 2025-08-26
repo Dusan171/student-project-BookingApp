@@ -99,5 +99,38 @@ namespace BookingApp.Services
             
             return occupiedDateObjects.Select(occupiedDate => occupiedDate.Date).ToList();
         }
+
+        public ReservationDTO GetById(int id)
+        {
+            var reservation = _reservationRepository.GetAll().FirstOrDefault(r => r.Id == id);
+            return reservation == null ? null : new ReservationDTO(reservation);
+        }
+
+        public void Update(ReservationDTO reservationDto)
+        {
+            var reservation = reservationDto.ToReservation();
+            _reservationRepository.Update(reservation);
+        }
+
+        public bool IsAccommodationAvailable(int accommodationId, DateTime newStartDate, DateTime newEndDate)
+        {
+            var allReservations = _reservationRepository.GetAll();
+
+            var reservationsForAccommodation = allReservations
+                .Where(r => r.AccommodationId == accommodationId)
+                .ToList();
+
+            foreach (var reservation in reservationsForAccommodation)
+            {
+                bool datesOverlap = (newStartDate < reservation.EndDate) && (newEndDate > reservation.StartDate);
+
+                if (datesOverlap)
+                {
+                    return false;
+                }
+            }
+            return true; 
+        }
+
     }
 }

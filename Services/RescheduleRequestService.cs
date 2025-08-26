@@ -5,6 +5,7 @@ using BookingApp.Domain;
 using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTO;
+using BookingApp.Repositories;
 
 namespace BookingApp.Services
 {
@@ -92,5 +93,30 @@ namespace BookingApp.Services
                 throw new InvalidOperationException("Selected period overlaps with another reservation.");
             }
         }
+      
+
+            
+        public List<RescheduleRequestDTO> GetAll() 
+        {
+            return _rescheduleRequestRepository.GetAll().Select(r => new RescheduleRequestDTO(r)).ToList(); 
+        }
+      
+        public RescheduleRequestDTO GetById(int id) 
+        { 
+            return _rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id) == null ? null : new RescheduleRequestDTO(_rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id));
+        }
+        public void Update(RescheduleRequestDTO requestDto)
+        {
+            var request = requestDto.ToRequest();
+            var allRequests = _rescheduleRequestRepository.GetAll();
+            var existingRequestIndex = allRequests.FindIndex(r => r.Id == request.Id);
+
+            if (existingRequestIndex != -1)
+            {
+                allRequests[existingRequestIndex] = request;
+                _rescheduleRequestRepository.SaveAll(allRequests);
+            }
+        }
     }
+    
 }

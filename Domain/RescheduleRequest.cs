@@ -18,7 +18,7 @@ namespace BookingApp.Domain
         public DateTime NewEndDate { get; set; }
         public RequestStatus Status { get; set; }
         public string OwnerComment { get; set; }
-        public bool IsSeenByGuest { get; set; } 
+        public bool IsSeenByGuest { get; set; }
 
         public RescheduleRequest()
         {

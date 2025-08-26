@@ -39,16 +39,22 @@ namespace BookingApp.Repositories
             _requests = GetAll();
             return _requests.Any() ? _requests.Max(r => r.Id) + 1 : 1;
         }
+        
 
         public RescheduleRequest GetByReservationId(int reservationId)
         {
             return GetAll().FirstOrDefault(r => r.ReservationId == reservationId);
         }
+       
         public bool HasPendingRequest(int reservationId)
         {
             var request = GetByReservationId(reservationId);
             return request != null && request.Status == RequestStatus.Pending;
 
+        }
+        public void SaveAll(List<RescheduleRequest> requests)
+        {
+            _serializer.ToCSV(FilePath, requests);
         }
     }
 }

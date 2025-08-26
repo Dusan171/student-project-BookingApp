@@ -7,6 +7,7 @@ using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Presentation.ViewModel
 {
