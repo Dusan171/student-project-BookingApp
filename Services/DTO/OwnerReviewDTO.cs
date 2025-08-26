@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BookingApp.Services.DTOs
+namespace BookingApp.Services.DTO
 {
     public class OwnerReviewDTO
     {
@@ -13,7 +13,6 @@ namespace BookingApp.Services.DTOs
         public int OwnerRating { get; set; }
         public string Comment { get; set; }
 
-        // Koristimo List<string> umesto jednog stringa, lakše je za rad u UI-ju
         public List<string> ImagePaths { get; set; }
 
         public DateTime CreatedAt { get; set; }
@@ -32,7 +31,6 @@ namespace BookingApp.Services.DTOs
             Comment = review.Comment;
             CreatedAt = review.CreatedAt;
 
-            // Parsiramo string u listu
             ImagePaths = string.IsNullOrWhiteSpace(review.ImagePaths)
                 ? new List<string>()
                 : review.ImagePaths.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -49,7 +47,6 @@ namespace BookingApp.Services.DTOs
                 Comment = this.Comment,
                 CreatedAt = this.CreatedAt,
 
-                // Spajamo listu nazad u jedan string za čuvanje
                 ImagePaths = string.Join(";", this.ImagePaths)
             };
         }

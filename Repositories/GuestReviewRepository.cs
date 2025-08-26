@@ -60,25 +60,16 @@ namespace BookingApp.Repositories
             GuestReview current = _reviews.Find(c => c.Id == review.Id);
             int index = _reviews.IndexOf(current);
             _reviews.Remove(current);
-            _reviews.Insert(index, review);       // keep ascending order of ids in file 
+            _reviews.Insert(index, review);       
             _serializer.ToCSV(FilePath, _reviews);
             return review;
         }
 
-       /* public List<GuestReview> GetByReservationId(Reservation reservation)
-        {
-            return GetByReservationId(reservation.Id);
-        }*/
-
-        // Implementacija NOVE metode
         public List<GuestReview> GetByReservationId(int reservationId)
         {
-            // Uvek ponovo ?itamo fajl da bismo imali sveže podatke
             _reviews = _serializer.FromCSV(FilePath);
             return _reviews.FindAll(review => review.ReservationId == reservationId);
         }
-        // --- DODAJEMO PONOVO METODU ZA KOLEGU ---
-        // Implementacija je jednostavna, samo poziva gornju metodu.
         public List<GuestReview> GetByReservationId(Reservation reservation)
         {
             return GetByReservationId(reservation.Id);

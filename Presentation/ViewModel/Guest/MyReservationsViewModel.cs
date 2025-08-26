@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text; // Potrebno za StringBuilder
+using System.Text; 
 using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain;
@@ -9,7 +9,6 @@ using BookingApp.Domain.Interfaces;
 using BookingApp.Presentation.View.Guest;
 using BookingApp.Services;
 using BookingApp.Services.DTO;
-using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
 
 namespace BookingApp.Presentation.ViewModel
@@ -40,7 +39,6 @@ namespace BookingApp.Presentation.ViewModel
 
         public MyReservationsViewModel()
         {
-            // --- ZAVISNOSTI I KOMANDE (BEZ PROMENA) ---
             _reservationDisplayService = Injector.CreateInstance<IReservationDisplayService>();
             _accommodationReviewService = Injector.CreateInstance<IAccommodationReviewService>();
             _guestReviewService = Injector.CreateInstance<IGuestReviewService>();
@@ -50,7 +48,6 @@ namespace BookingApp.Presentation.ViewModel
             ViewReviewCommand = new RelayCommand(ViewReview, CanViewReview);
             CloseCommand = new RelayCommand(Close);
 
-            // Inicijalno učitavanje podataka
             LoadReservations();
         }
 
@@ -60,7 +57,6 @@ namespace BookingApp.Presentation.ViewModel
         {
             if (SelectedReservation == null) return;
 
-            // --- PROMENA: Koristimo pomoćnu metodu ---
             var rescheduleWindow = new RescheduleRequestView(SelectedReservation.OriginalReservation);
             ShowDialogAndRefresh(rescheduleWindow);
         }
@@ -69,7 +65,6 @@ namespace BookingApp.Presentation.ViewModel
         {
             if (SelectedReservation == null) return;
 
-            // --- PROMENA: Koristimo pomoćnu metodu ---
             var rateWindow = new AccommodationReviewView(SelectedReservation.OriginalReservation);
             ShowDialogAndRefresh(rateWindow);
         }
@@ -82,7 +77,6 @@ namespace BookingApp.Presentation.ViewModel
 
             if (reviewFromOwner != null)
             {
-                // --- PROMENA: Logika za kreiranje poruke je sada u pomoćnoj metodi ---
                 string message = FormatReviewMessage(reviewFromOwner.ToGuestReview());
                 MessageBox.Show(message, "Review from Owner", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -101,7 +95,6 @@ namespace BookingApp.Presentation.ViewModel
 
         #region Pomoćne metode
 
-        // --- CanExecute metode (BEZ PROMENA) ---
         private bool CanReschedule(object obj)
         {
             return SelectedReservation != null && SelectedReservation.IsRescheduleEnabled;
@@ -117,7 +110,6 @@ namespace BookingApp.Presentation.ViewModel
             return SelectedReservation != null && SelectedReservation.IsGuestReviewVisible;
         }
 
-        // --- Metoda za učitavanje (BEZ PROMENA) ---
         public void LoadReservations()
         {
             var reservationsList = _reservationDisplayService.GetReservationsForGuest(Session.CurrentUser.Id);
@@ -125,17 +117,14 @@ namespace BookingApp.Presentation.ViewModel
             OnPropertyChanged(nameof(Reservations));
         }
 
-        // --- NOVO: Pomoćna metoda za prikazivanje prozora i osvežavanje (DRY princip) ---
         private void ShowDialogAndRefresh(Window dialogWindow)
         {
             dialogWindow.ShowDialog();
             LoadReservations();
         }
 
-        // --- NOVO: Pomoćna metoda koja samo formatira string poruke ---
         private string FormatReviewMessage(GuestReview review)
         {
-            // Korišćenje StringBuilder-a je dobra praksa za spajanje više delova teksta
             var sb = new StringBuilder();
             sb.AppendLine($"Rating for cleanliness: {review.CleanlinessRating}");
             sb.AppendLine($"Rating for rule following: {review.RuleRespectingRating}");

@@ -11,7 +11,6 @@ namespace BookingApp.Services.DTO
 {
     public class ReservationDTO : INotifyPropertyChanged
     {
-        // privatna polja
         private int _id;
         private int _accommodationId;
         private int _guestId;
@@ -25,7 +24,6 @@ namespace BookingApp.Services.DTO
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        // javna svojstva
         public int Id
         {
             get => _id;

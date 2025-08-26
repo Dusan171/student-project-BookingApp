@@ -59,7 +59,7 @@ namespace BookingApp.Repositories
             Comment current = _comments.Find(c => c.Id == comment.Id);
             int index = _comments.IndexOf(current);
             _comments.Remove(current);
-            _comments.Insert(index, comment);       // keep ascending order of ids in file 
+            _comments.Insert(index, comment);       
             _serializer.ToCSV(FilePath, _comments);
             return comment;
         }

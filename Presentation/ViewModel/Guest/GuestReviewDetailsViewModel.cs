@@ -12,8 +12,7 @@ namespace BookingApp.Presentation.ViewModel
     {
         #region Svojstva za prikaz
 
-        // Umesto da direktno izlažemo model, izlažemo samo podatke koji su nam potrebni.
-        // Ovo je primer gde ViewModel deluje i kao DTO.
+ 
 
         public int CleanlinessRating { get; }
         public int RuleRespectingRating { get; }

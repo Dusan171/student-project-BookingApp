@@ -62,7 +62,7 @@ namespace BookingApp.Repositories
             AccommodationImage current = _images.Find(c => c.Id == image.Id);
             int index = _images.IndexOf(current);
             _images.Remove(current);
-            _images.Insert(index, image);       // keep ascending order of ids in file 
+            _images.Insert(index, image);     
             _serializer.ToCSV(FilePath, _images);
             return image;
         }

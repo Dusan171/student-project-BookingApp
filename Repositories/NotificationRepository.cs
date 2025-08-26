@@ -67,7 +67,7 @@ namespace BookingApp.Repositories
                 Notification current = _notifications.Find(a => a.Id == notification.Id);
                 int index = _notifications.IndexOf(current);
                 _notifications.Remove(current);
-                _notifications.Insert(index, notification);       // keep ascending order of ids in file 
+                _notifications.Insert(index, notification);       
                 _serializer.ToCSV(FilePath, _notifications);
                 return notification;
             }

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using BookingApp.Services.DTOs;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Domain.Interfaces
 {

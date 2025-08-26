@@ -138,7 +138,7 @@ namespace BookingApp.Services.DTO
         {
             Id = a.Id;
             Name = a.Name;
-            GeoLocation.Id = a.GeoLocation.Id;
+            GeoLocation = new LocationDTO(a.GeoLocation);
             Type = a.Type.ToString();
             MaxGuests = a.MaxGuests;
             MinReservationDays = a.MinReservationDays;

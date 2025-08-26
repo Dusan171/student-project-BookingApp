@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain;
-using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
-using BookingApp.Services.DTOs;
-using BookingApp.Repositories;
 using BookingApp.Services.DTO;
-using BookingApp.Utilities;
 
 namespace BookingApp.Services
 {
@@ -25,37 +21,29 @@ namespace BookingApp.Services
             _accommodationRepository = accommodationRepository;
         }
         
-        public Reservation Create(ReservationDTO reservationDto)
+        public ReservationDTO Create(ReservationDTO reservationDto)
         {
-            
-            var accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == reservationDto.AccommodationId);
-            if (accommodation == null)
-            {
-                throw new Exception("Cannot create reservation for an unknown accommodation.");
-            }
+            var accommodation = GetAndValidateAccommodation(reservationDto.AccommodationId);
 
-            
             ValidateReservationRules(accommodation, reservationDto.StartDate, reservationDto.EndDate, reservationDto.GuestsNumber);
 
-            
             CheckForOverlappingDates(accommodation.Id, reservationDto.StartDate, reservationDto.EndDate);
 
-            
-            var reservation = new Reservation
+            var reservationToSave = reservationDto.ToReservation();
+            var savedReservation = _reservationRepository.Save(reservationToSave);
+
+            CreateOccupiedDates(accommodation.Id, savedReservation.Id, savedReservation.StartDate, savedReservation.EndDate);
+
+            return new ReservationDTO(savedReservation);
+        }
+        private Accommodation GetAndValidateAccommodation(int accommodationId)
+        {
+            var accommodation = _accommodationRepository.GetById(accommodationId);
+            if (accommodation == null)
             {
-                AccommodationId = reservationDto.AccommodationId,
-                GuestId = Session.CurrentUser.Id,
-                StartDate = reservationDto.StartDate,
-                EndDate = reservationDto.EndDate,
-                GuestsNumber = reservationDto.GuestsNumber,
-                Status = ReservationStatus.Active
-            };
-            _reservationRepository.Save(reservation);
-
-            
-            CreateOccupiedDates(accommodation.Id, reservation.Id, reservationDto.StartDate, reservationDto.EndDate);
-
-            return reservation;
+                throw new InvalidOperationException("Cannot create reservation for an unknown accommodation.");
+            }
+            return accommodation;
         }
         private void ValidateReservationRules(Accommodation accommodation, DateTime startDate, DateTime endDate, int guestNumber)
         {
