@@ -24,6 +24,12 @@ namespace BookingApp.Repositories
             return _serializer.FromCSV(FilePath);
         }
 
+        public Images GetById(int id)
+        {
+            _images = _serializer.FromCSV(FilePath);
+            return _images.FirstOrDefault(img => img.Id == id);
+        }
+
         public Images Save(Images image)
         {
             image.Id = NextId();

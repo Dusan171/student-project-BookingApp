@@ -32,6 +32,11 @@ namespace BookingApp.Repositories
             _serializer.ToCSV(FilePath, _keyPoints);
             return keyPoint;
         }
+        public KeyPoint GetById(int id)
+        {
+            _keyPoints = _serializer.FromCSV(FilePath);
+            return _keyPoints.FirstOrDefault(kp => kp.Id == id);
+        }
 
         public int NextId()
         {
