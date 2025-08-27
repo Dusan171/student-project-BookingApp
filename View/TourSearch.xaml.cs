@@ -17,21 +17,32 @@ namespace BookingApp.View
     {
         private readonly TourRepository _tourRepository;
         private readonly TourReservationRepository _reservationRepository;
+        private readonly TourReservationRepository _tourReservationRepository; 
         private readonly ReservationGuestRepository _guestRepository;
+        private readonly TourReviewRepository _reviewRepository;
         private List<Tour> _currentTours;
         private Tour? _selectedTour;
         private User? _currentUser;
+
+        // Review form state
+        private Tour? _selectedTourForReview;
+        private TourReservation? _selectedReservationForReview;
+        private int _guideKnowledgeRating = 0;
+        private int _guideLanguageRating = 0;
+        private int _tourInterestRating = 0;
+        private List<string> _selectedImagePaths = new List<string>();
 
         public TourSearch()
         {
             InitializeComponent();
             _tourRepository = new TourRepository();
             _reservationRepository = new TourReservationRepository();
+            _tourReservationRepository = new TourReservationRepository(); 
             _guestRepository = new ReservationGuestRepository();
+            _reviewRepository = new TourReviewRepository();
             _currentTours = _tourRepository.GetAll() ?? new List<Tour>();
             _currentUser = Session.CurrentUser;
 
-            // Initialize the unified interface
             InitializeInterface();
         }
 
@@ -42,31 +53,477 @@ namespace BookingApp.View
 
         private void InitializeInterface()
         {
-            // Load initial tours
             DisplayTours(_currentTours);
-
-            // Load user's reservations
             LoadMyReservations();
-
-            // Initialize reservation panel as disabled
+            LoadCompletedTours(); 
             ResetReservationPanel();
         }
 
+        private void LoadCompletedTours()
+        {
+            pnlCompletedTours.Children.Clear();
+
+            if (_currentUser == null)
+            {
+                var noUserPanel = new StackPanel();
+                noUserPanel.Children.Add(new TextBlock
+                {
+                    Text = "Morate se prijaviti da biste videli ture za ocenjivanje.",
+                    FontSize = 12,
+                    Foreground = Brushes.Gray,
+                    Margin = new Thickness(10)
+                });
+                pnlCompletedTours.Children.Add(noUserPanel);
+                return;
+            }
+
+            var completedReservations = _tourReservationRepository.GetCompletedUnreviewedReservationsByTourist(_currentUser.Id);
+
+            if (completedReservations == null || completedReservations.Count == 0)
+            {
+                var noToursPanel = new StackPanel();
+                noToursPanel.Children.Add(new TextBlock
+                {
+                    Text = "Nemate završenih tura za ocenjivanje.",
+                    FontSize = 12,
+                    Foreground = Brushes.Gray,
+                    Margin = new Thickness(10)
+                });
+                pnlCompletedTours.Children.Add(noToursPanel);
+                return;
+            }
+
+            foreach (var reservation in completedReservations)
+            {
+                var tourPanel = CreateCompletedTourPanel(reservation);
+                pnlCompletedTours.Children.Add(tourPanel);
+            }
+        }
+
+        private Border CreateCompletedTourPanel(TourReservation reservation)
+        {
+            var border = new Border
+            {
+                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E0E0E0")),
+                BorderThickness = new Thickness(1),
+                Margin = new Thickness(0, 5, 0, 5),
+                Padding = new Thickness(10, 8, 10, 8)
+            };
+
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            // Naziv ture
+            var tourNameText = new TextBlock
+            {
+                Text = reservation.TourName,
+                FontSize = 11,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(tourNameText, 0);
+            grid.Children.Add(tourNameText);
+
+            // Vodič
+            var guideText = new TextBlock
+            {
+                Text = reservation.GuideName,
+                FontSize = 11,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(guideText, 1);
+            grid.Children.Add(guideText);
+
+            // Datum
+            var dateText = new TextBlock
+            {
+                Text = reservation.TourDateFormatted,
+                FontSize = 11,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(dateText, 2);
+            grid.Children.Add(dateText);
+
+            // Status
+            var statusText = new TextBlock
+            {
+                Text = "Završeno",
+                FontSize = 11,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            Grid.SetColumn(statusText, 3);
+            grid.Children.Add(statusText);
+
+            
+            var reviewButton = new Button
+            {
+                Content = "OCENI",
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#007ACC")),
+                Foreground = Brushes.White,
+                Padding = new Thickness(8, 4, 8, 4),
+                FontSize = 10,
+                Tag = reservation
+            };
+            reviewButton.Click += ReviewButton_Click; 
+            Grid.SetColumn(reviewButton, 4);
+            grid.Children.Add(reviewButton);
+
+            border.Child = grid;
+            return border;
+        }
+
+        
+        private void ReviewButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is TourReservation reservation)
+            {
+                _selectedReservationForReview = reservation;
+                _selectedTourForReview = reservation.Tour;
+                ShowReviewForm();
+            }
+        }
+
+        private void ReviewTourBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is Tour tour)
+            {
+                _selectedTourForReview = tour;
+                ShowReviewForm();
+            }
+        }
+
+        private void ViewReviewBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is Tour tour)
+            {
+                var existingReview = _reviewRepository.GetByTouristId(_currentUser!.Id)
+                    .FirstOrDefault(r => r.TourId == tour.Id);
+
+                if (existingReview != null)
+                {
+                    string imageInfo = existingReview.ImagePaths.Count > 0
+                        ? $"\nSlike: {existingReview.ImagePaths.Count} slika priloženo"
+                        : "\nNema priloženih slika";
+
+                    MessageBox.Show($"Vaša ocena za turu '{tour.Name}':\n\n" +
+                                   $"{existingReview.GetRatingText()}\n" +
+                                   $"Komentar: {existingReview.Comment}\n" +
+                                   $"Datum: {existingReview.GetFormattedDate()}{imageInfo}",
+                                   "Vaša ocena", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
+
+        private void ShowReviewForm()
+        {
+            if (_selectedTourForReview == null) return;
+
+            lblReviewTourName.Text = $"Ocenjivanje ture: {_selectedTourForReview.Name}";
+            reviewFormPanel.Visibility = Visibility.Visible;
+
+            ResetReviewForm();
+        }
+
+        private void ResetReviewForm()
+        {
+            _guideKnowledgeRating = 0;
+            _guideLanguageRating = 0;
+            _tourInterestRating = 0;
+            _selectedImagePaths.Clear();
+
+            ResetStars();
+            txtReviewComment.Text = "";
+            lblSelectedFile.Text = "No file chosen";
+            pnlSelectedImages.Children.Clear();
+            selectedImagesScrollViewer.Visibility = Visibility.Collapsed;
+
+            lblGuideKnowledgeRating.Text = "(1-5)";
+            lblGuideLanguageRating.Text = "(1-5)";
+            lblTourInterestRating.Text = "(1-5)";
+        }
+
+        private void ResetStars()
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                var img = FindChild<Image>(pnlGuideKnowledgeRating, $"img{i}GuideKnowledge");
+                if (img != null)
+                {
+                    try
+                    {
+                        img.Source = new BitmapImage(new Uri("../Resources/Images/star_empty.png", UriKind.Relative));
+                    }
+                    catch { }
+                }
+            }
+
+            for (int i = 1; i <= 5; i++)
+            {
+                var img = FindChild<Image>(pnlGuideLanguageRating, $"img{i}GuideLanguage");
+                if (img != null)
+                {
+                    try
+                    {
+                        img.Source = new BitmapImage(new Uri("../Resources/Images/star_empty.png", UriKind.Relative));
+                    }
+                    catch { }
+                }
+            }
+
+            for (int i = 1; i <= 5; i++)
+            {
+                var img = FindChild<Image>(pnlTourInterestRating, $"img{i}TourInterest");
+                if (img != null)
+                {
+                    try
+                    {
+                        img.Source = new BitmapImage(new Uri("../Resources/Images/star_empty.png", UriKind.Relative));
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        private void StarGuideKnowledge_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int rating))
+            {
+                _guideKnowledgeRating = rating;
+                UpdateStarDisplay(pnlGuideKnowledgeRating, "GuideKnowledge", rating);
+                lblGuideKnowledgeRating.Text = $"({rating}/5)";
+            }
+        }
+
+        private void StarGuideLanguage_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int rating))
+            {
+                _guideLanguageRating = rating;
+                UpdateStarDisplay(pnlGuideLanguageRating, "GuideLanguage", rating);
+                lblGuideLanguageRating.Text = $"({rating}/5)";
+            }
+        }
+
+        private void StarTourInterest_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && int.TryParse(btn.Tag?.ToString(), out int rating))
+            {
+                _tourInterestRating = rating;
+                UpdateStarDisplay(pnlTourInterestRating, "TourInterest", rating);
+                lblTourInterestRating.Text = $"({rating}/5)";
+            }
+        }
+
+        private void UpdateStarDisplay(StackPanel panel, string prefix, int rating)
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                var img = FindChild<Image>(panel, $"img{i}{prefix}");
+                if (img != null)
+                {
+                    try
+                    {
+                        if (i <= rating)
+                        {
+                            img.Source = new BitmapImage(new Uri("../Resources/Images/star_filled.png", UriKind.Relative));
+                        }
+                        else
+                        {
+                            img.Source = new BitmapImage(new Uri("../Resources/Images/star_empty.png", UriKind.Relative));
+                        }
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        private void BtnChooseFile_Click(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Izaberite sliku",
+                Filter = "Image files (*.jpg, *.jpeg, *.png, *.bmp)|*.jpg;*.jpeg;*.png;*.bmp|All files (*.*)|*.*",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
+                Multiselect = true
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                foreach (string fileName in openFileDialog.FileNames)
+                {
+                    if (!_selectedImagePaths.Contains(fileName))
+                    {
+                        _selectedImagePaths.Add(fileName);
+                    }
+                }
+
+                UpdateSelectedImagesDisplay();
+            }
+        }
+
+        private void UpdateSelectedImagesDisplay()
+        {
+            pnlSelectedImages.Children.Clear();
+
+            if (_selectedImagePaths.Count == 0)
+            {
+                lblSelectedFile.Text = "No file chosen";
+                selectedImagesScrollViewer.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            lblSelectedFile.Text = $"{_selectedImagePaths.Count} slika izabrano";
+            selectedImagesScrollViewer.Visibility = Visibility.Visible;
+
+            foreach (var imagePath in _selectedImagePaths)
+            {
+                Border imageBorder = new Border
+                {
+                    Width = 60,
+                    Height = 60,
+                    Margin = new Thickness(0, 0, 5, 0),
+                    BorderBrush = Brushes.Gray,
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(3)
+                };
+
+                Grid imageGrid = new Grid();
+
+                try
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(imagePath);
+                    bitmap.DecodePixelWidth = 60;
+                    bitmap.EndInit();
+
+                    Image img = new Image
+                    {
+                        Source = bitmap,
+                        Stretch = Stretch.UniformToFill
+                    };
+                    imageGrid.Children.Add(img);
+                }
+                catch
+                {
+                    TextBlock errorText = new TextBlock
+                    {
+                        Text = "X",
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        FontSize = 20,
+                        Foreground = Brushes.Red
+                    };
+                    imageGrid.Children.Add(errorText);
+                }
+
+                Button removeBtn = new Button
+                {
+                    Content = "×",
+                    Width = 20,
+                    Height = 20,
+                    Background = new SolidColorBrush(Color.FromArgb(180, 255, 0, 0)),
+                    Foreground = Brushes.White,
+                    BorderBrush = Brushes.Transparent,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Margin = new Thickness(0, 2, 2, 0),
+                    FontSize = 12,
+                    FontWeight = FontWeights.Bold,
+                    Tag = imagePath
+                };
+
+                removeBtn.Click += (s, e) =>
+                {
+                    if (removeBtn.Tag is string pathToRemove)
+                    {
+                        _selectedImagePaths.Remove(pathToRemove);
+                        UpdateSelectedImagesDisplay();
+                    }
+                };
+
+                imageGrid.Children.Add(removeBtn);
+                imageBorder.Child = imageGrid;
+                pnlSelectedImages.Children.Add(imageBorder);
+            }
+        }
+
+        private void BtnCancelReview_Click(object sender, RoutedEventArgs e)
+        {
+            reviewFormPanel.Visibility = Visibility.Collapsed;
+            _selectedTourForReview = null;
+            _selectedReservationForReview = null;
+        }
+
+        private void BtnSubmitReview_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedTourForReview == null || _currentUser == null)
+            {
+                MessageBox.Show("Greška u podacima.", "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (_guideKnowledgeRating == 0 || _guideLanguageRating == 0 || _tourInterestRating == 0)
+            {
+                MessageBox.Show("Molimo ocenite sve kategorije (1-5 zvezdica).", "Nedostaju ocene",
+                               MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtReviewComment.Text))
+            {
+                MessageBox.Show("Molimo unesite komentar.", "Nedostaje komentar",
+                               MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var review = new TourReview
+            {
+                TourId = _selectedTourForReview.Id,
+                TouristId = _currentUser.Id,
+                GuideKnowledgeRating = _guideKnowledgeRating,
+                GuideLanguageRating = _guideLanguageRating,
+                TourInterestRating = _tourInterestRating,
+                Comment = txtReviewComment.Text.Trim(),
+                ImagePaths = new List<string>(_selectedImagePaths),
+                ReviewDate = DateTime.Now
+            };
+
+            try
+            {
+                _reviewRepository.Add(review);
+                MessageBox.Show("Ocena je uspešno sačuvana!", "Uspeh",
+                               MessageBoxButton.OK, MessageBoxImage.Information);
+
+                reviewFormPanel.Visibility = Visibility.Collapsed;
+                _selectedTourForReview = null;
+                _selectedReservationForReview = null;
+                LoadCompletedTours();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška pri čuvanju ocene: {ex.Message}", "Greška",
+                               MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+       
+
         private void ResetReservationPanel()
         {
-            // Reset to default state
             lblTourName.Text = "Izaberite turu za rezervaciju";
             lblTourName.Foreground = Brushes.Gray;
             lblTourDetails.Text = "Kliknite na 'REZERVIŠI' dugme kod bilo koje ture";
             lblTourDetails.Foreground = Brushes.Gray;
             lblAvailableSpots.Text = "";
 
-            // Disable all controls
             peopleCountPanel.IsEnabled = false;
             guestDetailsPanel.IsEnabled = false;
             buttonPanel.IsEnabled = false;
 
-            // Clear guest details
             pnlGuestDetails.Children.Clear();
             txtModalBrojOsoba.Text = "1";
 
@@ -75,12 +532,10 @@ namespace BookingApp.View
 
         private void EnableReservationPanel()
         {
-            // Enable all controls when tour is selected
             peopleCountPanel.IsEnabled = true;
             guestDetailsPanel.IsEnabled = true;
             buttonPanel.IsEnabled = true;
 
-            // Update text colors
             lblTourName.Foreground = Brushes.Black;
             lblTourDetails.Foreground = Brushes.Gray;
         }
@@ -104,7 +559,6 @@ namespace BookingApp.View
             if (!string.IsNullOrWhiteSpace(txtBrojLjudi.Text) && int.TryParse(txtBrojLjudi.Text, out int p))
                 maxPeople = p;
 
-            // ISPRAVKA - dodane null provere
             _currentTours = _tourRepository.SearchTours(city ?? "", country ?? "", language ?? "", maxPeople, duration) ?? new List<Tour>();
             DisplayTours(_currentTours);
         }
@@ -141,7 +595,6 @@ namespace BookingApp.View
 
                 StackPanel sp = new StackPanel();
 
-                // Tour name
                 sp.Children.Add(new TextBlock
                 {
                     Text = tour.Name ?? "Nepoznata tura",
@@ -150,7 +603,6 @@ namespace BookingApp.View
                     Margin = new Thickness(0, 0, 0, 5)
                 });
 
-                // Location and duration
                 string locationText = tour.Location != null ? $"{tour.Location.City}, {tour.Location.Country}" : "Nepoznata lokacija";
 
                 StackPanel locationPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 5) };
@@ -165,10 +617,7 @@ namespace BookingApp.View
                         Margin = new Thickness(0, 0, 3, 0)
                     });
                 }
-                catch (Exception)
-                {
-                    // Fallback if image not found
-                }
+                catch (Exception) { }
 
                 locationPanel.Children.Add(new TextBlock { Text = $"{locationText} | ", FontSize = 11, Foreground = Brushes.Gray });
 
@@ -182,10 +631,7 @@ namespace BookingApp.View
                         Margin = new Thickness(5, 0, 3, 0)
                     });
                 }
-                catch (Exception)
-                {
-                    // Fallback if image not found
-                }
+                catch (Exception) { }
 
                 locationPanel.Children.Add(new TextBlock { Text = $"{tour.DurationHours}h | ", FontSize = 11, Foreground = Brushes.Gray });
 
@@ -199,15 +645,11 @@ namespace BookingApp.View
                         Margin = new Thickness(5, 0, 3, 0)
                     });
                 }
-                catch (Exception)
-                {
-                    // Fallback if image not found
-                }
+                catch (Exception) { }
 
                 locationPanel.Children.Add(new TextBlock { Text = tour.Language ?? "Nepoznat jezik", FontSize = 11, Foreground = Brushes.Gray });
                 sp.Children.Add(locationPanel);
 
-                // Available spots
                 StackPanel spotsPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 5) };
 
                 try
@@ -220,10 +662,7 @@ namespace BookingApp.View
                         Margin = new Thickness(0, 0, 3, 0)
                     });
                 }
-                catch (Exception)
-                {
-                    // Fallback if image not found
-                }
+                catch (Exception) { }
 
                 spotsPanel.Children.Add(new TextBlock
                 {
@@ -234,7 +673,6 @@ namespace BookingApp.View
                 });
                 sp.Children.Add(spotsPanel);
 
-                // Description
                 sp.Children.Add(new TextBlock
                 {
                     Text = $"Opis: {tour.Description ?? "Nema opisa"}",
@@ -244,7 +682,6 @@ namespace BookingApp.View
                     Margin = new Thickness(0, 0, 0, 10)
                 });
 
-                // Reserve button - ISPRAVKA: Omogući kliktanje i za popunjene ture
                 Button reserveBtn = new Button
                 {
                     Background = tour.AvailableSpots > 0 ? new SolidColorBrush(Color.FromRgb(46, 134, 193)) : new SolidColorBrush(Color.FromRgb(231, 76, 60)),
@@ -252,7 +689,7 @@ namespace BookingApp.View
                     Padding = new Thickness(15, 8, 15, 8),
                     FontWeight = FontWeights.Bold,
                     BorderBrush = Brushes.Transparent,
-                    IsEnabled = true, // UVEK omogućeno
+                    IsEnabled = true,
                     Tag = tour
                 };
 
@@ -268,19 +705,14 @@ namespace BookingApp.View
                         Margin = new Thickness(0, 0, 5, 0)
                     });
                 }
-                catch (Exception)
-                {
-                    // Fallback if image not found
-                }
+                catch (Exception) { }
 
                 buttonContent.Children.Add(new TextBlock
                 {
-                    Text = tour.AvailableSpots > 0 ? "REZERVIŠI" : "REZERVIŠI",
+                    Text = "REZERVIŠI",
                     VerticalAlignment = VerticalAlignment.Center
                 });
                 reserveBtn.Content = buttonContent;
-
-                // UVEK dodeli event handler
                 reserveBtn.Click += ReserveBtn_Click;
 
                 sp.Children.Add(reserveBtn);
@@ -302,24 +734,18 @@ namespace BookingApp.View
         {
             if (_selectedTour == null) return;
 
-            // Enable the reservation panel
             EnableReservationPanel();
 
-            // Update tour information
             lblTourName.Text = _selectedTour.Name ?? "Nepoznata tura";
             string locationText = _selectedTour.Location != null ? $"{_selectedTour.Location.City}, {_selectedTour.Location.Country}" : "Nepoznata lokacija";
             lblTourDetails.Text = $"{locationText} | {_selectedTour.DurationHours}h | {_selectedTour.Language ?? "Nepoznat jezik"}";
             lblAvailableSpots.Text = $"Dostupno je još {_selectedTour.AvailableSpots} mesta";
 
-            // Reset guest count and generate fields
             txtModalBrojOsoba.Text = "1";
             GenerateGuestFields(1);
-
-            // Scroll to reservation panel
             ScrollToReservations();
         }
 
-        // GLAVNA FUNKCIONALNOST ALTERNATIVNIH TURA
         private void ShowAlternativeTours(Tour originalTour, int requiredSpots)
         {
             var alternativeTours = _tourRepository.GetAlternativeTours(originalTour.Id, requiredSpots) ?? new List<Tour>();
@@ -334,7 +760,6 @@ namespace BookingApp.View
                 return;
             }
 
-            // Kreiraj string sa alternativama
             string alternatives = $"Tura '{originalTour.Name ?? "Nepoznata"}' je popunjena.\n\n";
             alternatives += $"Dostupne alternative na istoj lokaciji:\n";
 
@@ -487,7 +912,6 @@ namespace BookingApp.View
                     alternativeDialog.Close();
                     ShowReservationPanel();
 
-                    // Obavesti korisnika da je izabrao alternativnu turu
                     MessageBox.Show($"Izabrali ste alternativnu turu: '{selectedTour.Name}'\n\nMolimo unesite podatke za rezervaciju.",
                                    "Alternativna tura izabrana", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -531,7 +955,6 @@ namespace BookingApp.View
                     Margin = new Thickness(0, 0, 0, 10)
                 });
 
-                // First row: Name and Last name
                 StackPanel nameRow = new StackPanel { Orientation = Orientation.Horizontal };
 
                 StackPanel firstNamePanel = new StackPanel { Width = 120, Margin = new Thickness(0, 0, 10, 0) };
@@ -554,7 +977,6 @@ namespace BookingApp.View
 
                 guestPanel.Children.Add(nameRow);
 
-                // Email row (only for first guest)
                 if (i == 0)
                 {
                     StackPanel emailPanel = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
@@ -618,7 +1040,6 @@ namespace BookingApp.View
 
                     StackPanel reservationPanel = new StackPanel();
 
-                    // Naziv ture
                     reservationPanel.Children.Add(new TextBlock
                     {
                         Text = tour.Name ?? "Nepoznata tura",
@@ -626,10 +1047,8 @@ namespace BookingApp.View
                         FontSize = 14
                     });
 
-                    // Lokacija
                     string locationText = tour.Location != null ? $"{tour.Location.City}, {tour.Location.Country}" : "Nepoznata lokacija";
 
-                    // Datum rezervacije
                     reservationPanel.Children.Add(new TextBlock
                     {
                         Text = $"Lokacija: {locationText}",
@@ -644,7 +1063,6 @@ namespace BookingApp.View
                         Foreground = Brushes.Gray
                     });
 
-                    // Broj gostiju
                     reservationPanel.Children.Add(new TextBlock
                     {
                         Text = $"Broj gostiju: {reservation.NumberOfGuests}",
@@ -652,7 +1070,6 @@ namespace BookingApp.View
                         Foreground = Brushes.Blue
                     });
 
-                    // Glavni kontakt
                     var mainGuest = reservation.Guests?.FirstOrDefault();
                     if (mainGuest != null)
                     {
@@ -664,7 +1081,6 @@ namespace BookingApp.View
                         });
                     }
 
-                    // Status rezervacije
                     reservationPanel.Children.Add(new TextBlock
                     {
                         Text = $"Status: {GetReservationStatusText(reservation.Status)}",
@@ -689,7 +1105,6 @@ namespace BookingApp.View
             }
         }
 
-        // Helper metode za status rezervacije
         private string GetReservationStatusText(TourReservationStatus status)
         {
             return status switch
@@ -729,11 +1144,9 @@ namespace BookingApp.View
             {
                 int newValue = current + 1;
 
-                // Uvek dozvoli povećanje, čak i preko dostupnih mesta
                 txtModalBrojOsoba.Text = newValue.ToString();
                 GenerateGuestFields(newValue);
 
-                // Upozori korisnika ako prelazi dostupna mesta
                 if (newValue > _selectedTour.AvailableSpots && _selectedTour.AvailableSpots > 0)
                 {
                     MessageBox.Show($"Ova tura ima samo {_selectedTour.AvailableSpots} dostupnih mesta, ali možete pokušati rezervaciju - sistem će ponuditi alternative.",
@@ -757,11 +1170,9 @@ namespace BookingApp.View
 
         private void BtnCancelReservation_Click(object sender, RoutedEventArgs e)
         {
-            // Reset reservation panel instead of hiding it
             ResetReservationPanel();
         }
 
-        // GLAVNA FUNKCIJA ZA REZERVACIJU SA ALTERNATIVNIM TURAMA
         private void BtnPotvrdiRezervaciju_Click(object sender, RoutedEventArgs e)
         {
             if (_selectedTour == null) return;
@@ -771,7 +1182,6 @@ namespace BookingApp.View
 
             int numberOfGuests = int.Parse(txtModalBrojOsoba.Text);
 
-            // Proveri da li tura još uvek ima dovoljno mesta - osvezi podatke
             var currentTour = _tourRepository.GetById(_selectedTour.Id);
             if (currentTour == null)
             {
@@ -779,14 +1189,12 @@ namespace BookingApp.View
                 return;
             }
 
-            // AKO NEMA DOVOLJNO MESTA - PONUDI ALTERNATIVE
             if (currentTour.AvailableSpots < numberOfGuests)
             {
                 ShowAlternativeTours(currentTour, numberOfGuests);
                 return;
             }
 
-            // Pokušaj rezervaciju
             bool reservationSuccess = _tourRepository.ReserveSpots(_selectedTour.Id, numberOfGuests);
 
             if (!reservationSuccess)
@@ -796,7 +1204,6 @@ namespace BookingApp.View
                 return;
             }
 
-            // Kreiraj rezervaciju
             var reservation = new TourReservation
             {
                 TourId = _selectedTour.Id,
@@ -806,7 +1213,6 @@ namespace BookingApp.View
                 Status = TourReservationStatus.ACTIVE
             };
 
-            // Kreiraj goste
             var guests = new List<ReservationGuest>();
             for (int i = 0; i < numberOfGuests; i++)
             {
@@ -828,20 +1234,14 @@ namespace BookingApp.View
 
             reservation.Guests = guests;
 
-            // Sačuvaj rezervaciju
             try
             {
                 _reservationRepository.Add(reservation);
 
                 MessageBox.Show("Rezervacija je uspešno kreirana!", "Uspeh", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                // Reset reservation panel
                 ResetReservationPanel();
-
-                // Refresh displays
                 RefreshData();
-
-                // Automatski skroluj do sekcije rezervacija
                 ScrollToReservations();
             }
             catch (Exception ex)
@@ -850,21 +1250,15 @@ namespace BookingApp.View
             }
         }
 
-        // Nova metoda za refresh podataka
         private void RefreshData()
         {
-            // Refresh search results
             _currentTours = _tourRepository.GetAll() ?? new List<Tour>();
             DisplayTours(_currentTours);
-
-            // Refresh reservations
             LoadMyReservations();
         }
 
-        // Nova metoda za skrolovanje do rezervacija
         private void ScrollToReservations()
         {
-            // Pronađi rezervacije panel i skroluj do njega
             if (pnlMyReservations.Parent is FrameworkElement parentElement)
             {
                 parentElement.BringIntoView();
@@ -934,7 +1328,6 @@ namespace BookingApp.View
             return null;
         }
 
-        // Event handlers for navigation
         private void BtnTutorijal_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Tutorijal će biti prikazan ovde.");
@@ -957,17 +1350,13 @@ namespace BookingApp.View
 
             if (result == MessageBoxResult.Yes)
             {
-                // Obriši sesiju
                 if (Session.CurrentUser != null)
                 {
                     Session.CurrentUser = null;
                 }
 
-                // Otvori login prozor
                 var loginWindow = new SignInForm();
                 loginWindow.Show();
-
-                // Zatvori trenutni prozor
                 this.Close();
             }
         }
@@ -989,7 +1378,7 @@ namespace BookingApp.View
 
         private void BtnPretraziteTure_Click(object sender, RoutedEventArgs e)
         {
-            // Scroll to search section - it's already visible at the top
+            
         }
 
         private void BtnRezervacije_Click(object sender, RoutedEventArgs e)
@@ -999,7 +1388,10 @@ namespace BookingApp.View
 
         private void BtnOceniTuru_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Funkcionalnost ocenjivanja tura će biti implementirana.", "Informacija", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (pnlCompletedTours.Parent is FrameworkElement parentElement)
+            {
+                parentElement.BringIntoView();
+            }
         }
 
         private void BtnPracenjeTure_Click(object sender, RoutedEventArgs e)

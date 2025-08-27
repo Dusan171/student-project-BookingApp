@@ -267,32 +267,31 @@
                 </StackPanel>
             </Border>
 
-            <!-- Reservation Section (side by side) -->
-            <Grid Margin="20">
+            <!-- Two-Row Layout -->
+            <!-- Gornji red: MOJE REZERVACIJE i REZERVACIJA TURE -->
+            <Grid Margin="20,0,20,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- My Reservations Panel -->
+                <!-- LEVA KOLONA - My Reservations -->
                 <Border Grid.Column="0" Background="White" Padding="20" Margin="0,0,10,0" CornerRadius="5">
                     <StackPanel>
                         <TextBlock Text="MOJE REZERVACIJE" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
-
-                        <ScrollViewer Height="500" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer Height="600" VerticalScrollBarVisibility="Auto">
                             <StackPanel Name="pnlMyReservations"/>
                         </ScrollViewer>
                     </StackPanel>
                 </Border>
 
-                <!-- Reservation Panel - sada uvek vidljiv -->
-                <Border Grid.Column="1" Name="reservationPanel" Background="White" Padding="20" 
-                        Margin="10,0,0,0" CornerRadius="5" Visibility="Visible">
+                <!-- DESNA KOLONA - Reservation Panel -->
+                <Border Grid.Column="1" Name="reservationPanel" Background="White" Padding="20" Margin="10,0,0,0" CornerRadius="5" Visibility="Visible">
                     <StackPanel>
                         <TextBlock Text="REZERVACIJA TURE" FontSize="16" FontWeight="Bold" 
                                    HorizontalAlignment="Left" Margin="0,0,0,20"/>
 
-                        <!-- Tour Info - sada sa placeholder tekstom -->
+                        <!-- Tour Info -->
                         <Border Background="#F8F9FA" Padding="15" Margin="0,0,0,20" CornerRadius="5">
                             <StackPanel Name="tourInfoPanel">
                                 <TextBlock Name="lblTourName" Text="Izaberite turu za rezervaciju" 
@@ -338,6 +337,153 @@
                         </StackPanel>
                     </StackPanel>
                 </Border>
+            </Grid>
+
+            <!-- Donji red: OCENJIVANJE TURA I VODIČA samo na levoj polovini -->
+            <Grid Margin="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- LEVA POLOVINA - Reviews and Rating -->
+                <Border Grid.Column="0" Background="White" Padding="20" Margin="0,0,10,0" CornerRadius="5">
+                    <StackPanel>
+                        <TextBlock Text="OCENJIVANJE TURA I VODIČA" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+
+                        <!-- Tours Table -->
+                        <Border BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="5" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Table Header -->
+                                <Border Grid.Row="0" Background="#F8F9FA" Padding="10,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="2*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Grid.Column="0" Text="Naziv ture" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="1" Text="Vodič" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="2" Text="Datum" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="3" Text="Status" FontWeight="Bold" FontSize="11"/>
+                                        <TextBlock Grid.Column="4" Text="Akcija" FontWeight="Bold" FontSize="11"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Table Content -->
+                                <ScrollViewer Grid.Row="1" Height="300" VerticalScrollBarVisibility="Auto">
+                                    <StackPanel Name="pnlCompletedTours"/>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+
+                        <!-- Review Form -->
+                        <Border Name="reviewFormPanel" Background="#F8F9FA" Padding="15" CornerRadius="5" Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Name="lblReviewTourName" Text="" FontWeight="Bold" FontSize="14" Margin="0,0,0,10"/>
+
+                                <!-- Rating Categories -->
+                                <TextBlock Text="Znanje vodiča:" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <StackPanel Name="pnlGuideKnowledgeRating" Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Button Name="star1GuideKnowledge" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideKnowledge_Click" Tag="1">
+                                        <Image Name="img1GuideKnowledge" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star2GuideKnowledge" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideKnowledge_Click" Tag="2">
+                                        <Image Name="img2GuideKnowledge" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star3GuideKnowledge" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideKnowledge_Click" Tag="3">
+                                        <Image Name="img3GuideKnowledge" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star4GuideKnowledge" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideKnowledge_Click" Tag="4">
+                                        <Image Name="img4GuideKnowledge" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star5GuideKnowledge" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideKnowledge_Click" Tag="5">
+                                        <Image Name="img5GuideKnowledge" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <TextBlock Name="lblGuideKnowledgeRating" Text="(1-5)" FontSize="11" Foreground="Gray" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+
+                                <TextBlock Text="Jezik vodiča:" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <StackPanel Name="pnlGuideLanguageRating" Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Button Name="star1GuideLanguage" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideLanguage_Click" Tag="1">
+                                        <Image Name="img1GuideLanguage" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star2GuideLanguage" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideLanguage_Click" Tag="2">
+                                        <Image Name="img2GuideLanguage" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star3GuideLanguage" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideLanguage_Click" Tag="3">
+                                        <Image Name="img3GuideLanguage" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star4GuideLanguage" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideLanguage_Click" Tag="4">
+                                        <Image Name="img4GuideLanguage" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star5GuideLanguage" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarGuideLanguage_Click" Tag="5">
+                                        <Image Name="img5GuideLanguage" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <TextBlock Name="lblGuideLanguageRating" Text="(1-5)" FontSize="11" Foreground="Gray" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+
+                                <TextBlock Text="Zanimljivost ture:" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <StackPanel Name="pnlTourInterestRating" Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Button Name="star1TourInterest" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarTourInterest_Click" Tag="1">
+                                        <Image Name="img1TourInterest" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star2TourInterest" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarTourInterest_Click" Tag="2">
+                                        <Image Name="img2TourInterest" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star3TourInterest" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarTourInterest_Click" Tag="3">
+                                        <Image Name="img3TourInterest" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star4TourInterest" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarTourInterest_Click" Tag="4">
+                                        <Image Name="img4TourInterest" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <Button Name="star5TourInterest" Background="Transparent" BorderBrush="Transparent" Width="25" Height="25" Click="StarTourInterest_Click" Tag="5">
+                                        <Image Name="img5TourInterest" Source="../Resources/Images/star_empty.png" Width="20" Height="20"/>
+                                    </Button>
+                                    <TextBlock Name="lblTourInterestRating" Text="(1-5)" FontSize="11" Foreground="Gray" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                </StackPanel>
+
+                                <!-- Comment -->
+                                <TextBlock Text="Komentar:" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <TextBox Name="txtReviewComment" Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
+                                         VerticalScrollBarVisibility="Auto" Margin="0,0,0,15"/>
+
+                                <!-- Image Upload Section -->
+                                <TextBlock Text="Slike sa ture:" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Button Name="btnChooseFile" Content="Choose File" Background="LightGray" 
+                                            Padding="10,5" Margin="0,0,10,0" Click="BtnChooseFile_Click"/>
+                                    <TextBlock Name="lblSelectedFile" Text="No file chosen" VerticalAlignment="Center" 
+                                               FontSize="11" Foreground="Gray"/>
+                                </StackPanel>
+
+                                <!-- Selected Images List -->
+                                <ScrollViewer Name="selectedImagesScrollViewer" Height="80" VerticalScrollBarVisibility="Auto" 
+                                              Margin="0,0,0,15" Visibility="Collapsed">
+                                    <StackPanel Name="pnlSelectedImages" Orientation="Horizontal"/>
+                                </ScrollViewer>
+
+                                <!-- Buttons -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Name="btnCancelReview" Content="Odustani" Background="#6C757D" Foreground="White" 
+                                            Padding="15,8" Margin="10,0" Click="BtnCancelReview_Click"/>
+                                    <Button Name="btnSubmitReview" Content="Sačuvaj ocenu" Background="#28A745" Foreground="White" 
+                                            Padding="15,8" Margin="10,0" Click="BtnSubmitReview_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+               
             </Grid>
 
         </StackPanel>

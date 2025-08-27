@@ -13,13 +13,36 @@ namespace BookingApp.Repositories
         private readonly Serializer<TourReservation> _serializer;
         private List<TourReservation> _tourReservations;
         private readonly ReservationGuestRepository _guestRepository;
+        private readonly TourRepository _tourRepository;
+        private readonly UserRepository _userRepository;
+        private readonly StartTourTimeRepository _startTourTimeRepository;
 
         public TourReservationRepository()
         {
             _serializer = new Serializer<TourReservation>();
-            _tourReservations = _serializer.FromCSV(FilePath);
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
             _guestRepository = new ReservationGuestRepository();
+            _tourRepository = new TourRepository();
+            _userRepository = new UserRepository();
+            _startTourTimeRepository = new StartTourTimeRepository();
             LoadGuests();
+            LoadTourDetails();
+        }
+
+        private void LoadTourDetails()
+        {
+            foreach (var reservation in _tourReservations)
+            {
+                reservation.Tour = _tourRepository.GetById(reservation.TourId);
+                reservation.StartTourTime = _startTourTimeRepository.GetById(reservation.StartTourTimeId);
+            }
+        }
+
+        public List<TourReservation> GetCompletedReservationsByTourist(int touristId)
+        {
+            return _tourReservations
+                .Where(tr => tr.TouristId == touristId && tr.Status == TourReservationStatus.COMPLETED)
+                .ToList();
         }
 
         private void LoadGuests()
@@ -30,7 +53,7 @@ namespace BookingApp.Repositories
             }
         }
 
-        // DODANA metoda za generisanje ID-a
+        
         public int NextId()
         {
             if (_tourReservations.Count < 1)
@@ -48,7 +71,7 @@ namespace BookingApp.Repositories
             return _tourReservations.Where(tr => tr.TouristId == touristId).ToList();
         }
 
-        // DODANA metoda koju traži TourSearch.xaml.cs
+        
         public List<TourReservation> GetReservationsByTourist(int touristId)
         {
             return GetByTouristId(touristId);
@@ -62,7 +85,22 @@ namespace BookingApp.Repositories
                 .ToList();
         }
 
-        // IZMENA: Dodato generisanje ID-a pre dodavanja
+
+
+        public List<TourReservation> GetCompletedUnreviewedReservationsByTourist(int touristId)
+        {
+            var completedReservations = _tourReservations
+                .Where(tr => tr.TouristId == touristId && tr.Status == TourReservationStatus.COMPLETED)
+                .ToList();
+
+            // Filtriranje već ocenjenih tura
+            var reviewRepository = new TourReviewRepository();
+            var existingReviews = reviewRepository.GetByTouristId(touristId);
+
+            return completedReservations
+                .Where(reservation => !existingReviews.Any(review => review.TourId == reservation.TourId))
+                .ToList();
+        }
         public TourReservation Add(TourReservation reservation)
         {
             reservation.Id = NextId();
