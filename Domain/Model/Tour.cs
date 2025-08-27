@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Serializer;
 using System.Windows;
 using BookingApp.Domain.Model;
-
 
 namespace BookingApp.Domain.Model
 {
@@ -22,8 +21,6 @@ namespace BookingApp.Domain.Model
         public double DurationHours { get; set; }
         public List<Images> Images { get; set; }
         public bool IsFinished { get; set; }
-
-
         public User Guide { get; set; }
 
         public Tour()
@@ -132,11 +129,9 @@ namespace BookingApp.Domain.Model
                 }
             }
 
-
             if (values.Length > 11 && int.TryParse(values[11], out int guideId))
             {
                 Guide = new User { Id = guideId };
-
             }
         }
 
