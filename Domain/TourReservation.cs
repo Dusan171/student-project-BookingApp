@@ -47,7 +47,7 @@ namespace BookingApp.Domain
 
         public string[] ToCSV()
         {
-            string guestIds = string.Join("|", Guests.Select(g => g.Id));
+            string guestIds = string.Join(",", Guests.Select(g => g.Id));
 
             return new string[]
             {
@@ -76,7 +76,7 @@ namespace BookingApp.Domain
             Guests = new List<ReservationGuest>();
             if (!string.IsNullOrEmpty(values[7]))
             {
-                var guestIds = values[7].Split('|');
+                var guestIds = values[7].Split(',');
                 foreach (var id in guestIds)
                 {
                     Guests.Add(new ReservationGuest { Id = int.Parse(id) });
