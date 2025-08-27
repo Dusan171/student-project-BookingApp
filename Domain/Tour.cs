@@ -5,7 +5,7 @@ using BookingApp.Serializer;
 using System.Windows;
 using BookingApp.Domain;
 
-
+public enum TourStatus { NONE, ACTIVE, FINISHED};
 public class Tour : ISerializable
 
 {
@@ -20,7 +20,11 @@ public class Tour : ISerializable
     public List<StartTourTime> StartTimes { get; set; }
     public double DurationHours { get; set; }
     public List<Images> Images { get; set; }
-    public bool IsFinished { get; set; }
+    public TourStatus Status { get; set; }
+
+
+    public User Guide { get; set; }
+
     public Tour()
     {
         KeyPoints = new List<KeyPoint>();
@@ -29,7 +33,7 @@ public class Tour : ISerializable
     }
 
     public Tour(int id, string name, Location location, string description, string language,
-                 int maxTourists, int reservedSpots, double durationHours, bool isFinished = false)
+                 int maxTourists, int reservedSpots, double durationHours, TourStatus status, User guide = null)
     {
         Id = id;
         Name = name;
@@ -39,7 +43,9 @@ public class Tour : ISerializable
         MaxTourists = maxTourists;
         ReservedSpots = reservedSpots;
         DurationHours = durationHours;
-        IsFinished = isFinished;
+        Status = status;
+        Guide = guide;
+
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
         Images = new List<Images>();
@@ -47,22 +53,23 @@ public class Tour : ISerializable
 
     public string[] ToCSV()
     {
-        string keyPointIds = string.Join("|", KeyPoints.Select(kp => kp.Id));
-        string startTimeIds = string.Join("|", StartTimes.Select(st => st.Id));
-        string imageIds = string.Join("|", Images.Select(img => img.Id));
+        string keyPointIds = string.Join(",", KeyPoints.Select(kp => kp.Id));
+        string startTimeIds = string.Join(",", StartTimes.Select(st => st.Id));
+        string imageIds = string.Join(",", Images.Select(img => img.Id));
 
         string[] csvValues = {
-        Id.ToString(),
-        Name,
-        Location.Id.ToString(),
-        Language,
-        MaxTourists.ToString(),
-        ReservedSpots.ToString(),
-        DurationHours.ToString(),
-        IsFinished.ToString(),
-        keyPointIds,
-        startTimeIds,
-        imageIds
+            Id.ToString(),
+            Name,
+            Location.Id.ToString(),
+            Language,
+            MaxTourists.ToString(),
+            ReservedSpots.ToString(),
+            DurationHours.ToString(),
+            Status.ToString(),
+            keyPointIds,
+            startTimeIds,
+            imageIds,
+            Guide != null ? Guide.Id.ToString() : ""
         };
 
         return csvValues;
@@ -83,7 +90,7 @@ public class Tour : ISerializable
         MaxTourists = int.Parse(values[4]);          
         ReservedSpots = int.Parse(values[5]);        
         DurationHours = double.Parse(values[6]);
-        IsFinished = bool.Parse(values[7]);
+        Status = Enum.Parse<TourStatus>(values[7]);
 
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
@@ -126,6 +133,13 @@ public class Tour : ISerializable
                     Images.Add(new Images { Id = imageId });
                 }
             }
+        }
+
+
+        if (values.Length > 11 && int.TryParse(values[11], out int guideId))
+        {
+            Guide = new User { Id = guideId };
+
         }
     }
 
