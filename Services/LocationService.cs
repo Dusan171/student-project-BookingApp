@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Services
 {
@@ -17,24 +18,26 @@ namespace BookingApp.Services
             _repository = repository;
         }
 
-        public List<Location> GetAllLocations()
+        public List<LocationDTO> GetAllLocations()
         {
-            return _repository.GetAll();
+            return _repository.GetAll()
+                      .Select(location => new LocationDTO(location))
+                      .ToList();
         }
 
-        public Location AddLocation(Location location)
+        public LocationDTO AddLocation(LocationDTO location)
         {
-            return _repository.Save(location);
+            return new LocationDTO(_repository.Save(location.ToLocation()));
         }
 
-        public void DeleteLocation(Location location)
+        public void DeleteLocation(LocationDTO location)
         {
-            _repository.Delete(location);
+            _repository.Delete(location.ToLocation());
         }
 
-        public Location UpdateLocation(Location location)
+        public LocationDTO UpdateLocation(LocationDTO location)
         {
-            return _repository.Update(location);
+            return new LocationDTO(_repository.Update(location.ToLocation()));
         }
     }
 }

@@ -1,14 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel; // Koristićemo ObservableCollection
+using System.Collections.ObjectModel; 
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
-using BookingApp.Presentation.View.Guest; // Potrebno za otvaranje novog prozora
+using BookingApp.Presentation.View.Guest; 
 using BookingApp.Services;
 using BookingApp.Services.DTO;
-using BookingApp.Services.DTOs;
 using BookingApp.Utilities;
 using BookingApp.View;
 
@@ -16,13 +14,11 @@ namespace BookingApp.Presentation.ViewModel
 {
     public class AccommodationLookupViewModel : ViewModelBase
     {
-        // Servisi i repozitorijumi dobijeni preko Injector-a
         private readonly IAccommodationService _accommodationService;
         private readonly IAccommodationFilterService _filterService;
 
         #region Svojstva za povezivanje (Binding)
 
-        // Svojstva za polja za pretragu
         private string _nameSearch;
         public string NameSearch
         {
@@ -65,11 +61,8 @@ namespace BookingApp.Presentation.ViewModel
             set { _minDaysSearch = value; OnPropertyChanged(); }
         }
 
-        // Kolekcija za prikaz u DataGrid-u. Koristimo ObservableCollection
-        // da bi se DataGrid automatski osvežio kada se kolekcija promeni.
         public ObservableCollection<AccommodationDTO> Accommodations { get; set; }
 
-        // Svojstvo za praćenje selektovanog smeštaja u DataGrid-u
         private AccommodationDTO _selectedAccommodation;
         public AccommodationDTO SelectedAccommodation
         {
@@ -83,22 +76,19 @@ namespace BookingApp.Presentation.ViewModel
         public ICommand SearchCommand { get; }
         public ICommand ReserveCommand { get; }
         public ICommand LogoutCommand { get; }
-        public ICommand ResetSearchCommand { get; } // Dodatna komanda za resetovanje pretrage
+        public ICommand ResetSearchCommand { get; } 
         #endregion
 
         public AccommodationLookupViewModel()
         {
-            // Dobijanje zavisnosti od Injector-a
             _accommodationService = Injector.CreateInstance<IAccommodationService>();
             _filterService = Injector.CreateInstance<IAccommodationFilterService>();
 
-            // Inicijalizacija komandi
             SearchCommand = new RelayCommand(Search);
             ReserveCommand = new RelayCommand(Reserve, CanReserve);
             LogoutCommand = new RelayCommand(Logout);
             ResetSearchCommand = new RelayCommand(ResetSearch);
 
-            // Učitavanje početnih podataka
             Accommodations = new ObservableCollection<AccommodationDTO>();
             InitializeAccommodations();
         }
@@ -107,29 +97,26 @@ namespace BookingApp.Presentation.ViewModel
 
         private void Search(object obj)
         {
-            var searchParams = CreateSearchParameters(); // Koristimo novu pomoćnu metodu
+            var searchParams = CreateSearchParameters(); 
             var result = _filterService.Filter(searchParams);
             UpdateAccommodations(result);
         }
 
         private void ResetSearch(object obj)
         {
-            ClearSearchFields(); // Koristimo novu pomoćnu metodu
+            ClearSearchFields(); 
             InitializeAccommodations();
         }
 
         private void Reserve(object obj)
         {
-            // Selektovana stavka je sada DTO, npr. AccommodationDTO
             if (SelectedAccommodation == null) return;
 
-            // --- PROMENA #5: Dobavljamo pun domenski model na osnovu ID-a iz DTO-a ---
-            var fullAccommodation = _accommodationService.GetById(SelectedAccommodation.Id); // Pretpostavka da DTO ima 'Id' i repo ima 'GetById'
+            var fullAccommodation = _accommodationService.GetAccommodationById(SelectedAccommodation.Id);
 
             if (fullAccommodation != null)
             {
-                // Prosleđujemo pun objekat novom prozoru
-                var reservationWindow = new AccommodationReservationView(fullAccommodation);
+                var reservationWindow = new AccommodationReservationView(fullAccommodation.ToAccommodation());
                 reservationWindow.ShowDialog();
             }
             else
@@ -140,7 +127,6 @@ namespace BookingApp.Presentation.ViewModel
 
         private bool CanReserve(object obj)
         {
-            // Dugme "Reserve" je omogućeno samo ako je nešto selektovano u DataGrid-u
             return SelectedAccommodation != null;
         }
 
@@ -153,7 +139,6 @@ namespace BookingApp.Presentation.ViewModel
                 var signInWindow = new SignInForm();
                 signInWindow.Show();
 
-                // Zatvaranje prozora je odgovornost View-a
                 Application.Current.Windows.OfType<AccommodationLookup>().FirstOrDefault()?.Close();
             }
         }

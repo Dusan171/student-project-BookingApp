@@ -1,4 +1,10 @@
-﻿using System;
+﻿using BookingApp.Domain;
+using BookingApp.Presentation.Owner;
+using BookingApp.Presentation.View.Owner;
+using BookingApp.Presentation.ViewModel.Owner;
+using BookingApp.Repositories;
+using BookingApp.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,16 +19,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace BookingApp.Presentation.Owner
+namespace BookingApp.Presentation.View.Owner
 {
-    /// <summary>
-    /// Interaction logic for WelcomeView.xaml
-    /// </summary>
-    public partial class WelcomeView : UserControl
+    public partial class HomeView : UserControl
     {
-        public WelcomeView()
+        public HomeView()
         {
             InitializeComponent();
+         
         }
     }
 }

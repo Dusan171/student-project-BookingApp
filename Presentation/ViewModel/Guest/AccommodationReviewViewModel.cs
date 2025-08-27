@@ -14,7 +14,6 @@ namespace BookingApp.Presentation.ViewModel
         private readonly Reservation _reservation;
         private readonly IAccommodationReviewService _accommodationReviewService;
 
-        // Akcija za zatvaranje prozora
         public Action CloseAction { get; set; }
 
         #region Svojstva za povezivanje (Binding)
@@ -57,37 +56,23 @@ namespace BookingApp.Presentation.ViewModel
         {
             _reservation = reservation ?? throw new ArgumentNullException(nameof(reservation));
 
-            // Dobijanje zavisnosti
             _accommodationReviewService = Injector.CreateInstance<IAccommodationReviewService>();
 
-            // Inicijalizacija komandi
             SubmitCommand = new RelayCommand(Submit);
 
-            //CheckIfReviewIsAllowed();
         }
 
         #region Logika
 
-        /*private void CheckIfReviewIsAllowed()
-        {
-            if (_accommodationReviewService.IsReviewPeriodExpired(_reservation))
-            {
-                MessageBox.Show("The period for leaving a review has expired (5 days). The window will now close.", "Review Period Expired", MessageBoxButton.OK, MessageBoxImage.Warning);
-                CloseAction?.Invoke();
-            }
-        }*/
-
         private void Submit(object obj)
         {
-            // Koristimo pomoćnu metodu za validaciju
             if (!IsInputValid(out int cleanliness, out int ownerRating))
             {
-                return; // Prekini ako unos nije validan
+                return; 
             }
 
             try
             {
-                // Servis će baciti izuzetak ako je period istekao, što je ispravno.
                 _accommodationReviewService.Create(new ReservationDTO(_reservation), cleanliness, ownerRating, Comment, ImagePaths);
                 MessageBox.Show("Thank you for your review!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -101,7 +86,6 @@ namespace BookingApp.Presentation.ViewModel
 
         private bool IsInputValid(out int cleanliness, out int ownerRating)
         {
-            // Inicijalizujemo 'out' parametre
             cleanliness = 0;
             ownerRating = 0;
 
@@ -115,8 +99,6 @@ namespace BookingApp.Presentation.ViewModel
                 MessageBox.Show("Enter a valid owner rating (1-5).");
                 return false;
             }
-
-            // Možemo dodati i druge validacije, npr. da komentar nije predugačak.
 
             return true;
         }

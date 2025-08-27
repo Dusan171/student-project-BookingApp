@@ -45,26 +45,5 @@ namespace BookingApp.Domain
             };
             return csvValues;
         }
-        //i ovo treba u servisni sloj
-
-        public bool IsValid(out string errorMessage)
-        {
-            if (CleanlinessRating < 1 || CleanlinessRating > 5)
-            {
-                errorMessage = "Cleanliness rating must be between 1 and 5.";
-                return false;
-            }
-
-            if (RuleRespectingRating < 1 || RuleRespectingRating > 5)
-            {
-                errorMessage = "Rule respecting rating must be between 1 and 5.";
-                return false;
-            }
-
-            errorMessage = null;
-            return true;
-        }
-
-
     }
 }

@@ -116,14 +116,14 @@ namespace BookingApp.View.Guide
                 bool hasActiveReservation = HasActiveReservation(tour);
                 foreach (var startTime in tour.StartTimes)
                 {
-                     CreateTourCard(tour, startTime.Time, isToursToday, hasActiveReservation);
+                    CreateTourCard(tour, startTime.Time, isToursToday, hasActiveReservation);
                 }
             }
         }
 
         private void CreateTourCard(Tour tour, DateTime time, bool isToursToday, bool hasActiveReservation)
         {
-            
+
             Border card = new Border
             {
                 BorderThickness = new Thickness(1),

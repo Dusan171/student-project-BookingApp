@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using BookingApp.Domain;
-using BookingApp.Services.DTOs;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Domain.Interfaces
 {
     public interface IRescheduleRequestService
     {
-        //mora da radi sa modelom, jer mu treba citav objekat za dalja racunanja
-        public List<DateTime> GetBlackoutDatesForReschedule(Reservation reservation);
-        public void CreateRequest(CreateRescheduleRequestDTO requestDto);
+        public List<DateTime> GetBlackoutDatesForReschedule(ReservationDTO reservation);
+        public void CreateRequest(RescheduleRequestDTO requestDto);
+        List<RescheduleRequestDTO> GetAll();
+        RescheduleRequestDTO GetById(int id);
+        void Update(RescheduleRequestDTO request);
     }
 }

@@ -1,15 +1,16 @@
 ﻿using BookingApp.Domain;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BookingApp.Services.DTO
 {
-    public class ReservationDTO
+    public class ReservationDTO : INotifyPropertyChanged
     {
-        // privatna polja
         private int _id;
         private int _accommodationId;
         private int _guestId;
@@ -18,7 +19,11 @@ namespace BookingApp.Services.DTO
         private int _guestsNumber;
         private string _status;
 
-        // javna svojstva
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
         public int Id
         {
             get => _id;
@@ -28,43 +33,84 @@ namespace BookingApp.Services.DTO
         public int AccommodationId
         {
             get => _accommodationId;
-            set => _accommodationId = value;
+            set
+            {
+                if (_accommodationId != value)
+                {
+                    _accommodationId = value;
+                    OnPropertyChanged();
+        }
+            }
         }
 
         public int GuestId
         {
             get => _guestId;
-            set => _guestId = value;
+            set
+            {
+                if (_guestId != value)
+                {
+                    _guestId = value;
+                    OnPropertyChanged();
+        }
+            }
         }
 
         public DateTime StartDate
         {
             get => _startDate;
-            set => _startDate = value;
+            set
+            {
+                if (_startDate != value)
+                {
+                    _startDate = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public DateTime EndDate
         {
             get => _endDate;
-            set => _endDate = value;
+            set
+            {
+                if (_endDate != value)
+                {
+                    _endDate = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public int GuestsNumber
         {
             get => _guestsNumber;
-            set => _guestsNumber = value;
+            set
+            {
+                if (_guestsNumber != value)
+                {
+                    _guestsNumber = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
         public string Status
         {
             get => _status;
-            set => _status = value;
+            set
+            {
+                if (_status != value)
+                {
+                    _status = value;
+                    OnPropertyChanged();
+                }
+            }
         }
 
-        // prazan konstruktor
         public ReservationDTO() { }
 
-        // konstruktor koji prima entitet
+        
         public ReservationDTO(Reservation reservation)
         {
             _id = reservation.Id;
@@ -76,7 +122,7 @@ namespace BookingApp.Services.DTO
             _status = reservation.Status.ToString();
         }
 
-        // metoda koja DTO pretvara nazad u entitet
+       
         public Reservation ToReservation()
         {
             return new Reservation

@@ -15,14 +15,14 @@
         </Grid.RowDefinitions>
 
 
-        <Button Content="X" HorizontalAlignment="Right" Margin="10" Click="CloseButton_Click" FontWeight="Bold" FontSize="16" Background="Transparent"/>
+        <Button Content="X" HorizontalAlignment="Right" Margin="10"  Command="{Binding CloseCommand}" FontWeight="Bold" FontSize="16" Background="Transparent"/>
 
-        <Image x:Name="DisplayedImage" Grid.Row="1" Stretch="Uniform" Margin="10" />
+        <Image x:Name="DisplayedImage" Grid.Row="1" Stretch="Uniform" Source="{Binding CurrentImage}" Margin="10" />
 
         
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-            <Button Content="⟨" Width="40" Height="30" Margin="5" Click="PrevButton_Click" Background="Transparent"/>
-            <Button Content="⟩" Width="40" Height="30" Margin="5" Click="NextButton_Click" Background="Transparent"/>
+            <Button Content="⟨" Width="40" Height="30" Margin="5" Command="{Binding PrevCommand}" Background="Transparent"/>
+            <Button Content="⟩" Width="40" Height="30" Margin="5" Command="{Binding NextCommand}" Background="Transparent"/>
         </StackPanel>
     </Grid>
 </UserControl>

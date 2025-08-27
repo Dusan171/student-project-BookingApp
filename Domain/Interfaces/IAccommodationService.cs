@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookingApp.Services.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,12 @@ namespace BookingApp.Domain.Interfaces
 {
     public interface IAccommodationService
     {
-        List<Accommodation> GetAllAccommodations();
-        Accommodation GetById(int id);
-        Accommodation AddAccommodation(Accommodation accommodation);
-        void DeleteAccommodation(Accommodation accommodation);
-        Accommodation UpdateAccommodation(Accommodation accommodation);
-        List<Accommodation> GetAccommodationsByLocation(Location location);
+        List<AccommodationDTO> GetAllAccommodations();
+        AccommodationDTO GetAccommodationById(int id);
+        AccommodationDTO AddAccommodation(AccommodationDTO accommodation);
+        void DeleteAccommodation(AccommodationDTO accommodation);
+        AccommodationDTO UpdateAccommodation(AccommodationDTO accommodation);
+        List<AccommodationDTO> GetAccommodationsByLocation(LocationDTO location);
+        bool RegisterAccommodation(AccommodationDTO accommodation);
     }
 }

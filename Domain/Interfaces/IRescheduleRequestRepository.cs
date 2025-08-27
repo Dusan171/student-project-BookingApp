@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookingApp.Serializer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,7 @@ namespace BookingApp.Domain.Interfaces
         int NextId();
         RescheduleRequest GetByReservationId(int reservationId);
         bool HasPendingRequest(int reservationId);
+        public void SaveAll(List<RescheduleRequest> requests);
+        
     }
 }

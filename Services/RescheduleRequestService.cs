@@ -4,7 +4,8 @@ using System.Linq;
 using BookingApp.Domain;
 using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
-using BookingApp.Services.DTOs;
+using BookingApp.Services.DTO;
+using BookingApp.Repositories;
 
 namespace BookingApp.Services
 {
@@ -22,67 +23,100 @@ namespace BookingApp.Services
             _accommodationRepository = accommodationRepository;
             _reservationRepository = reservationRepository;
         }
-        //prebaceno iz RescheduleRequestView.xaml.cs
-
-        // /// Dohvata sve zauzete datume za smeštaj, ISKLJUČUJUĆI datume trenutne rezervacije.
-        public List<DateTime> GetBlackoutDatesForReschedule(Reservation reservation)
+        public List<DateTime> GetBlackoutDatesForReschedule(ReservationDTO reservationDto)
         {
+            if (reservationDto == null)
+            {
+                return new List<DateTime>();
+            }
+
+            var reservation = reservationDto.ToReservation();
+
             var allOccupiedDates = _occupiedDateRepository.GetByAccommodationId(reservation.AccommodationId);
+
             var currentReservationDates = Enumerable.Range(0, (reservation.EndDate - reservation.StartDate).Days)
                                                     .Select(offset => reservation.StartDate.AddDays(offset).Date)
-                                                    .ToHashSet(); // Korišćenje HashSet-a za brže pretrage
+                                                    .ToHashSet();
 
             return allOccupiedDates
                 .Where(od => !currentReservationDates.Contains(od.Date.Date))
                 .Select(od => od.Date)
                 .ToList();
         }
-        /// Kreira i čuva zahtev za pomeranje, nakon provere svih poslovnih pravila.
-        /// 
-        public void CreateRequest(CreateRescheduleRequestDTO requestDto)
+ 
+        public void CreateRequest(RescheduleRequestDTO requestDto)
         {
-            // Dobijamo originalnu rezervaciju iz baze na osnovu ID-a iz DTO-a
-            var reservation = _reservationRepository.GetAll().FirstOrDefault(r => r.Id == requestDto.ReservationId);
-            if (reservation == null)
+            var reservation = _reservationRepository.GetById(requestDto.ReservationId);
+            if (reservation == null) throw new InvalidOperationException("Reservation not found.");
+
+            var accommodation = _accommodationRepository.GetById(reservation.AccommodationId);
+            if (accommodation == null) throw new InvalidOperationException("Accommodation not found.");
+
+            ValidateRequestRules(accommodation, requestDto.NewStartDate, requestDto.NewEndDate);
+
+            CheckForAvailability(reservation, requestDto.NewStartDate, requestDto.NewEndDate);
+
+            var newRequest = requestDto.ToRequest(); 
+
+            newRequest.Status = RequestStatus.Pending;
+            newRequest.OwnerComment = string.Empty; 
+            newRequest.IsSeenByGuest = false;
+
+            _rescheduleRequestRepository.Save(newRequest);
+        }
+        private void ValidateRequestRules(Accommodation accommodation, DateTime newStart, DateTime newEnd)
+        {
+            if (newEnd <= newStart)
             {
-                throw new Exception("Reservation to reschedule could not be found.");
+                throw new ArgumentException("End date must be after start date.");
             }
 
-            var accommodation = _accommodationRepository.GetAll().FirstOrDefault(a => a.Id == reservation.AccommodationId);
-            if (accommodation == null)
-            {
-                throw new Exception("Associated accommodation could not be found.");
-            }
-
-            //Validacija poslovnih pravila (koristimo podatke iz DTO-a)
-            int stayLength = (requestDto.NewEndDate - requestDto.NewStartDate).Days;
+            int stayLength = (newEnd - newStart).Days;
             if (stayLength < accommodation.MinReservationDays)
             {
-                throw new Exception($"Minimum stay is {accommodation.MinReservationDays} days.");
+                throw new InvalidOperationException($"Minimum stay is {accommodation.MinReservationDays} days.");
             }
+        }
 
-            //Provera dostupnosti
-            var blackoutDates = GetBlackoutDatesForReschedule(reservation);
+        private void CheckForAvailability(Reservation originalReservation, DateTime newStart, DateTime newEnd)
+        {
+            var reservationDtoForCheck = new ReservationDTO(originalReservation);
+            var blackoutDates = GetBlackoutDatesForReschedule(reservationDtoForCheck);
+
+            int stayLength = (newEnd - newStart).Days;
             bool isOverlap = Enumerable.Range(0, stayLength)
-                .Select(offset => requestDto.NewStartDate.AddDays(offset).Date)
+                .Select(offset => newStart.AddDays(offset).Date)
                 .Any(date => blackoutDates.Contains(date));
 
             if (isOverlap)
             {
-                throw new Exception("Selected period overlaps with another reservation and is not available.");
+                throw new InvalidOperationException("Selected period overlaps with another reservation.");
             }
+        }
+      
 
-            //Kreiranje domenskog modela iz DTO-a i čuvanje
-            var newRequest = new RescheduleRequest
+            
+        public List<RescheduleRequestDTO> GetAll() 
+        {
+            return _rescheduleRequestRepository.GetAll().Select(r => new RescheduleRequestDTO(r)).ToList(); 
+        }
+      
+        public RescheduleRequestDTO GetById(int id) 
+        { 
+            return _rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id) == null ? null : new RescheduleRequestDTO(_rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id));
+        }
+        public void Update(RescheduleRequestDTO requestDto)
+        {
+            var request = requestDto.ToRequest();
+            var allRequests = _rescheduleRequestRepository.GetAll();
+            var existingRequestIndex = allRequests.FindIndex(r => r.Id == request.Id);
+
+            if (existingRequestIndex != -1)
             {
-                ReservationId = requestDto.ReservationId,
-                GuestId = Session.CurrentUser.Id,
-                NewStartDate = requestDto.NewStartDate,
-                NewEndDate = requestDto.NewEndDate,
-                Status = RequestStatus.Pending,
-                IsSeenByGuest = false
-            };
-            _rescheduleRequestRepository.Save(newRequest);
+                allRequests[existingRequestIndex] = request;
+                _rescheduleRequestRepository.SaveAll(allRequests);
+            }
         }
     }
+    
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Serializer;
@@ -19,8 +19,6 @@ public class Tour : ISerializable
     public double DurationHours { get; set; }
     public List<Images> Images { get; set; }
     public bool IsFinished { get; set; }
-
-    
     public User Guide { get; set; }
 
     public Tour()
@@ -129,11 +127,9 @@ public class Tour : ISerializable
             }
         }
 
-        
         if (values.Length > 11 && int.TryParse(values[11], out int guideId))
         {
             Guide = new User { Id = guideId };
-           
         }
     }
 

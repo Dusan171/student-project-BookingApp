@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BookingApp.Services.DTO;
+using System.Windows.Media.Imaging;
+using System.IO;
 
 namespace BookingApp.Services
 {
@@ -15,34 +18,58 @@ namespace BookingApp.Services
         public AccommodationImageService(IAccommodationImageRepository repository)
         {
             _repository = repository;
+            _baseDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Images");
+
         }
 
-        public List<AccommodationImage> GetAllImages()
+        public List<AccommodationImageDTO> GetAllImages()
         {
-            return _repository.GetAll();
+            return _repository.GetAll()
+                      .Select(image => new AccommodationImageDTO(image))
+                      .ToList();
         }
 
-        public AccommodationImage AddImage(AccommodationImage image)
+        public AccommodationImageDTO AddImage(AccommodationImageDTO image)
         {
             if (image == null || string.IsNullOrWhiteSpace(image.Path))
                 throw new System.Exception("Image is not valid");
 
-            return _repository.Save(image);
+            return new AccommodationImageDTO(_repository.Save(image.ToAccommodationImage()));
         }
 
-        public void DeleteImage(AccommodationImage image)
+        public void DeleteImage(AccommodationImageDTO image)
         {
-            _repository.Delete(image);
+            _repository.Delete(image.ToAccommodationImage());
         }
 
-        public AccommodationImage UpdateImage(AccommodationImage image)
+        public AccommodationImageDTO UpdateImage(AccommodationImageDTO image)
         {
-            return _repository.Update(image);
+            return new AccommodationImageDTO( _repository.Update(image.ToAccommodationImage()));
         }
 
-        public List<AccommodationImage> GetImagesByAccommodation(Accommodation accommodation)
+        public List<AccommodationImageDTO> GetImagesByAccommodation(AccommodationDTO accommodation)
         {
-            return _repository.GetByAccommodation(accommodation);
+            return _repository.GetByAccommodation(accommodation.ToAccommodation())
+                       .Select(image => new AccommodationImageDTO(image))
+                       .ToList();
+        }
+        private readonly string _baseDir;
+
+        public BitmapImage LoadImage(string relativePath)
+        {
+            try
+            {
+                string fullPath = Path.Combine(_baseDir, relativePath);
+                if (!File.Exists(fullPath))
+                    return null;
+
+                return new BitmapImage(new Uri(fullPath, UriKind.Absolute));
+            }
+            catch
+            {
+                return null;
+            }
+        
         }
     }
 }

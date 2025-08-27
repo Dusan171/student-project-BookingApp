@@ -1,9 +1,8 @@
 ﻿using BookingApp.Domain;
 using System;
 
-namespace BookingApp.Services.DTOs
+namespace BookingApp.Services.DTO
 {
-    // Ovo je DTO koji sadrži sve podatke potrebne za prikaz jednog reda u MyReservationsView
     public class ReservationDetailsDTO
     {
         public int ReservationId { get; set; }
@@ -14,7 +13,7 @@ namespace BookingApp.Services.DTOs
         public string RequestStatusText { get; set; }
         public string OwnerComment { get; set; }
         public bool IsRescheduleEnabled { get; set; }
-        public Reservation OriginalReservation { get; set; } // Ostavljamo ovo radi lakšeg prosleđivanja
+        public Reservation OriginalReservation { get; set; } 
         public bool IsRatingEnabled { get; set; }
         public bool IsGuestReviewVisible { get; set; }
     }

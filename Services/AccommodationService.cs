@@ -5,51 +5,88 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BookingApp.Services.DTO;
+using BookingApp.Repositories;
 
 namespace BookingApp.Services
 {
     public class AccommodationService : IAccommodationService
     {
-        private readonly IAccommodationRepository _repository;
+        private readonly IAccommodationRepository accommodationRepository;
+        private readonly ILocationRepository locationRepository;
+        private readonly IAccommodationImageRepository accommodationImageRepository;
 
-        
-        public AccommodationService(IAccommodationRepository repository)
+        public AccommodationService(IAccommodationRepository accommodationRepository, ILocationRepository locationRepository,IAccommodationImageRepository accommodationImageRepository)
         {
-            _repository = repository;
+            this.accommodationRepository = accommodationRepository;
+            this.locationRepository = locationRepository;
+            this.accommodationImageRepository = accommodationImageRepository;
         }
 
-        public List<Accommodation> GetAllAccommodations()
+        public List<AccommodationDTO> GetAllAccommodations()
         {
-            return _repository.GetAll();
+            return accommodationRepository.GetAll().Select(a => new AccommodationDTO(a)).ToList();
         }
 
-        public Accommodation GetById(int id)
+        public AccommodationDTO GetAccommodationById(int id)
         {
-            return _repository.GetById(id);
+            var accommodation = accommodationRepository.GetById(id);
+            if (accommodation == null)
+            {
+                return null;
+            }
+            return new AccommodationDTO(accommodation);
         }
 
-        public Accommodation AddAccommodation(Accommodation accommodation)
+        public AccommodationDTO AddAccommodation(AccommodationDTO accommodation)
         {
-            // izmeni
-            if (!accommodation.IsValid())
+            if (!accommodation.ToAccommodation().IsValid())
                 throw new System.Exception("Accommodation is not valid");
-
-            return _repository.Save(accommodation);
+            accommodationRepository.Save(accommodation.ToAccommodation());
+            return accommodation;
         }
 
-        public void DeleteAccommodation(Accommodation accommodation)
+        public void DeleteAccommodation(AccommodationDTO accommodation)
         {
-            _repository.Delete(accommodation);
+            accommodationRepository.Delete(accommodation.ToAccommodation());
         }
 
-        public Accommodation UpdateAccommodation(Accommodation accommodation)
+        public AccommodationDTO UpdateAccommodation(AccommodationDTO accommodation)
         {
-            return _repository.Update(accommodation);
+            return new AccommodationDTO(accommodationRepository.Update(accommodation.ToAccommodation()));
         }
 
-        public List<Accommodation> GetAccommodationsByLocation(Location location)
+        public List<AccommodationDTO> GetAccommodationsByLocation(LocationDTO location)
         {
-            return _repository.GetByLocation(location);
+            return accommodationRepository
+                       .GetByLocation(location.ToLocation())   
+                       .Select(a => new AccommodationDTO(a))   
+                       .ToList();
+        }
+        public bool RegisterAccommodation(AccommodationDTO accommodation)
+        {
+            var newAccommodation = accommodation.ToAccommodation();
+
+            if (!newAccommodation.IsValid())
+                return false;
+
+            var savedLocation = locationRepository.Save(newAccommodation.GeoLocation);
+            newAccommodation.GeoLocation = savedLocation;
+
+            var savedAccommodation = accommodationRepository.Save(newAccommodation);
+
+            foreach (var imageDto in accommodation.ImagePaths)
+            {
+                var image = new AccommodationImage
+                {
+                    Path = imageDto.Path,
+                    AccommodationId = savedAccommodation.Id
+                };
+
+                accommodationImageRepository.Save(image);
+            }
+
+            return true;
         }
     }
 }

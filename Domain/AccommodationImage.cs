@@ -14,9 +14,9 @@ namespace BookingApp.Domain
 
         public AccommodationImage() { }
 
-        public AccommodationImage(int id, string path, int accommodationId)
+        public AccommodationImage( string path, int accommodationId)
         {
-            Id = id;
+            
             Path = path;
             AccommodationId = accommodationId;
         }

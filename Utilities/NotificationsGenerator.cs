@@ -1,4 +1,8 @@
-﻿using System;
+﻿using BookingApp.Domain;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Repositories;
+using BookingApp.Services.DTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,13 +15,12 @@ namespace BookingApp.Utilities
 {
     public class NotificationsGenerator
     {
-        public static List<Notification> Generate(List<Reservation> reservations, GuestReviewRepository guestReviewRepository)
+        public static List<NotificationDTO> Generate(List<ReservationDTO> reservations, IGuestReviewRepository guestReviewRepository)
         {
-            var notifications = new List<Notification>();
+            var notifications = new List<NotificationDTO>();
 
             foreach (var reservation in reservations)
             {
-                // IsReservationRated sada ponovo radi jer guestReviewRepository opet ima metodu koja prima ceo 'reservation'
                 if (IsReservationFinished(reservation) &&
                     !IsReservationRated(reservation, guestReviewRepository) &&
                     IsWithinRatingPeriod(reservation))
@@ -29,20 +32,20 @@ namespace BookingApp.Utilities
             return notifications;
         }
 
-        private static bool IsReservationFinished(Reservation reservation) => reservation.EndDate < DateTime.Now;
+        private static bool IsReservationFinished(ReservationDTO reservation) => reservation.EndDate < DateTime.Now;
 
-        private static bool IsReservationRated(Reservation reservation, GuestReviewRepository repo) =>
-            repo.GetByReservationId(reservation).Any();
+        private static bool IsReservationRated(ReservationDTO reservation, IGuestReviewRepository repo) =>
+            repo.GetByReservationId(reservation.ToReservation()).Any();
 
-        private static bool IsWithinRatingPeriod(Reservation reservation)
+        private static bool IsWithinRatingPeriod(ReservationDTO reservation)
         {
             int daysPassed = (DateTime.Now - reservation.EndDate).Days;
             return daysPassed >= 0 && daysPassed <= 5;
         }
 
-        private static Notification NewNotification(Reservation reservation)
+        private static NotificationDTO NewNotification(ReservationDTO reservation)
         {
-            return new Notification
+            return new NotificationDTO
             {
                 ReservationId= reservation.Id,
                 GuestId = reservation.GuestId,

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.DTO;
@@ -12,7 +10,7 @@ namespace BookingApp.Services
 {
     public class AccommodationReviewService : IAccommodationReviewService
     {
-        // Sada zavisi SAMO od jednog repozitorijuma!
+        
         private readonly IAccommodationReviewRepository _accommodationReviewRepository;
         private const int DaysToLeaveReview = 5;
 
@@ -52,14 +50,15 @@ namespace BookingApp.Services
         }
         public AccommodationReview GetByReservationId(int reservationId)
         {
-            // 1. Pozivamo repozitorijum da pronađe SVE recenzije za dati ID rezervacije.
-            //    Repozitorijum će verovatno vratiti listu (List<AccommodationReview>).
             var reviewsForReservation = _accommodationReviewRepository.GetByReservationId(reservationId);
 
-            // 2. Pošto znamo da gost može ostaviti samo JEDNU recenziju po rezervaciji,
-            //    bezbedno je uzeti prvi (i jedini) element iz liste.
-            //    Koristimo FirstOrDefault() da bismo izbegli grešku ako recenzija ne postoji (tada će vratiti null).
             return reviewsForReservation.FirstOrDefault();
+        }
+
+        public List<AccommodationReviewDTO> GetAll()
+        {
+            var reviews = _accommodationReviewRepository.GetAll();
+            return reviews.Select(r => new AccommodationReviewDTO(r)).ToList();
         }
     }
 }

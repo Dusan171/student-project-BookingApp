@@ -1,62 +1,62 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using BookingApp.Domain;
+﻿using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Services.DTO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BookingApp.Services
 {
     public class GuestReviewService : IGuestReviewService
     {
-        // JEDINA zavisnost servisa je interfejs repozitorijuma.
         private readonly IGuestReviewRepository _repository;
 
-        // Konstruktor prima implementaciju repozitorijuma.
         public GuestReviewService(IGuestReviewRepository repository)
         {
             _repository = repository;
         }
 
-        // --- Metoda koja je VAMA potrebna za ViewModel ---
-        public GuestReview GetReviewForReservation(int reservationId)
+        public List<GuestReviewDTO> GetAllReviews()
         {
-            // Servis delegira posao repozitorijumu i obrađuje rezultat.
-            // Repozitorijum vraća listu, a servis uzima prvi element.
-            return _repository.GetByReservationId(reservationId).FirstOrDefault();
+            return _repository.GetAll()
+                      .Select(review => new GuestReviewDTO(review))
+                      .ToList();
         }
 
-
-        // --- Metode koje su potrebne VAŠEM KOLEGI (Vlasnik) ---
-        // One samo prosleđuju poziv direktno repozitorijumu.
-
-        public List<GuestReview> GetAllReviews()
+        public GuestReviewDTO AddReview(GuestReviewDTO review)
         {
-            return _repository.GetAll();
+            return new GuestReviewDTO(_repository.Save(review.ToGuestReview()));
         }
 
-        public GuestReview AddReview(GuestReview review)
+        public void DeleteReview(GuestReviewDTO review)
         {
-            // Ovde bi mogla da dođe neka poslovna logika PRE čuvanja,
-            // npr. provera da li je rok za ocenjivanje prošao.
-            // Za sada je direktan poziv u redu.
-            return _repository.Save(review);
+            _repository.Delete(review.ToGuestReview());
         }
 
-        public void DeleteReview(GuestReview review)
+        public GuestReviewDTO UpdateReview(GuestReviewDTO review)
         {
-            _repository.Delete(review);
+            return new GuestReviewDTO(_repository.Update(review.ToGuestReview()));
         }
 
-        public GuestReview UpdateReview(GuestReview review)
+        public List<GuestReviewDTO> GetReviewsByReservation(ReservationDTO reservation)
         {
-            return _repository.Update(review);
+            return _repository.GetByReservationId(reservation.ToReservation().Id)
+                      .Select(review => new GuestReviewDTO(review)).ToList();
         }
 
-        // --- Stara metoda koja ostaje radi kompatibilnosti ---
-        public List<GuestReview> GetReviewsByReservation(Reservation reservation)
+        public GuestReviewDTO GetReviewForReservation(int reservationId)
         {
-            // OVO JE ISPRAVKA ZA GREŠKU KOJA VAM SE JAVLJALA
-            // Pozivamo metodu repozitorijuma koja prima ID, a ne ceo objekat.
-            return _repository.GetByReservationId(reservation.Id);
+            var reviewModel = _repository.GetByReservationId(reservationId).FirstOrDefault();
+
+            if (reviewModel == null)
+            {
+                return null;
+            }
+
+            return new GuestReviewDTO(reviewModel);
         }
+
     }
 }

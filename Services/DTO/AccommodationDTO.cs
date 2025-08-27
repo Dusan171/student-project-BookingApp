@@ -1,55 +1,167 @@
 ﻿using BookingApp.Domain;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace BookingApp.Services.DTO
 {
-    public class AccommodationDTO
+    public class AccommodationDTO : INotifyPropertyChanged
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-       // public string City { get; set; }
-       // public string Country { get; set; }
-       public Location GeoLocation { get; set; }
-        public string Type { get; set; }
-        public int MaxGuests { get; set; }
-        public int MinReservationDays { get; set; }
-        public int CancellationDeadlineDays { get; set; }
-        public List<string> ImagePaths { get; set; }
+     
+        private int _id;
+        private string _name;
+        private LocationDTO _geoLocation;
+        private string _city;
+        private string _country;
+        private string _type;
+        private int? _maxGuests;
+        private int? _minReservationDays;
+        private int _cancellationDeadlineDays;
+        private List<AccommodationImageDTO> _imagePaths;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+       
+        public int Id
+        {
+            get => _id;
+            set => _id = value;
+        }
+
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public LocationDTO GeoLocation
+        {
+            get => _geoLocation;
+            set
+            {
+                if (_geoLocation != value)
+                {
+                    _geoLocation = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string Type
+        {
+            get => _type;
+            set
+            {
+                if (_type != value)
+                {
+                    _type = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int? MaxGuests
+        {
+            get => _maxGuests;
+            set
+            {
+                if (_maxGuests != value)
+                {
+                    _maxGuests = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int? MinReservationDays
+        {
+            get => _minReservationDays;
+            set
+    {
+                if (_minReservationDays != value)
+                {
+                    _minReservationDays = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int CancellationDeadlineDays
+        {
+            get => _cancellationDeadlineDays;
+            set
+            {
+                if (_cancellationDeadlineDays != value)
+                {
+                    _cancellationDeadlineDays = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public List<AccommodationImageDTO> ImagePaths
+        {
+            get => _imagePaths;
+            set
+            {
+                if (_imagePaths != value)
+                {
+                    _imagePaths = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
 
         public AccommodationDTO()
         {
-            ImagePaths = new List<string>();
+            GeoLocation = new LocationDTO();
+            _imagePaths = new List<AccommodationImageDTO>();
         }
 
-        public AccommodationDTO(Accommodation accommodation)
+        public AccommodationDTO(Accommodation a)
         {
-            Id = accommodation.Id;
-            Name = accommodation.Name;
-            GeoLocation = accommodation.GeoLocation;
-            Type = accommodation.Type.ToString();
-            MaxGuests = accommodation.MaxGuests ?? 0;
-            MinReservationDays = accommodation.MinReservationDays ?? 0;
-            CancellationDeadlineDays = accommodation.CancellationDeadlineDays;
-            ImagePaths = accommodation.Images?.Select(img => img.Path).ToList() ?? new List<string>();
+            Id = a.Id;
+            Name = a.Name;
+            GeoLocation = new LocationDTO(a.GeoLocation);
+            Type = a.Type.ToString();
+            MaxGuests = a.MaxGuests;
+            MinReservationDays = a.MinReservationDays;
+            CancellationDeadlineDays = a.CancellationDeadlineDays;
+            ImagePaths = a.Images.Select(i => new AccommodationImageDTO { Path = i.Path }).ToList();
         }
 
         public Accommodation ToAccommodation()
         {
-            Enum.TryParse<AccommodationType>(Type, out var accommodationType);
-
-            return new Accommodation
+            var accommodation = new Accommodation
             {
                 Id = this.Id,
                 Name = this.Name,
-                GeoLocation = this.GeoLocation,
-                Type = accommodationType,
+                GeoLocation=this.GeoLocation.ToLocation(),
+                Type = Enum.Parse<AccommodationType>(this.Type),
                 MaxGuests = this.MaxGuests,
                 MinReservationDays = this.MinReservationDays,
                 CancellationDeadlineDays = this.CancellationDeadlineDays,
-                Images = this.ImagePaths.Select(path => new AccommodationImage { Path = path }).ToList()
+                Images = this.ImagePaths.Select(i => new AccommodationImage { Path = i.Path }).ToList()
             };
+
+            return accommodation;
         }
     }
 }
+
