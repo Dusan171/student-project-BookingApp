@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using BookingApp.Serializer;
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public class GuestReview : ISerializable, INotifyPropertyChanged
     {

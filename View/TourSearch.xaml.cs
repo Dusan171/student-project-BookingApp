@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 using BookingApp.Utilities;
 

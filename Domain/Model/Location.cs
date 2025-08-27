@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 using System.ComponentModel;
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public class Location : ISerializable, INotifyPropertyChanged
     {

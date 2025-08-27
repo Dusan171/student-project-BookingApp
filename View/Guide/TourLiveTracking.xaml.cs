@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using BookingApp.Domain;
 using BookingApp.Utilities;
 using BookingApp.Repositories;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.View.Guide
 {

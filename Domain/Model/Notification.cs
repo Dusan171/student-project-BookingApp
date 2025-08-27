@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Serializer;
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public class Notification : BookingApp.Serializer.ISerializable, INotifyPropertyChanged
     {
@@ -24,7 +24,7 @@ namespace BookingApp.Domain
             Id.ToString(),
             ReservationId.ToString(),
             GuestId.ToString(),
-            Deadline.ToString("o"), // ISO 8601 format da se datum lepo upiše
+            Deadline.ToString("o"), 
             IsRead.ToString()
          };
             return csvValues;

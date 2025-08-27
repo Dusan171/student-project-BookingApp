@@ -1,7 +1,7 @@
 ﻿using System;
 using BookingApp.Serializer;
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
 
     public class AccommodationReview : ISerializable

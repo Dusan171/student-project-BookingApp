@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Domain.Model;
 using BookingApp.Presentation.View.Guest;
 using BookingApp.Services;
 using BookingApp.Services.DTO;

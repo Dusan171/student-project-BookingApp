@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Serializer;
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public class ReservationGuest : ISerializable
     {
@@ -48,7 +48,7 @@ namespace BookingApp.Domain
                 FirstName,
                 LastName,
                 Age.ToString(),
-                Email ?? "", // DODATO u CSV
+                Email ?? "", 
                 HasAppeared.ToString(),
                 KeyPointJoinedAt.ToString()
             };
@@ -63,14 +63,12 @@ namespace BookingApp.Domain
             Age = int.Parse(values[4]);
             if (values.Length > 7)
             {
-                
                 Email = values[5];
                 HasAppeared = bool.Parse(values[6]);
                 KeyPointJoinedAt = int.Parse(values[7]);
             }
             else
             {
-                
                 Email = "";
                 HasAppeared = bool.Parse(values[5]);
                 KeyPointJoinedAt = int.Parse(values[6]);

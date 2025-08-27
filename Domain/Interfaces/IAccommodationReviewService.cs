@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using BookingApp.Domain.Model;
 using BookingApp.DTO;
 using BookingApp.Services.DTO;
 

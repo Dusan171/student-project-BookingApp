@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Serializer;
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public enum TourReservationStatus
     {

@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Utilities;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
             RateGuestCommand = new RelayCommand(ExecuteRateGuest, CanExecuteRateGuest);
         }
 
-        // Metoda koja ce se koristiti za dodavanje notifikacija
         public void AddNotifications(List<Notification> notifications)
         {
             Notifications.Clear();

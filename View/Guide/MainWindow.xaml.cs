@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 
 namespace BookingApp.View.Guide

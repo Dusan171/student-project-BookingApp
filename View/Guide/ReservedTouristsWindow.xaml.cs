@@ -3,6 +3,7 @@ using System.Windows;
 using BookingApp.Domain;
 using System.Windows.Controls;
 using System.Linq;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.View.Guide
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Serializer;
 using BookingApp.Domain.Interfaces;
 using System.IO;

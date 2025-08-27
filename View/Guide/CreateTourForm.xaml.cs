@@ -7,6 +7,7 @@ using BookingApp.Domain;
 using BookingApp.Repositories;
 using System.Collections.ObjectModel;
 using System.IO;
+using BookingApp.Domain.Model;
 
 
 namespace BookingApp.View.Guide

@@ -1,4 +1,4 @@
-﻿using BookingApp.Domain;
+﻿using BookingApp.Domain.Model;
 using BookingApp.Presentation.ViewModel; // Namespace gde je vaš novi ViewModel
 using System.Windows;
 

@@ -1,4 +1,4 @@
-﻿using BookingApp.Domain;
+﻿using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 using BookingApp.Services;
 using System;
@@ -18,16 +18,12 @@ using System.Windows.Shapes;
 
 namespace BookingApp.Presentation.View.Owner
 {
-    /// <summary>
-    /// Interaction logic for RegisterAccommodationView.xaml
-    /// </summary>
+   
     public partial class RegisterAccommodationView : UserControl
     {
         public RegisterAccommodationView()
         {
             InitializeComponent();
-
-            // Postavi DataContext preko Injectora
             DataContext = Injector.CreateRegisterAccommodationViewModel();
         }
     }

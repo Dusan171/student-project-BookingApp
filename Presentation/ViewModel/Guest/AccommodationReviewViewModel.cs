@@ -6,6 +6,7 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using BookingApp.Services.DTO;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Presentation.ViewModel
 {

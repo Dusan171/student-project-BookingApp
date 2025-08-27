@@ -1,4 +1,4 @@
-﻿using BookingApp.Domain;
+﻿using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 using System.Collections.Generic;

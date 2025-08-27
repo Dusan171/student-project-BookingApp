@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;

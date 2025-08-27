@@ -1,5 +1,5 @@
 ﻿using System;
-using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Services
