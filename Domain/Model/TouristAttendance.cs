@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public class TouristAttendance
     {

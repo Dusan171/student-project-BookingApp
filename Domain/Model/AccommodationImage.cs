@@ -3,7 +3,7 @@ using System;
 using System.ComponentModel;
 
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public class AccommodationImage : ISerializable, INotifyPropertyChanged
     {

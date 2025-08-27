@@ -1,9 +1,11 @@
 ﻿using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Xml.Linq;
 
 namespace BookingApp.View
 {

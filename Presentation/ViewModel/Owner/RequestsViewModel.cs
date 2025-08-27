@@ -9,6 +9,7 @@ using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
 using System.Linq;
 using System;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Presentation.ViewModel.Owner
 {

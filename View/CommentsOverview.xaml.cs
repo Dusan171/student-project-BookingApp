@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 using System.Collections.ObjectModel;
 using System.Windows;

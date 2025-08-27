@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Domain;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Domain.Interfaces
 {

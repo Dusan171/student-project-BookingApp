@@ -9,7 +9,7 @@ using BookingApp.Serializer;
 using static System.Net.Mime.MediaTypeNames;
 using System.ComponentModel;
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public enum AccommodationType { APARTMENT, HOUSE, COTTAGE }
     public class Accommodation : ISerializable, INotifyPropertyChanged
@@ -75,7 +75,7 @@ namespace BookingApp.Domain
 
         }
 
-        //treba prebaciti u AccommodationService.cs i onda promijeniti svuda gdje se bila pozivala
+        
         public bool IsValid()
         {
             if (string.IsNullOrWhiteSpace(Name))

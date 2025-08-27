@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Serializer;
 using BookingApp.Domain.Interfaces;
 

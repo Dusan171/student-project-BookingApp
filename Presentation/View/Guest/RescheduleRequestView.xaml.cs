@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain;
+using BookingApp.Domain.Model;
 using BookingApp.Presentation.ViewModel; // Namespace gde je ViewModel
 using System.Windows;
 

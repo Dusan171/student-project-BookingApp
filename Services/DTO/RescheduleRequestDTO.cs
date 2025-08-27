@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using BookingApp.Domain;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Services.DTO
 {

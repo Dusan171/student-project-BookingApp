@@ -8,6 +8,7 @@ using System.Windows;
 using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Presentation.View.Owner;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.View
 {
