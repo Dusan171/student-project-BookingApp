@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using BookingApp.Domain;
-using BookingApp.Utilities;
 using BookingApp.Repositories;
 using BookingApp.Domain.Model;
 
@@ -16,7 +15,7 @@ namespace BookingApp.View.Guide
         private List<TourReservation> reservations;
         private TourRepository tourRepository = new TourRepository();
         private List<TouristAttendance> attendanceList = new List<TouristAttendance>();
-
+        private TouristAttendanceRepository attendanceRepo = new TouristAttendanceRepository();
 
         public TourLiveTracking(Tour tour, DateTime startTime)
         {
@@ -31,7 +30,7 @@ namespace BookingApp.View.Guide
         private void LoadTourDetails(DateTime startTime)
         {
             TourNameTextBlock.Text = currentTour.Name;
-            TourDateTimeTextBlock.Text = $"Date & Time: {startTime:yy-mm-dd, HH:mm:ss}";
+            TourDateTimeTextBlock.Text = $"Date & Time: {startTime:yyyy-MM-dd HH:mm}";
             TourLanguageTextBlock.Text = $"Language: {currentTour.Language}";
             TourLocationTextBlock.Text = $"Location: {currentTour.Location.City}, {currentTour.Location.Country}";
             TourDurationTextBlock.Text = $"Duration: {currentTour.DurationHours}h";
@@ -41,13 +40,14 @@ namespace BookingApp.View.Guide
         {
             var reservationRepository = new TourReservationRepository();
             reservations = reservationRepository.GetAll()
-                          .Where(r => r.TourId == currentTour.Id && r.Status==0)
+                          .Where(r => r.TourId == currentTour.Id && r.Status == 0)
                           .ToList();
 
             attendanceList = reservations
                 .SelectMany(r => r.Guests)
                 .Select(g => new TouristAttendance
                 {
+                    TourId = currentTour.Id,
                     GuestId = g.Id,
                     HasAppeared = false,
                     KeyPointJoinedAt = -1
@@ -55,96 +55,42 @@ namespace BookingApp.View.Guide
                 .ToList();
         }
 
-
-
         private void LoadKeyPoints()
         {
             KeyPointsPanel.Children.Clear();
 
-            bool firstChecked = true;
             int count = 1;
             foreach (var kp in currentTour.KeyPoints)
             {
                 var cb = new CheckBox
                 {
                     Content = $"#{count} {kp.Name}",
-                    Margin = new Thickness(0, 5, 0, 5),
-                    IsChecked = firstChecked
+                    Margin = new Thickness(0, 5, 0, 5)
                 };
 
-                cb.Tag = kp; 
+                cb.Tag = kp;
                 cb.Click += KeyPointCheckBox_Click;
 
-                firstChecked = false;
                 KeyPointsPanel.Children.Add(cb);
                 count++;
             }
-        }
-        private ReservationGuest FindGuestById(int guestId)
-        {
-            foreach (var reservation in reservations)
-            {
-                var guest = reservation.Guests.FirstOrDefault(g => g.Id == guestId);
-                if (guest != null)
-                    return guest;
-            }
-            return null;
-        }
 
+            if (KeyPointsPanel.Children.Count > 0 && KeyPointsPanel.Children[0] is CheckBox firstCb)
+                firstCb.IsChecked = true;
+        }
 
         private void KeyPointCheckBox_Click(object sender, RoutedEventArgs e)
         {
-            var cb = sender as CheckBox;
-            if (cb == null) return;
-
-            var keyPoint = cb.Tag as KeyPoint;
-            if (keyPoint == null) return;
-
-            var guests = reservations.SelectMany(r => r.Guests).ToList();
-            var dialog = new ReservedTouristsWindow(currentTour, keyPoint, guests, attendanceList);
-             
-
-            if (dialog.ShowDialog() == true)
+            if (AllKeyPointsVisited())
             {
-                var updatedGuests = dialog.GetUpdatedAttendance();
-
-                foreach (var guest in updatedGuests)
-                {
-                    var record = attendanceList.FirstOrDefault(a => a.GuestId == guest.GuestId && a.TourId == currentTour.Id);
-
-                    if (record != null)
-                    {
-                        record.HasAppeared = guest.HasAppeared;
-                        record.KeyPointJoinedAt = guest.HasAppeared ? keyPoint.Id : -1;
-                    }
-                    else
-                    {
-                        attendanceList.Add(new TouristAttendance
-                        {
-                            TourId = currentTour.Id,
-                            GuestId = guest.GuestId,
-                            HasAppeared = guest.HasAppeared,
-                            KeyPointJoinedAt = guest.HasAppeared ? keyPoint.Id : -1
-                        });
-                    }
-                }
-
-                if (AllKeyPointsVisited())
-                {
-                    MessageBox.Show("Sve ključne tačke su prošle. Tura će biti završena.",
-                                    "Kraj Ture",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Information);
-                    EndTour();
-                }
-            }
-            else
-            {
-                cb.IsChecked = false;
+                OpenTouristWindow();
+                MessageBox.Show("Sve ključne tačke su prošle. Tura će biti završena.",
+                                "Kraj Ture",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                EndTour();
             }
         }
-
-
 
         private bool AllKeyPointsVisited()
         {
@@ -154,6 +100,54 @@ namespace BookingApp.View.Guide
                     return false;
             }
             return true;
+        }
+        private void TouristsButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenTouristWindow();
+        }
+        private void OpenTouristWindow()
+        {
+            var passedKeyPoints = currentTour.KeyPoints
+                                    .Where(kp =>
+                                        KeyPointsPanel.Children
+                                        .OfType<CheckBox>()
+                                        .Any(cb => cb.Tag == kp && cb.IsChecked == true))
+                                    .ToList();
+
+            if (!passedKeyPoints.Any())
+            {
+                MessageBox.Show("Nema označenih tačaka – turisti se ne mogu dodeliti.");
+                return;
+            }
+
+            var guests = reservations.SelectMany(r => r.Guests).ToList();
+
+            var dialog = new ReservedTouristsWindow(currentTour, passedKeyPoints, guests, attendanceList);
+
+            if (dialog.ShowDialog() == true)
+            {
+                attendanceList = dialog.GetUpdatedAttendance();
+                WriteAttendantsToFile(attendanceList);
+            }
+        }
+        private void WriteAttendantsToFile(List<TouristAttendance> attendantsList)
+        {
+            foreach (var attendant in attendantsList)
+            {
+                var existing = attendanceRepo.GetAll().FirstOrDefault(a => a.Id == attendant.Id);
+                if (existing == null)
+                {
+                    attendanceRepo.Save(attendant); 
+                }
+                else
+                {
+                    existing.GuestId = attendant.GuestId;
+                    existing.TourId = attendant.TourId;
+                    existing.HasAppeared = attendant.HasAppeared;
+                    existing.KeyPointJoinedAt = attendant.KeyPointJoinedAt;
+                    attendanceRepo.Update(existing); 
+                }
+            }
         }
 
 
@@ -168,17 +162,17 @@ namespace BookingApp.View.Guide
             {
                 EndTour();
             }
-            
         }
+
         private void EndTour()
         {
-            currentTour.IsFinished = true;
-
+            currentTour.Status = TourStatus.FINISHED;
             tourRepository.Update(currentTour);
 
             MessageBox.Show("Tura je uspešno završena.", "Završeno", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            NavigationService?.GoBack();
+            var mainPage = new MainWindow();
+            this.NavigationService.Navigate(mainPage);
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -189,14 +183,15 @@ namespace BookingApp.View.Guide
 
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Help is not implemented yet.");
+            MessageBox.Show("Klikni na ključne tačke kako bi ih obeležio. Dugme 'Turisti' otvara listu turista i omogućava da označiš kada su se pridružili.");
         }
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            Session.CurrentUser = null;
+            /*Session.CurrentUser = null;
             var signInWindow = new SignInForm();
-            signInWindow.Show();
+            signInWindow.Show();*/
         }
+
     }
 }

@@ -40,6 +40,7 @@ namespace BookingApp.View.Guide
             allTours = tourRepository.GetAll();
             FillTourDetails(allTours);
         }
+
         private void FillTourDetails(List<Tour> tours)
         {
             var locationRepo = new LocationRepository();
@@ -52,35 +53,22 @@ namespace BookingApp.View.Guide
                 if (tour.Location != null)
                     tour.Location = locationRepo.GetById(tour.Location.Id);
 
-                var detailedKeyPoints = new List<KeyPoint>();
-                foreach (var kp in tour.KeyPoints)
-                {
-                    var detailedKp = keyPointRepo.GetById(kp.Id);
-                    if (detailedKp != null)
-                        detailedKeyPoints.Add(detailedKp);
-                }
-                tour.KeyPoints = detailedKeyPoints;
+                tour.KeyPoints = tour.KeyPoints
+                    .Select(kp => keyPointRepo.GetById(kp.Id))
+                    .Where(kp => kp != null)
+                    .ToList();
 
-                var detailedStartTimes = new List<StartTourTime>();
-                foreach (var st in tour.StartTimes)
-                {
-                    var detailedSt = startTimeRepo.GetById(st.Id);
-                    if (detailedSt != null)
-                        detailedStartTimes.Add(detailedSt);
-                }
-                tour.StartTimes = detailedStartTimes;
+                tour.StartTimes = tour.StartTimes
+                    .Select(st => startTimeRepo.GetById(st.Id))
+                    .Where(st => st != null)
+                    .ToList();
 
-                var detailedImages = new List<Images>();
-                foreach (var img in tour.Images)
-                {
-                    var detailedImg = imagesRepo.GetById(img.Id);
-                    if (detailedImg != null)
-                        detailedImages.Add(detailedImg);
-                }
-                tour.Images = detailedImages;
+                tour.Images = tour.Images
+                    .Select(img => imagesRepo.GetById(img.Id))
+                    .Where(img => img != null)
+                    .ToList();
             }
         }
-
 
         private void LoadAllReservations()
         {
@@ -122,9 +110,17 @@ namespace BookingApp.View.Guide
             }
         }
 
+        private bool HasOngoingTour()
+        {
+            return allTours.Any(t => t.Status == TourStatus.ACTIVE);
+        }
+        private bool IsNotFinished(Tour tour)
+        {
+            var foundTour = allTours.FirstOrDefault(t => t.Id == tour.Id);
+            return foundTour != null && foundTour.Status == TourStatus.NONE;
+        }
         private void CreateTourCard(Tour tour, DateTime time, bool isToursToday, bool hasActiveReservation)
         {
-
             Border card = new Border
             {
                 BorderThickness = new Thickness(1),
@@ -172,35 +168,27 @@ namespace BookingApp.View.Guide
                 Margin = new Thickness(20, 0, 0, 0),
                 VerticalAlignment = VerticalAlignment.Center,
                 Visibility = isToursToday ? Visibility.Visible : Visibility.Collapsed,
-                IsEnabled = !hasActiveReservation
+                IsEnabled = hasActiveReservation && !HasOngoingTour() && IsNotFinished(tour)
             };
 
             startBtn.Click += (s, e) =>
             {
+                if (!hasActiveReservation)
+                {
+                    MessageBox.Show("Tura ne može početi jer nema rezervisanih turista.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                tour.Status = TourStatus.ACTIVE;
                 var liveTrackingPage = new TourLiveTracking(tour, time);
                 LiveTrackingFrame.Navigate(liveTrackingPage);
                 LiveTrackingOverlay.Visibility = Visibility.Visible;
                 TourListPanel.Visibility = Visibility.Collapsed;
             };
 
-            Button cancelBtn = new Button
-            {
-                Content = "CANCEL",
-                Foreground = Brushes.Red,
-                Margin = new Thickness(10, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                Visibility = isToursToday ? Visibility.Collapsed : Visibility.Visible
-            };
-
-            cancelBtn.Click += (s, e) =>
-            {
-                MessageBox.Show($"Dodaj kod");
-            };
-
             horizontal.Children.Add(image);
             horizontal.Children.Add(info);
             horizontal.Children.Add(startBtn);
-            horizontal.Children.Add(cancelBtn);
 
             card.Child = horizontal;
 
@@ -213,6 +201,11 @@ namespace BookingApp.View.Guide
             TourListPanel.Visibility = Visibility.Collapsed;
 
             CreateTourForm form = new CreateTourForm();
+            form.TourCreated += (s, e) =>
+            {
+                LoadAllTours();
+                DisplayTours(FilterToday());
+            };
             form.Cancelled += OnCreateTourCancelled;
             CreateTourFrame.Navigate(form);
         }
