@@ -16,6 +16,7 @@ namespace BookingApp.View.Guide
         private TourRepository tourRepository = new TourRepository();
         private List<TouristAttendance> attendanceList = new List<TouristAttendance>();
         private TouristAttendanceRepository attendanceRepo = new TouristAttendanceRepository();
+        private ReservationGuestRepository guestsRepository = new ReservationGuestRepository();
 
         public TourLiveTracking(Tour tour, DateTime startTime)
         {
@@ -145,7 +146,15 @@ namespace BookingApp.View.Guide
                     existing.TourId = attendant.TourId;
                     existing.HasAppeared = attendant.HasAppeared;
                     existing.KeyPointJoinedAt = attendant.KeyPointJoinedAt;
-                    attendanceRepo.Update(existing); 
+                    attendanceRepo.Update(existing);
+                    var guest = guestsRepository.GetAll().FirstOrDefault(g => g.Id == attendant.GuestId);
+                    if (guest != null)
+                    {
+                        guest.HasAppeared = attendant.HasAppeared;
+                        guest.KeyPointJoinedAt = attendant.KeyPointJoinedAt;
+                        guestsRepository.Update(guest);
+                        guestsRepository.SaveAll();
+                    }
                 }
             }
         }
