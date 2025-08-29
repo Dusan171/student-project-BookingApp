@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using BookingApp.Domain;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.View.Guide
 {

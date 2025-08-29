@@ -1,10 +1,11 @@
 ﻿using BookingApp.Domain.Model;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace BookingApp.Domain
 {
-    public class TourReview
+    public class TourReview : INotifyPropertyChanged
     {
         public int Id { get; set; }
         public int TourId { get; set; }
@@ -14,7 +15,25 @@ namespace BookingApp.Domain
         public int TourInterestRating { get; set; } // 1-5 zanimljivost ture
         public string Comment { get; set; } = string.Empty;
         public DateTime ReviewDate { get; set; }
-        public bool IsValid { get; set; } = true;
+        private bool _isValid;
+        public bool IsValid
+        {
+            get => _isValid;
+            set
+            {
+                if (_isValid != value)
+                {
+                    _isValid = value;
+                    OnPropertyChanged(nameof(IsValid));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
         public List<string> ImagePaths { get; set; } = new List<string>(); // Putanje do slika
 
         // Navigation properties
@@ -35,7 +54,7 @@ namespace BookingApp.Domain
             TourInterestRating = tourInterestRating;
             Comment = comment;
             ReviewDate = DateTime.Now;
-            IsValid = true;
+            _isValid = true;
         }
 
         public double GetAverageRating()

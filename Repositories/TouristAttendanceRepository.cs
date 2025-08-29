@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Serializer;
 using System.IO;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Repositories
 {
