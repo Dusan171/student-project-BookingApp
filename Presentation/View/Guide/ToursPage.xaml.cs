@@ -112,9 +112,11 @@ namespace BookingApp.Presentation.View.Guide
             foreach (var tour in tours)
             {
                 bool hasActiveReservation = HasActiveReservation(tour);
+                bool isCancelled = IsCancelled(tour);
+
                 //foreach (var startTime in tour.StartTimes)
                 //{
-                if (tour.StartTimes != null && tour.StartTimes.Any())
+                if (tour.StartTimes != null && tour.StartTimes.Any() && !isCancelled)
                 {
                     CreateTourCard(tour, tour.StartTimes.First().Time, isToursToday, hasActiveReservation);
                 }
@@ -122,6 +124,11 @@ namespace BookingApp.Presentation.View.Guide
                 //}
             }
         }
+        private bool IsCancelled(Tour tour)
+        {
+            return tour.Status == TourStatus.CANCELLED;
+        }
+
 
         private bool HasOngoingTour()
         {
@@ -204,10 +211,35 @@ namespace BookingApp.Presentation.View.Guide
                     TourListPanel.Visibility = Visibility.Collapsed;
                 }
             };
+            Button cancelBtn = new Button
+            {
+                Content = "CANCEL",
+                Foreground = Brushes.Red,
+                Margin = new Thickness(10, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                Visibility = !isToursToday ? Visibility.Visible : Visibility.Collapsed,
+                IsEnabled = (time - DateTime.Now).TotalHours >= 48 && tour.Status != TourStatus.ACTIVE
+            };
+
+            cancelBtn.Click += (s, e) =>
+            {
+                var result = MessageBox.Show("Da li ste sigurni da želite otkazati ovu turu?", "Potvrda otkazivanja", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    tour.Status = TourStatus.CANCELLED;
+
+                    var tourRepo = new TourRepository();
+                    tourRepo.Update(tour);
+                    MessageBox.Show("Tura je uspešno otkazana.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    DisplayTours(TourFilterComboBox.SelectedIndex == 0 ? FilterToday() : allTours);
+                }
+            };
 
             horizontal.Children.Add(image);
             horizontal.Children.Add(info);
             horizontal.Children.Add(startBtn);
+            horizontal.Children.Add(cancelBtn);
 
             card.Child = horizontal;
 

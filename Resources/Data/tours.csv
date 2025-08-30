@@ -1,13 +1,13 @@
-1|Ruma - Obilazak grada|1|srpski|20|3|2.5|NONE|3|1|1|1|
-2|Zlatibor|2|engleski|4|3|1.5|NONE|3|3|2|2|
-3|Nis - Obilazak starog grada|3|srpski|2|8|1|NONE|3|8|3|3|
-4|Pariz|4|engleski|20|3|3|NONE|3|4|5|5|
-5|Nis - Muzej|3|srpski|12|2|1|NONE|3|8|3|3|
-6|Nis - Tvrdjava|3|srpski|15|5|0.8|FINISHED|3|7|22|3|
-7|Setnja po kampusu|6|srpski|10|2|1|FINISHED|3||6|1|
-8|Tour of Islam Grcki|8|Croatian|2|2|1|CANCELLED|3|7,8|10||
-9|Tura FTN|9|Serbian|5|2|2|FINISHED|3|9,10,11,12|9||
-10|Diznilend|20|Engleski|12|3|100|FINISHED|3|13|11,12,13,14,15||
-11|Tura Novog Sada|21|Serbian|10|5|2|FINISHED|3|14,15|16,17||
-12|Tura Kampusa|21|Serbian|12|3|1|FINISHED|3|16|18,19,20||
-13|Tura Beograda|22|srpski|11|2|1|FINISHED|3|18|22||
+1|Ruma - Obilazak grada|1|srpski|20|3|2.5|NONE|3|1|1|1|0
+2|Zlatibor|2|engleski|4|3|1.5|NONE|3|3|2|2|0
+3|Nis - Obilazak starog grada|3|srpski|2|8|1|NONE|3|8|3|3|0
+4|Pariz|4|engleski|20|3|3|CANCELLED|3|4|5||0
+5|Nis - Muzej|3|srpski|12|2|1|NONE|3|8|3|3|0
+6|Nis - Tvrdjava|3|srpski|15|5|0.8|FINISHED|3|7|22|3|0
+7|Setnja po kampusu|6|srpski|10|2|1|FINISHED|3||6|1|0
+8|Tour of Islam Grcki|8|Croatian|2|2|1|CANCELLED|3|7,8|10||0
+9|Tura FTN|9|Serbian|5|2|2|FINISHED|3|9,10,11,12|9||0
+10|Diznilend|20|Engleski|12|3|100|FINISHED|3|13|11,12,13,14,15||0
+11|Tura Novog Sada|21|Serbian|10|5|2|FINISHED|3|14,15|16,17||0
+12|Tura Kampusa|21|Serbian|12|3|1|FINISHED|3|16|18,19,20||0
+13|Tura Beograda|22|srpski|11|2|1|FINISHED|3|18|22||0
