@@ -9,24 +9,27 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
+using BookingApp.Utilities;
+using BookingApp.Presentation.View.Guide;
 
-namespace BookingApp.View.Guide
+namespace BookingApp.Presentation.View.Guide
 {
     public partial class ToursPage : UserControl
     {
         private List<Tour> allTours;
         private List<TourReservation> allReservations;
-
+        MainWindow mainPage;
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
-        public ToursPage()
+        public ToursPage(MainWindow main)
         {
             AllocConsole();
             InitializeComponent();
 
             LoadAllTours();
             LoadAllReservations();
+            mainPage = main;
 
             TourFilterComboBox.SelectionChanged += TourFilterComboBox_SelectionChanged;
 
@@ -37,7 +40,13 @@ namespace BookingApp.View.Guide
         {
             var tourRepository = new TourRepository();
             allTours = tourRepository.GetAll();
+            FilterGuideTours();
             FillTourDetails(allTours);
+        }
+
+        private void FilterGuideTours()
+        {
+            allTours = allTours.Where(t => t.GuideId == Session.CurrentUser.Id).ToList();
         }
 
         private void FillTourDetails(List<Tour> tours)
@@ -182,10 +191,9 @@ namespace BookingApp.View.Guide
 
                 tour.Status = TourStatus.ACTIVE;
 
-                // LiveTrackingFrame mora postojati u XAML-u
                 if (LiveTrackingFrame != null)
                 {
-                    var liveTrackingPage = new TourLiveTracking(tour, time);
+                    var liveTrackingPage = new TourLiveTracking(tour, time, mainPage);
                     LiveTrackingFrame.Navigate(liveTrackingPage);
                     LiveTrackingOverlay.Visibility = Visibility.Visible;
                     TourListPanel.Visibility = Visibility.Collapsed;
@@ -203,32 +211,24 @@ namespace BookingApp.View.Guide
 
         private void NewTour_Click(object sender, RoutedEventArgs e)
         {
-            if (CreateTourFrame != null && CreateTourOverlay != null)
+
+            CreateTourForm form = new CreateTourForm(mainPage);
+            form.TourCreated += (s, e) =>
             {
-                CreateTourOverlay.Visibility = Visibility.Visible;
-                TourListPanel.Visibility = Visibility.Collapsed;
+                LoadAllTours();
+                DisplayTours(FilterToday());
 
-                CreateTourForm form = new CreateTourForm();
-                form.TourCreated += (s, e) =>
-                {
-                    LoadAllTours();
-                    DisplayTours(FilterToday());
-                };
-                form.Cancelled += OnCreateTourCancelled;
+            };
+            form.Cancelled += OnCreateTourCancelled;
+            mainPage.ContentFrame.Content = form;
 
-                CreateTourFrame.Navigate(form);
-            }
         }
 
         private void OnCreateTourCancelled(object sender, EventArgs e)
         {
-            if (CreateTourOverlay != null)
-            {
-                CreateTourOverlay.Visibility = Visibility.Collapsed;
-                TourListPanel.Visibility = Visibility.Visible;
-                LoadAllTours();
-                DisplayTours(FilterToday());
-            }
+            LoadAllTours();
+            DisplayTours(FilterToday());
+            mainPage.ContentFrame.Content = this;
         }
     }
 }
