@@ -39,6 +39,7 @@ namespace BookingApp.Presentation.View.Guide
         private void LoadAllTours()
         {
             var tourRepository = new TourRepository();
+            //ovde si menjala
             allTours = tourRepository.GetAll();
             FilterGuideTours();
             FillTourDetails(allTours);
@@ -111,10 +112,14 @@ namespace BookingApp.Presentation.View.Guide
             foreach (var tour in tours)
             {
                 bool hasActiveReservation = HasActiveReservation(tour);
-                foreach (var startTime in tour.StartTimes)
+                //foreach (var startTime in tour.StartTimes)
+                //{
+                if (tour.StartTimes != null && tour.StartTimes.Any())
                 {
-                    CreateTourCard(tour, startTime.Time, isToursToday, hasActiveReservation);
+                    CreateTourCard(tour, tour.StartTimes.First().Time, isToursToday, hasActiveReservation);
                 }
+
+                //}
             }
         }
 
