@@ -11,47 +11,22 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- LEVA STRANA -->
         <Border Grid.Column="0" Background="#F2F2F2" CornerRadius="30" Margin="10,10,10,76" Padding="20">
             <StackPanel HorizontalAlignment="Center" Width="487">
-                <!-- Avatar -->
                 <Ellipse Width="100" Height="100" Stroke="Gray" StrokeThickness="2" Margin="0,0,0,10">
                     <Ellipse.Fill>
                         <SolidColorBrush Color="LightCyan"/>
                     </Ellipse.Fill>
                 </Ellipse>
 
-                <!-- Dinamičko korisničko ime -->
-                <TextBlock  Text="{Binding Username}" x:Name="UsernameTextBlock" FontWeight="Bold" FontSize="16" Margin="0,0,0,20" TextAlignment="Center"/>
+                <TextBlock Text="{Binding Username}" x:Name="UsernameTextBlock" FontWeight="Bold" FontSize="16" Margin="0,0,0,20" TextAlignment="Center"/>
 
-                <!-- Navigacija -->
-                <Button x:Name="NotificationsButton" Content="📢 Notifications" Margin="0,5" Command="{Binding ShowNotificationsCommand}"/>
-                <Button Content="👥 Community" Margin="0,5" Command="{Binding CommunityCommand}"/>
-                <Button Content="📚 My Library" Margin="0,5" Command="{Binding LibraryCommand}"/>
+                <Button x:Name="UnratedButton" Content="🔔 Unrated" Margin="0,5" Command="{Binding ShowUnratedGuestsCommand}" />
+                <Button Content="📚 My units" Margin="0,5" Command="{Binding ShowMyUnitsCommand}"/>
+                <Button Content="💬 Forums" Margin="0,5" Command="{Binding ShowForumsCommand}"/>
             </StackPanel>
         </Border>
 
-        <!-- DESNA STRANA -->
-        <ContentControl  Content="{Binding CurrentContent}" x:Name="MainContent" Grid.Column="1" Margin="20"/>
-
-
-        <Border x:Name="ToastPopup"
-        Grid.Column="1"
-        Background="LightGray"
-        BorderBrush="Black"
-        BorderThickness="1"
-        Padding="10"
-        CornerRadius="20"
-        Width="250"
-        Height="70"
-        HorizontalAlignment="Right"
-        VerticalAlignment="Bottom"
-        Margin="20"
-        Visibility="Collapsed"
-        Opacity="1">
-            <TextBlock x:Name="ToastMessage" Text="You have unrated guests!" TextAlignment="Center" FontWeight="Bold" Foreground="Black"/>
-        </Border>
-        <!-- ListBox za notifikacije -->
-        
+        <ContentControl Content="{Binding CurrentContent}" x:Name="MainContent" Grid.Column="1" Margin="20"/>
     </Grid>
 </UserControl>

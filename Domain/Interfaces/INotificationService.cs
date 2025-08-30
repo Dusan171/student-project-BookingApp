@@ -9,10 +9,11 @@ namespace BookingApp.Domain.Interfaces
 {
     public interface INotificationService
     {
-        NotificationDTO GetById(int id);
         List<NotificationDTO> GetAll();
+        NotificationDTO GetById(int id);
         NotificationDTO Add(NotificationDTO notification);
         void Delete(NotificationDTO notification);
-       
+        NotificationDTO MarkAsRead(int id);
+        void CheckAndGenerateNotifications();
     }
 }

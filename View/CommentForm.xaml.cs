@@ -76,28 +76,38 @@ namespace BookingApp.View
 
         private void SaveComment(object sender, RoutedEventArgs e)
         {
-
-            if(SelectedComment != null)
+            if (SelectedComment != null)
             {
-                SelectedComment.Text = Text;
-                SelectedComment.CreationTime = DateTime.Now;
-                Comment updatedComment = _repository.Update(SelectedComment);
-                if (updatedComment != null)
-                {
-                    // Update observable collection
-                    int index = CommentsOverview.Comments.IndexOf(SelectedComment);
-                    CommentsOverview.Comments.Remove(SelectedComment);
-                    CommentsOverview.Comments.Insert(index, updatedComment);
-                }
-            } 
+                UpdateComment();
+            }
             else
             {
-                Comment newComment = new Comment(DateTime.Now, Text, LoggedInUser);
-                Comment savedComment = _repository.Save(newComment);
-                CommentsOverview.Comments.Add(savedComment);
+                CreateNewComment();
             }
-            
+
             Close();
+        }
+
+        private void UpdateComment()
+        {
+            SelectedComment.Text = Text;
+            SelectedComment.CreationTime = DateTime.Now;
+
+            Comment updatedComment = _repository.Update(SelectedComment);
+
+            if (updatedComment != null)
+            {
+                int index = CommentsOverview.Comments.IndexOf(SelectedComment);
+                CommentsOverview.Comments.Remove(SelectedComment);
+                CommentsOverview.Comments.Insert(index, updatedComment);
+            }
+        }
+
+        private void CreateNewComment()
+        {
+            Comment newComment = new Comment(DateTime.Now, Text, LoggedInUser);
+            Comment savedComment = _repository.Save(newComment);
+            CommentsOverview.Comments.Add(savedComment);
         }
 
         private void Cancel(object sender, RoutedEventArgs e) 

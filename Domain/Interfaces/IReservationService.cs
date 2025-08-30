@@ -12,5 +12,6 @@ namespace BookingApp.Domain.Interfaces
         ReservationDTO GetById(int id);
         void Update(ReservationDTO reservationDto);
         bool IsAccommodationAvailable(int accommodationId, DateTime newStartDate, DateTime newEndDate);
+        List<ReservationDTO> GetUnratedReservations();
     }
 }

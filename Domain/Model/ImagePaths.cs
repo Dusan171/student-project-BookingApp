@@ -11,21 +11,17 @@ namespace BookingApp.Domain.Model
         public int Id { get; set; }
         public string Path { get; set; }
 
-        public ImagePaths()
-        {
-        }
+        public ImagePaths(){ }
 
         public ImagePaths(int id, string path)
         {
             Id = id;
             Path = path;
         }
-
         public string[] ToCSV()
         {
             return new string[] { $"{Id}|{Path}" };
         }
-
         public void FromCSV(string[] values)
         {
             Id = int.Parse(values[0]);
