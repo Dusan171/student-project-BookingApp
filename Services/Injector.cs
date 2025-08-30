@@ -8,6 +8,7 @@ using BookingApp.Utilities;
 using System;
 using System.Collections.Generic;
 using BookingApp.Presentation.View.Owner;
+using BookingApp.Presentation.ViewModel.Tourist;
 
 namespace BookingApp.Services
 {
@@ -30,12 +31,17 @@ namespace BookingApp.Services
             _implementations[typeof(IRescheduleRequestRepository)] = new RescheduleRequestRepository();
             _implementations[typeof(INotificationRepository)] = new NotificationRepository();
 
-            // Tour modules
+            // Tour modules - postoje?i
             _implementations[typeof(ITourRepository)] = new TourRepository();
             _implementations[typeof(IStartTourTimeRepository)] = new StartTourTimeRepository();
             _implementations[typeof(ITourReservationRepository)] = new TourReservationRepository();
             _implementations[typeof(IReservationGuestRepository)] = new ReservationGuestRepository();
             _implementations[typeof(ITourReviewRepository)] = new TourReviewRepository();
+
+            // Tour modules - novi
+            _implementations[typeof(ITourPresenceRepository)] = new TourPresenceRepository();
+            _implementations[typeof(ITourRequestRepository)] = new TourRequestRepository();
+            _implementations[typeof(ITourRequestParticipantRepository)] = new TourRequestParticipantRepository();
 
             // ------------------- Services -------------------
             _implementations[typeof(IUserService)] = new UserService(CreateInstance<IUserRepository>());
@@ -67,7 +73,6 @@ namespace BookingApp.Services
                 CreateInstance<IReservationRepository>(),
                 CreateInstance<IAccommodationRepository>(),
                 CreateInstance<IRescheduleRequestRepository>(),
-                //CreateInstance<IRescheduleRequestService>(),
                 CreateInstance<IAccommodationReviewService>(),
                 CreateInstance<IGuestReviewService>()
             );
@@ -76,7 +81,7 @@ namespace BookingApp.Services
                 CreateInstance<IReservationService>()
             );
 
-            // ------------------- Tour Services -------------------
+            // ------------------- Tour Services - postoje?i -------------------
             _implementations[typeof(ITourService)] = new TourService(
                 CreateInstance<ITourRepository>(),
                 CreateInstance<ILocationRepository>(),
@@ -96,6 +101,21 @@ namespace BookingApp.Services
                 CreateInstance<ITourReviewService>()
             );
             _implementations[typeof(IReservationGuestService)] = new ReservationGuestService(CreateInstance<IReservationGuestRepository>());
+
+            // ------------------- Tour Services - novi -------------------
+            _implementations[typeof(ITourPresenceService)] = new TourPresenceService(
+                CreateInstance<ITourPresenceRepository>(),
+                CreateInstance<ITourRepository>(),
+                CreateInstance<IUserRepository>(),
+                CreateInstance<INotificationService>(),
+                CreateInstance<ITourReservationRepository>()
+                );
+            _implementations[typeof(ITourRequestService)] = new TourRequestService(
+                CreateInstance<ITourRequestRepository>(),
+                CreateInstance<ITourRequestParticipantRepository>(),
+                CreateInstance<IUserRepository>(),
+                CreateInstance<INotificationService>()
+            );
 
             // ------------------- Other Services -------------------
             _implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
@@ -170,6 +190,20 @@ namespace BookingApp.Services
             var reservationService = CreateInstance<IReservationService>();
             var guestReviewService = CreateInstance<IGuestReviewService>();
             return new UnratedGuestsViewModel(reservationService, guestReviewService);
+        }
+
+        // ------------------- Tourist ViewModel Factories - novi -------------------
+        public static TourPresenceViewModel CreateTourPresenceViewModel(int userId)
+        {
+            var presenceService = CreateInstance<ITourPresenceService>();
+            var tourService = CreateInstance<ITourService>();
+            return new TourPresenceViewModel(presenceService, tourService, userId);
+        }
+
+        public static TourRequestViewModel CreateTourRequestViewModel(int userId)
+        {
+            var requestService = CreateInstance<ITourRequestService>();
+            return new TourRequestViewModel(requestService, userId);
         }
     }
 }

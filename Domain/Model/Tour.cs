@@ -32,6 +32,8 @@ public class Tour : ISerializable
         }
     }
 
+    public Tour() { }
+
     public Tour(int id, int guideID, string name, Location location, string description, string language,
                  int maxTourists, int reservedSpots, double durationHours, TourStatus status, User guide = null)
     {
@@ -137,5 +139,6 @@ public class Tour : ISerializable
         if (values.Length > 12 && int.TryParse(values[12], out int guideId))
         {
             Guide = new User { Id = guideId };
+        }
     }
 }

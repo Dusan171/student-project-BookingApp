@@ -88,6 +88,13 @@
                     <Button x:Name="ReviewsTab" Content="⭐ Ocene i komentari" 
                             Style="{StaticResource TabButtonStyle}"
                             Click="Reviews_Click"/>
+                    <Button x:Name="TourPresenceTab" Content="📍 Praćenje tura" 
+                            Style="{StaticResource TabButtonStyle}"
+                            Click="TourPresence_Click"/>
+
+                    <Button x:Name="TourRequestsTab" Content="📝 Zahtevi za ture" 
+                            Style="{StaticResource TabButtonStyle}"
+                            Click="TourRequests_Click"/>
                 </StackPanel>
 
                 <!-- User Info & Logout -->
@@ -123,6 +130,9 @@
 
                 <views:TourReviewView x:Name="TourReviewViewContent" Visibility="Collapsed"/>
 
+                <views:TourPresenceView x:Name="TourPresenceContent" Visibility="Collapsed"/>
+                <views:TourRequestsView x:Name="TourRequestsContent" Visibility="Collapsed"/>
+
                 <Border x:Name="ReviewsContent" Background="White" CornerRadius="8" 
                         Margin="20" Visibility="Collapsed">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -133,6 +143,8 @@
                                    Foreground="#7F8C8D" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </Border>
+
+
             </Grid>
         </Border>
     </Grid>
