@@ -8,7 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace BookingApp.View.Guide
+namespace BookingApp.Presentation.View.Guide
 {
     public partial class ReviewsPage : UserControl 
     {
@@ -73,7 +73,7 @@ namespace BookingApp.View.Guide
                 var tour = tours.FirstOrDefault(t => t.Id == review.TourId);
                 var tourist = tourists.FirstOrDefault(t => t.Id == review.TouristId);
                 String joinedAt = GetKeyPointJoinedAt(tourist.Id, guests);
-                TourReviewDisplay reviewDisplay = new TourReviewDisplay(1, tour.Name, review.IsValid, tourist.FirstName + " " + tourist.LastName, joinedAt, review.GuideKnowledgeRating, review.GuideLanguageRating, review.TourInterestRating, review.Comment, review);
+                TourReviewDisplay reviewDisplay = new TourReviewDisplay(1, tour.Name, review.IsValid, tourist.FirstName + " " + tourist.LastName, joinedAt, review.GuideKnowledge, review.GuideLanguage, review.TourInterest, review.Comment, review);
                 reviewDisplays.Add(reviewDisplay);
                 //dodaj u fajl preko repository, a mozda i ne mora fr
             }
@@ -101,7 +101,7 @@ namespace BookingApp.View.Guide
                     
                     review.OriginalReview.IsValid = false;
                     review.IsValid = false;
-                    reviewRepository.Update(review.OriginalReview); 
+                    reviewRepository.UpdateReview(review.OriginalReview); 
                     reviewRepository.SaveToFile();
                     //CreateReviewForShow();
                     ReviewsList.Items.Refresh();

@@ -1,14 +1,15 @@
 ﻿using BookingApp.Utilities;
 using BookingApp.Presentation.Owner;
 using BookingApp.Presentation.View.Guest;
-using BookingApp.View.Guide;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Presentation.View.Owner;
+using BookingApp.Presentation.View.Guide;
 using BookingApp.Domain.Model;
+using BookingApp.Presentation.View.Tourist;
 
 namespace BookingApp.View
 {
@@ -79,8 +80,8 @@ namespace BookingApp.View
                             break;
 
                         case UserRole.TOURIST:
-                            var touristView = new TourSearch();
-                            touristView.Show();
+                            var touristWindow = new TouristDashboardWindow();
+                            touristWindow.Show();
                             break;
 
                         default:

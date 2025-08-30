@@ -9,24 +9,27 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.IO;
+using BookingApp.Utilities;
+using BookingApp.Presentation.View.Guide;
 
-namespace BookingApp.View.Guide
+namespace BookingApp.Presentation.View.Guide
 {
     public partial class ToursPage : UserControl
     {
         private List<Tour> allTours;
         private List<TourReservation> allReservations;
-
+        MainWindow mainPage;
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
-        public ToursPage()
+        public ToursPage(MainWindow main)
         {
             AllocConsole();
             InitializeComponent();
 
             LoadAllTours();
             LoadAllReservations();
+            mainPage = main;
 
             TourFilterComboBox.SelectionChanged += TourFilterComboBox_SelectionChanged;
 
@@ -36,8 +39,15 @@ namespace BookingApp.View.Guide
         private void LoadAllTours()
         {
             var tourRepository = new TourRepository();
+            //ovde si menjala
             allTours = tourRepository.GetAll();
+            FilterGuideTours();
             FillTourDetails(allTours);
+        }
+
+        private void FilterGuideTours()
+        {
+            allTours = allTours.Where(t => t.GuideId == Session.CurrentUser.Id).ToList();
         }
 
         private void FillTourDetails(List<Tour> tours)
@@ -102,12 +112,23 @@ namespace BookingApp.View.Guide
             foreach (var tour in tours)
             {
                 bool hasActiveReservation = HasActiveReservation(tour);
-                foreach (var startTime in tour.StartTimes)
+                bool isCancelled = IsCancelled(tour);
+
+                //foreach (var startTime in tour.StartTimes)
+                //{
+                if (tour.StartTimes != null && tour.StartTimes.Any() && !isCancelled)
                 {
-                    CreateTourCard(tour, startTime.Time, isToursToday, hasActiveReservation);
+                    CreateTourCard(tour, tour.StartTimes.First().Time, isToursToday, hasActiveReservation);
                 }
+
+                //}
             }
         }
+        private bool IsCancelled(Tour tour)
+        {
+            return tour.Status == TourStatus.CANCELLED;
+        }
+
 
         private bool HasOngoingTour()
         {
@@ -185,16 +206,41 @@ namespace BookingApp.View.Guide
                 // LiveTrackingFrame mora postojati u XAML-u
                 if (LiveTrackingFrame != null)
                 {
-                    var liveTrackingPage = new TourLiveTracking(tour, time);
+                    var liveTrackingPage = new TourLiveTracking(tour, time, mainPage);
                     LiveTrackingFrame.Navigate(liveTrackingPage);
                     LiveTrackingOverlay.Visibility = Visibility.Visible;
                     TourListPanel.Visibility = Visibility.Collapsed;
+                }
+            };
+            Button cancelBtn = new Button
+            {
+                Content = "CANCEL",
+                Foreground = Brushes.Red,
+                Margin = new Thickness(10, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                Visibility = !isToursToday ? Visibility.Visible : Visibility.Collapsed,
+                IsEnabled = (time - DateTime.Now).TotalHours >= 48 && tour.Status != TourStatus.ACTIVE
+            };
+
+            cancelBtn.Click += (s, e) =>
+            {
+                var result = MessageBox.Show("Da li ste sigurni da želite otkazati ovu turu?", "Potvrda otkazivanja", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    tour.Status = TourStatus.CANCELLED;
+
+                    var tourRepo = new TourRepository();
+                    tourRepo.Update(tour);
+                    MessageBox.Show("Tura je uspešno otkazana.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    DisplayTours(TourFilterComboBox.SelectedIndex == 0 ? FilterToday() : allTours);
                 }
             };
 
             horizontal.Children.Add(image);
             horizontal.Children.Add(info);
             horizontal.Children.Add(startBtn);
+            horizontal.Children.Add(cancelBtn);
 
             card.Child = horizontal;
 
@@ -208,13 +254,15 @@ namespace BookingApp.View.Guide
                 CreateTourOverlay.Visibility = Visibility.Visible;
                 TourListPanel.Visibility = Visibility.Collapsed;
 
-                CreateTourForm form = new CreateTourForm();
-                form.TourCreated += (s, e) =>
-                {
-                    LoadAllTours();
-                    DisplayTours(FilterToday());
-                };
-                form.Cancelled += OnCreateTourCancelled;
+            CreateTourForm form = new CreateTourForm(mainPage);
+            form.TourCreated += (s, e) =>
+            {
+                LoadAllTours();
+                DisplayTours(FilterToday());
+
+            };
+            form.Cancelled += OnCreateTourCancelled;
+            mainPage.ContentFrame.Content = form;
 
                 CreateTourFrame.Navigate(form);
             }
@@ -226,9 +274,9 @@ namespace BookingApp.View.Guide
             {
                 CreateTourOverlay.Visibility = Visibility.Collapsed;
                 TourListPanel.Visibility = Visibility.Visible;
-                LoadAllTours();
-                DisplayTours(FilterToday());
-            }
+            LoadAllTours();
+            DisplayTours(FilterToday());
+            mainPage.ContentFrame.Content = this;
         }
     }
 }

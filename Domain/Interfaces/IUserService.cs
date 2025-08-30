@@ -9,7 +9,6 @@ namespace BookingApp.Domain.Interfaces
 {
     public interface IUserService
     {
-        UserDTO GetUserByUsername(string username);
-
+        UserDTO? GetUserByUsername(string username);
     }
 }

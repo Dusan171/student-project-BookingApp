@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BookingApp.Serializer;
 
 namespace BookingApp.Domain.Model
@@ -23,13 +22,15 @@ namespace BookingApp.Domain.Model
         public int NumberOfGuests { get; set; }
         public DateTime ReservationDate { get; set; }
         public TourReservationStatus Status { get; set; }
-        public List<ReservationGuest> Guests { get; set; }
 
-        public Tour Tour { get; set; }
-        public StartTourTime StartTourTime { get; set; }
+
+        public List<ReservationGuest> Guests { get; set; }
+        public Tour? Tour { get; set; }
+        public StartTourTime? StartTourTime { get; set; }
 
 
         public string TourName => Tour?.Name ?? "Nepoznata tura";
+
         public string GuideName
         {
             get
@@ -43,8 +44,10 @@ namespace BookingApp.Domain.Model
                 return "Nepoznat vodič";
             }
         }
+
         public string TourDateFormatted => StartTourTime?.Time.ToString("dd.MM.yyyy") ?? ReservationDate.ToString("dd.MM.yyyy");
 
+        public bool IsCompleted => Status == TourReservationStatus.COMPLETED;
         public TourReservation()
         {
             Guests = new List<ReservationGuest>();
@@ -67,44 +70,37 @@ namespace BookingApp.Domain.Model
 
         public string[] ToCSV()
         {
-            string guestIds = string.Join(",", Guests.Select(g => g.Id)); 
             return new string[]
             {
-        Id.ToString(),
-        TourId.ToString(),
-        StartTourTimeId.ToString(),
-        TouristId.ToString(),
-        NumberOfGuests.ToString(),
-        ReservationDate.ToString("dd-MM-yyyy HH:mm:ss"),
-        Status.ToString(),
-        guestIds
+                Id.ToString(),
+                TourId.ToString(),
+                StartTourTimeId.ToString(),
+                TouristId.ToString(),
+                NumberOfGuests.ToString(),
+                ReservationDate.ToString("dd-MM-yyyy HH:mm:ss"),
+                Status.ToString()
             };
         }
 
         public void FromCSV(string[] values)
         {
+            if (values == null || values.Length < 7)
+            {
+                throw new ArgumentException("Invalid CSV data for TourReservation");
+            }
+
             Id = int.Parse(values[0]);
             TourId = int.Parse(values[1]);
             StartTourTimeId = int.Parse(values[2]);
             TouristId = int.Parse(values[3]);
             NumberOfGuests = int.Parse(values[4]);
             ReservationDate = DateTime.ParseExact(values[5], "dd-MM-yyyy HH:mm:ss",
-                                                 System.Globalization.CultureInfo.InvariantCulture);
+                                      CultureInfo.InvariantCulture);
             Status = (TourReservationStatus)Enum.Parse(typeof(TourReservationStatus), values[6]);
-            Guests = new List<ReservationGuest>();
 
-            
-            if (values.Length > 7 && !string.IsNullOrEmpty(values[7]))
-            {
-                var guestIds = values[7].Split(','); 
-                foreach (var id in guestIds)
-                {
-                    if (!string.IsNullOrWhiteSpace(id) && int.TryParse(id.Trim(), out int guestId))
-                    {
-                        Guests.Add(new ReservationGuest { Id = guestId });
-                    }
-                }
-            }
+            Guests = new List<ReservationGuest>();
         }
+
+ 
     }
 }

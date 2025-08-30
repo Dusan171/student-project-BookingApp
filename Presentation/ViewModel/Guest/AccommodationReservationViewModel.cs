@@ -2,10 +2,12 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Collections.Generic;
+using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
 using BookingApp.Utilities;
 using BookingApp.Services.DTO;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Presentation.ViewModel.Guest
 {

@@ -1,4 +1,4 @@
-﻿using BookingApp.Services.DTO;
+using BookingApp.Services.DTO;
 using System;
 using System.Globalization;
 using System.Windows;

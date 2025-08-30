@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace BookingApp.View.Guide
+namespace BookingApp.Presentation.View.Guide
 {
     public partial class MainWindow : Page
     {
@@ -9,12 +9,12 @@ namespace BookingApp.View.Guide
         {
             InitializeComponent();
 
-            ContentFrame.Navigate(new ToursPage());
+            ContentFrame.Navigate(new ToursPage(this));
         }
 
         private void Tours_Click(object sender, RoutedEventArgs e)
         {
-            ContentFrame.Navigate(new ToursPage());
+            ContentFrame.Navigate(new ToursPage(this));
         }
 
         private void Reviews_Click(object sender, RoutedEventArgs e)
@@ -24,7 +24,7 @@ namespace BookingApp.View.Guide
 
         private void Statistics_Click(object sender, RoutedEventArgs e)
         {
-            //ContentFrame.Navigate(new StatisticsPage());
+            ContentFrame.Navigate(new StatisticsSelectionPage(this));
         }
     }
 }

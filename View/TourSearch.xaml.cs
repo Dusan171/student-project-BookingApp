@@ -195,7 +195,7 @@ namespace BookingApp.View
             }
         }
 
-        private void ViewReviewBtn_Click(object sender, RoutedEventArgs e)
+        /*private void ViewReviewBtn_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is Tour tour)
             {
@@ -215,7 +215,7 @@ namespace BookingApp.View
                                    "Vaša ocena", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
-        }
+        }*/
 
         private void ShowReviewForm()
         {
@@ -484,9 +484,9 @@ namespace BookingApp.View
             {
                 TourId = _selectedTourForReview.Id,
                 TouristId = _currentUser.Id,
-                GuideKnowledgeRating = _guideKnowledgeRating,
-                GuideLanguageRating = _guideLanguageRating,
-                TourInterestRating = _tourInterestRating,
+                GuideKnowledge = _guideKnowledgeRating,
+                GuideLanguage = _guideLanguageRating,
+                TourInterest = _tourInterestRating,
                 Comment = txtReviewComment.Text.Trim(),
                 ImagePaths = new List<string>(_selectedImagePaths),
                 ReviewDate = DateTime.Now
@@ -494,7 +494,7 @@ namespace BookingApp.View
 
             try
             {
-                _reviewRepository.Add(review);
+                _reviewRepository.AddReview(review);
                 MessageBox.Show("Ocena je uspešno sačuvana!", "Uspeh",
                                MessageBoxButton.OK, MessageBoxImage.Information);
 

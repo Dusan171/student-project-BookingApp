@@ -1,17 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using BookingApp.Domain.Model;
 
-namespace BookingApp.View.Guide
-{
+namespace BookingApp.Presentation.View.Guide
+{ 
     public partial class ReservedTouristsWindow : Window
     {
         private List<ReservationGuest> guests;
         private List<KeyPoint> passedKeyPoints;
         private List<TouristAttendance> attendance;
-
 
         public ReservedTouristsWindow(Tour tour, List<KeyPoint> passedKeyPoints, List<ReservationGuest> guests, List<TouristAttendance> attendance)
         {

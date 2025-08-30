@@ -5,8 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BookingApp.Domain.Interfaces
+namespace BookingApp.Domain.Interfaces.ServiceInterfaces
 {
+    using BookingApp.Services.DTO;
+    using System.Collections.Generic;
+
     public interface ILocationService
     {
         List<LocationDTO> GetAllLocations();

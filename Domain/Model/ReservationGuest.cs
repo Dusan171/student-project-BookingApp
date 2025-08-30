@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BookingApp.Serializer;
 
 namespace BookingApp.Domain.Model
@@ -11,13 +7,24 @@ namespace BookingApp.Domain.Model
     {
         public int Id { get; set; }
         public int ReservationId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         public int Age { get; set; }
-        public string Email { get; set; } // NOVO POLJE
+        public string Email { get; set; } = string.Empty;
         public bool HasAppeared { get; set; }
         public int KeyPointJoinedAt { get; set; }
         public int TouristId { get; set; }
+
+        public string DisplayTitle
+        {
+            get
+            {
+                // Ovo će se postaviti u ViewModel-u kada se kreira guest
+                return $"Osoba {Index + 1}" + (Email != null ? " (glavni kontakt)" : "");
+            }
+        }
+
+        public int Index { get; set; }
 
         public ReservationGuest()
         {
@@ -30,16 +37,14 @@ namespace BookingApp.Domain.Model
         {
             Id = id;
             ReservationId = reservationId;
-            FirstName = firstName;
-            LastName = lastName;
+            FirstName = firstName ?? string.Empty;
+            LastName = lastName ?? string.Empty;
             Age = age;
-            Email = email;
+            Email = email ?? string.Empty;
             HasAppeared = hasAppeared;
             KeyPointJoinedAt = keyPointJoinedAt;
             TouristId = touristId;
         }
-
-        public string FullName => $"{FirstName} {LastName}";
 
         public string[] ToCSV()
         {
@@ -47,10 +52,10 @@ namespace BookingApp.Domain.Model
             {
                 Id.ToString(),
                 ReservationId.ToString(),
-                FirstName,
-                LastName,
+                FirstName ?? string.Empty,
+                LastName ?? string.Empty,
                 Age.ToString(),
-                Email ?? "",
+                Email ?? string.Empty,
                 HasAppeared.ToString(),
                 KeyPointJoinedAt.ToString(),
                 TouristId.ToString()
@@ -58,28 +63,20 @@ namespace BookingApp.Domain.Model
         }
 
         public void FromCSV(string[] values)
-        {
-            Id = int.Parse(values[0]);
-            ReservationId = int.Parse(values[1]);
-            FirstName = values[2];
-            LastName = values[3];
-            Age = int.Parse(values[4]);
+{
+    if (values == null || values.Length < 6)
+        throw new ArgumentException("Invalid CSV data for ReservationGuest");
 
-            if (values.Length > 7)
-            {
-                Email = values[5];
-                HasAppeared = bool.Parse(values[6]);
-                KeyPointJoinedAt = int.Parse(values[7]);
-                TouristId = int.Parse(values[8]);
-            }
-            else
-            {
-                Email = "";
-                HasAppeared = bool.Parse(values[5]);
-                KeyPointJoinedAt = int.Parse(values[6]);
-                TouristId = int.Parse(values[7]);
-            }
-        }
-    }
+    Id = int.Parse(values[0]);
+    ReservationId = int.Parse(values[1]);
+    FirstName = values[2] ?? string.Empty;
+    LastName = values[3] ?? string.Empty;
+    Age = int.Parse(values[4]);
+    Email = values.Length > 5 ? values[5] ?? string.Empty : string.Empty;
+    HasAppeared = values.Length > 6 ? bool.Parse(values[6]) : false;
+    KeyPointJoinedAt = values.Length > 7 ? int.Parse(values[7]) : -1;
+    TouristId = values.Length > 8 ? int.Parse(values[8]) : 0;
 }
 
+    }
+}
