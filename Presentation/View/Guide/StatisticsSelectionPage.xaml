@@ -1,0 +1,116 @@
+﻿<UserControl x:Class="BookingApp.Presentation.View.Guide.StatisticsSelectionPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White">
+
+        <!-- Početni meni za izbor -->
+        <Grid x:Name="SelectionGrid" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+                <TextBlock Text="Choose what statistics you would like to see" 
+                           FontSize="16" TextAlignment="Center" Margin="0,0,0,20"/>
+                <Button Content="Show Tour Statistics" Width="200" Height="40" Margin="0,0,0,10" 
+                        Click="ShowTourStatistics_Click"/>
+                <Button Content="Show Request Statistics" Width="200" Height="40" 
+                        Click="ShowRequestStatistics_Click"/>
+            </StackPanel>
+        </Grid>
+
+     
+</UserControl>
+<!--  <Grid x:Name="TourStatisticsGrid" Visibility="Collapsed">
+            <StackPanel Margin="20">
+                <TextBlock Text="Tour Statistics" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,10">
+    <TextBlock Text="Filter by year:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+    <ComboBox x:Name="YearComboBox" Width="120" SelectionChanged="YearComboBox_SelectionChanged"/>
+</StackPanel>
+<TextBlock Text="Most visited tour" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,5"/>
+<StackPanel x:Name="MostVisitedPanel" />
+
+<TextBlock Text="Other tours" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,5"/>
+<ScrollViewer VerticalScrollBarVisibility="Auto" Height="400">
+    <ItemsControl x:Name="OtherToursPanel">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel/>
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+    </ItemsControl>
+</ScrollViewer>
+</StackPanel>
+</Grid> -->
+
+<!-- 
+    <UserControl x:Class="BookingApp.View.Guide.StatisticsSelectionPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White">
+
+    <Grid>
+        <Grid x:Name="SelectionGrid" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+                <TextBlock Text="Choose what statistics you would like to see" 
+                           FontSize="16" TextAlignment="Center" Margin="0,0,0,20"/>
+                <Button Content="Show Tour Statistics" Width="200" Height="40" Margin="0,0,0,10" 
+                        Click="ShowTourStatistics_Click"/>
+                <Button Content="Show Request Statistics" Width="200" Height="40" 
+                        Click="ShowRequestStatistics_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid x:Name="TourStatisticsGrid" Visibility="Collapsed">
+            <StackPanel Margin="20">
+                <TextBlock Text="Tour Statistics" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                <StackPanel Margin="0,10,0,10">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="SpaceBetween">
+                        <TextBlock Text="Most visited tour" FontSize="16" FontWeight="SemiBold"/>
+                        <ComboBox x:Name="YearComboBox" Width="120" SelectionChanged="YearFilterComboBox_SelectionChanged">
+                            <ComboBoxItem Content="All Time" IsSelected="True"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <Border BorderThickness="1" BorderBrush="Gray" Padding="10" Margin="0,5,0,10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                            <Rectangle Width="60" Height="60" Fill="LightGray" Margin="0,0,10,0"/>
+                            <StackPanel>
+                                <TextBlock x:Name="MostVisitedTourName" Text="Tour name"/>
+                                <TextBlock x:Name="MostVisitedTourDate" Text="Date"/>
+                                <TextBlock x:Name="MostVisitedTourLanguage" Text="Language"/>
+                                <TextBlock x:Name="MostVisitedTourDuration" Text="Duration"/>
+                            </StackPanel>
+                            <Button Content="Details" Width="80" Margin="20,0,0,0" VerticalAlignment="Center"
+                                    x:Name="MostVisitedDetailsButton" Click="ShowTourDetails_Click"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                
+                <TextBlock Text="Other tours" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,5"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="400">
+                    <ItemsControl x:Name="OtherToursList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" BorderBrush="Gray" Padding="10" Margin="0,0,0,10">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Rectangle Width="60" Height="60" Fill="LightGray" Margin="0,0,10,0"/>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}"/>
+                                            <TextBlock Text="{Binding StartTime, StringFormat={}{0:dd.MM.yyyy, HH:mm}}"/>
+                                            <TextBlock Text="{Binding Language}"/>
+                                            <TextBlock Text="{Binding DurationHours, StringFormat=Duration: {0}h}"/>
+                                        </StackPanel>
+                                        <Button Content="Details" Width="80" Margin="20,0,0,0" VerticalAlignment="Center"
+                                                Click="ShowTourDetails_Click"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>-->
+

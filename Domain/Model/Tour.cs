@@ -9,10 +9,11 @@ public enum TourStatus { NONE, ACTIVE, FINISHED, CANCELLED }
 public class Tour : ISerializable
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public Location Location { get; set; } = new Location();
-    public string Description { get; set; } = string.Empty;
-    public string Language { get; set; } = string.Empty;
+    public string Name { get; set; }
+    public int GuideId { get; set; }
+    public Location Location { get; set; }
+    public string Description { get; set; }
+    public string Language { get; set; }
     public int MaxTourists { get; set; }
     public int ReservedSpots { get; set; }
     public List<KeyPoint> KeyPoints { get; set; } = new List<KeyPoint>();
@@ -31,16 +32,15 @@ public class Tour : ISerializable
         }
     }
 
-    public Tour() { }
-
-    public Tour(int id, string name, Location location, string description, string language,
-                int maxTourists, int reservedSpots, double durationHours, TourStatus status = TourStatus.NONE, User? guide = null)
+    public Tour(int id, int guideID, string name, Location location, string description, string language,
+                 int maxTourists, int reservedSpots, double durationHours, TourStatus status, User guide = null)
     {
         Id = id;
-        Name = name ?? string.Empty;
-        Location = location ?? new Location();
-        Description = description ?? string.Empty;
-        Language = language ?? string.Empty;
+        GuideId = guideID;
+        Name = name;
+        Location = location;
+        Description = description;
+        Language = language;
         MaxTourists = maxTourists;
         ReservedSpots = reservedSpots;
         DurationHours = durationHours;
@@ -68,6 +68,7 @@ public class Tour : ISerializable
             ReservedSpots.ToString(),
             DurationHours.ToString(),
             Status.ToString(),
+            GuideId.ToString(),
             keyPointIds,
             startTimeIds,
             imageIds,
@@ -88,33 +89,53 @@ public class Tour : ISerializable
         ReservedSpots = int.Parse(values[5]);
         DurationHours = double.Parse(values[6]);
         Status = Enum.Parse<TourStatus>(values[7]);
-
+        GuideId = int.Parse(values[8]);
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
         Images = new List<Images>();
 
-        if (values.Length > 8 && !string.IsNullOrEmpty(values[8]))
+
+        if (values.Length > 7 && !string.IsNullOrEmpty(values[9]))
         {
-            foreach (var id in values[8].Split(','))
-                if (int.TryParse(id, out int kpId))
-                    KeyPoints.Add(new KeyPoint { Id = kpId });
+            var keyPointIds = values[9].Split(',');
+            foreach (var id in keyPointIds)
+            {
+                if (int.TryParse(id, out int keyPointId))
+                {
+                    KeyPoints.Add(new KeyPoint { Id = keyPointId });
+                }
+            }
         }
 
-        if (values.Length > 9 && !string.IsNullOrEmpty(values[9]))
+
+        if (values.Length > 9 && !string.IsNullOrEmpty(values[10]))
         {
-            foreach (var id in values[9].Split(','))
-                if (int.TryParse(id, out int stId))
-                    StartTimes.Add(new StartTourTime { Id = stId });
+            var startTimeIds = values[10].Split(',');
+            foreach (var id in startTimeIds)
+            {
+                if (int.TryParse(id, out int startTimeId))
+                {
+                    StartTimes.Add(new StartTourTime { Id = startTimeId });
+                }
+            }
         }
 
-        if (values.Length > 10 && !string.IsNullOrEmpty(values[10]))
+
+        if (values.Length > 10 && !string.IsNullOrEmpty(values[11]))
         {
-            foreach (var id in values[10].Split(','))
-                if (int.TryParse(id, out int imgId))
-                    Images.Add(new Images { Id = imgId });
+            var imageIds = values[11].Split(',');
+            foreach (var id in imageIds)
+            {
+                if (int.TryParse(id, out int imageId))
+                {
+                    Images.Add(new Images { Id = imageId });
+                }
+            }
         }
 
-        if (values.Length > 11 && int.TryParse(values[11], out int guideId))
+
+        if (values.Length > 12 && int.TryParse(values[12], out int guideId))
+        {
             Guide = new User { Id = guideId };
     }
 }

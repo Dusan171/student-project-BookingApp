@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="BookingApp.Presentation.View.Guide.TourDetailsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White">
+
+    <StackPanel Margin="20">
+        <TextBlock Text="Tour Details" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+        <StackPanel>
+            <TextBlock x:Name="TourNameText" FontSize="16" FontWeight="SemiBold"/>
+            <TextBlock x:Name="TourDateText"/>
+            <TextBlock x:Name="TourDurationText"/>
+            <TextBlock x:Name="TotalTouristText"/>
+        </StackPanel>
+
+        <TextBlock Text="Tourist Age Statistics:" FontSize="16" Margin="0,10,0,5"/>
+        <StackPanel>
+            <TextBlock x:Name="Under18Text"/>
+            <TextBlock x:Name="Between18And50Text"/>
+            <TextBlock x:Name="Above50Text"/>
+        </StackPanel>
+
+        <Button Name="BackButton" Content="Back" Margin="0,10,0,0" Click="BackButton_Click"/>
+    </StackPanel>
+</UserControl>

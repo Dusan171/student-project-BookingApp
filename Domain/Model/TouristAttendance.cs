@@ -12,13 +12,14 @@ namespace BookingApp.Domain.Model
         public int Id { get; set; }
         public int GuestId { get; set; }
         public int TourId { get; set; }
+        public DateTime StartTourTime { get; set; }
         public bool HasAppeared { get; set; }
         public int KeyPointJoinedAt { get; set; }
 
         
         public void FromCSV(string[] values)
         {
-            if (values.Length < 5)
+            if (values.Length < 6)
                 throw new ArgumentException("CSV values are missing for TouristAttendance");
 
             Id = int.Parse(values[0]);
@@ -26,6 +27,7 @@ namespace BookingApp.Domain.Model
             TourId = int.Parse(values[2]);
             HasAppeared = bool.Parse(values[3]);
             KeyPointJoinedAt = int.Parse(values[4]);
+            StartTourTime = DateTime.Parse(values[5]);
         }
         public string[] ToCSV()
         {
@@ -35,7 +37,8 @@ namespace BookingApp.Domain.Model
             GuestId.ToString(),
             TourId.ToString(),
             HasAppeared.ToString(),
-            KeyPointJoinedAt.ToString()
+            KeyPointJoinedAt.ToString(),
+            StartTourTime.ToString()
             };
         }
     }
