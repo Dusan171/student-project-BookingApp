@@ -1,13 +1,13 @@
 ﻿using BookingApp.Utilities;
 using BookingApp.Presentation.Owner;
 using BookingApp.Presentation.View.Guest;
-using BookingApp.View.Guide;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Presentation.View.Owner;
+using BookingApp.Presentation.View.Guide;
 using BookingApp.Domain.Model;
 
 namespace BookingApp.View

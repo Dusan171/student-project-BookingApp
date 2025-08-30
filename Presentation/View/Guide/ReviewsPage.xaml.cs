@@ -8,7 +8,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace BookingApp.View.Guide
+namespace BookingApp.Presentation.View.Guide
 {
     public partial class ReviewsPage : UserControl 
     {

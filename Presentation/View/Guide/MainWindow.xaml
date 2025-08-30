@@ -1,4 +1,4 @@
-﻿<Page x:Class="BookingApp.View.Guide.MainWindow"
+﻿<Page x:Class="BookingApp.Presentation.View.Guide.MainWindow"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       Background="White">
