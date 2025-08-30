@@ -29,9 +29,15 @@ namespace BookingApp.Services
             _implementations[typeof(IAccommodationReviewRepository)] = new AccommodationReviewRepository();
             _implementations[typeof(IRescheduleRequestRepository)] = new RescheduleRequestRepository();
             _implementations[typeof(INotificationRepository)] = new NotificationRepository();
+            _implementations[typeof(IKeyPointRepository)] = new KeyPointRepository();
+            _implementations[typeof(ITouristAttendanceRepository)] = new TouristAttendanceRepository();
+
+
+
+
             _implementations[typeof(AccommodationValidationService)] = new AccommodationValidationService();
             // Tour modules
-            _implementations[typeof(ITourRepository)] = new TourRepository();
+        _implementations[typeof(ITourRepository)] = new TourRepository();
             _implementations[typeof(IStartTourTimeRepository)] = new StartTourTimeRepository();
             _implementations[typeof(ITourReservationRepository)] = new TourReservationRepository();
             _implementations[typeof(IReservationGuestRepository)] = new ReservationGuestRepository();
@@ -57,6 +63,8 @@ namespace BookingApp.Services
                 (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
                 (IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)]
             );
+           // _implementations[typeof(IKeyPointService)] = new KeyPointService(CreateInstance<IKeyPointRepository>());
+           // _implementations[typeof(ITouristAttendanceService)] = new TouristAttendanceService(CreateInstance<ITouristAttendanceRepository>());
             _implementations[typeof(IAccommodationReviewService)] = new AccommodationReviewService(CreateInstance<IAccommodationReviewRepository>());
             _implementations[typeof(IRescheduleRequestService)] = new RescheduleRequestService(
                 CreateInstance<IOccupiedDateRepository>(),

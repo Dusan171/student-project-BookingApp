@@ -10,7 +10,7 @@ using System.Windows.Controls;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class ReviewsPage : UserControl 
+    public partial class ReviewsControl : UserControl 
     {
         private List<TourReview> reviews;
         private List<TouristAttendance> attendances;
@@ -23,9 +23,9 @@ namespace BookingApp.Presentation.View.Guide
         private UserRepository userRepository;
         private List<User> tourists;
         private TourRepository toursRepository;
-        private ObservableCollection<TourReviewDisplay> reviewDisplays;
+        private ObservableCollection<TourReviewDisplayDTO> reviewDisplays;
 
-        public ReviewsPage()
+        public ReviewsControl()
         {
             InitializeComponent();
             reviewRepository = new TourReviewRepository();
@@ -34,7 +34,7 @@ namespace BookingApp.Presentation.View.Guide
             userRepository = new UserRepository();
             guestsRepository = new ReservationGuestRepository();
             keypointRepository = new KeyPointRepository();
-            reviewDisplays = new ObservableCollection<TourReviewDisplay>();
+            reviewDisplays = new ObservableCollection<TourReviewDisplayDTO>();
 
             LoadReviews();
             LoadAttendaces();
@@ -73,7 +73,7 @@ namespace BookingApp.Presentation.View.Guide
                 var tour = tours.FirstOrDefault(t => t.Id == review.TourId);
                 var tourist = tourists.FirstOrDefault(t => t.Id == review.TouristId);
                 String joinedAt = GetKeyPointJoinedAt(tourist.Id, guests);
-                TourReviewDisplay reviewDisplay = new TourReviewDisplay(1, tour.Name, review.IsValid, tourist.FirstName + " " + tourist.LastName, joinedAt, review.GuideKnowledge, review.GuideLanguage, review.TourInterest, review.Comment, review);
+                TourReviewDisplayDTO reviewDisplay = new TourReviewDisplayDTO(1, tour.Name, review.IsValid, tourist.FirstName + " " + tourist.LastName, joinedAt, review.GuideKnowledge, review.GuideLanguage, review.TourInterest, review.Comment, review);
                 reviewDisplays.Add(reviewDisplay);
                 //dodaj u fajl preko repository, a mozda i ne mora fr
             }
@@ -89,7 +89,7 @@ namespace BookingApp.Presentation.View.Guide
         }
         private void ReportButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is Button button && button.DataContext is TourReviewDisplay review)
+            if (sender is Button button && button.DataContext is TourReviewDisplayDTO review)
             {
                 var result = MessageBox.Show("Da li ste sigurni da želite da prijavite ovu recenziju?",
                                              "Potvrda prijave",

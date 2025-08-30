@@ -29,9 +29,9 @@ namespace BookingApp.Presentation.View.Guide
         private TourRepository _tourRepository;
         private TouristAttendanceRepository _attendanceRepository;
         private Tour _mostVisitedTour;
-        private MainWindow mainPage;
+        private MainPage mainPage;
 
-        public TourStatisticsControl(MainWindow main)
+        public TourStatisticsControl(MainPage main)
         {
             InitializeComponent();
 

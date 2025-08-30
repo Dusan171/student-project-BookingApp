@@ -14,15 +14,15 @@ using BookingApp.Presentation.View.Guide;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class ToursPage : UserControl
+    public partial class ToursControl : UserControl
     {
         private List<Tour> allTours;
         private List<TourReservation> allReservations;
-        MainWindow mainPage;
+        MainPage mainPage;
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
-        public ToursPage(MainWindow main)
+        public ToursControl(MainPage main)
         {
             AllocConsole();
             InitializeComponent();
@@ -203,10 +203,9 @@ namespace BookingApp.Presentation.View.Guide
 
                 tour.Status = TourStatus.ACTIVE;
 
-                // LiveTrackingFrame mora postojati u XAML-u
                 if (LiveTrackingFrame != null)
                 {
-                    var liveTrackingPage = new TourLiveTracking(tour, time, mainPage);
+                    var liveTrackingPage = new TourLiveTrackingControl(tour, time, mainPage);
                     LiveTrackingFrame.Navigate(liveTrackingPage);
                     LiveTrackingOverlay.Visibility = Visibility.Visible;
                     TourListPanel.Visibility = Visibility.Collapsed;
@@ -249,35 +248,24 @@ namespace BookingApp.Presentation.View.Guide
 
         private void NewTour_Click(object sender, RoutedEventArgs e)
         {
-            if (CreateTourFrame != null && CreateTourOverlay != null)
+
+            CreateTourControl form = new CreateTourControl(mainPage);
+            form.TourCreated += (s, e) =>
             {
-                CreateTourOverlay.Visibility = Visibility.Visible;
-                TourListPanel.Visibility = Visibility.Collapsed;
+                LoadAllTours();
+                DisplayTours(FilterToday());
 
-                CreateTourForm form = new CreateTourForm(mainPage);
-                form.TourCreated += (s, e) =>
-                {
-                    LoadAllTours();
-                    DisplayTours(FilterToday());
+            };
+            form.Cancelled += OnCreateTourCancelled;
+            mainPage.ContentFrame.Content = form;
 
-                };
-                form.Cancelled += OnCreateTourCancelled;
-                mainPage.ContentFrame.Content = form;
-
-                CreateTourFrame.Navigate(form);
-            }
         }
 
         private void OnCreateTourCancelled(object sender, EventArgs e)
         {
-            if (CreateTourOverlay != null)
-            {
-                CreateTourOverlay.Visibility = Visibility.Collapsed;
-                TourListPanel.Visibility = Visibility.Visible;
-                LoadAllTours();
-                DisplayTours(FilterToday());
-                mainPage.ContentFrame.Content = this;
-            }
+            LoadAllTours();
+            DisplayTours(FilterToday());
+            mainPage.ContentFrame.Content = this;
         }
     }
 }

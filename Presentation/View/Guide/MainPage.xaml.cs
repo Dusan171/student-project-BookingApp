@@ -3,28 +3,28 @@ using System.Windows.Controls;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class MainWindow : Page
+    public partial class MainPage : Page
     {
-        public MainWindow()
+        public MainPage()
         {
             InitializeComponent();
 
-            ContentFrame.Navigate(new ToursPage(this));
+            ContentFrame.Navigate(new ToursControl(this));
         }
 
         private void Tours_Click(object sender, RoutedEventArgs e)
         {
-            ContentFrame.Navigate(new ToursPage(this));
+            ContentFrame.Navigate(new ToursControl(this));
         }
 
         private void Reviews_Click(object sender, RoutedEventArgs e)
         {
-            ContentFrame.Navigate(new ReviewsPage());
+            ContentFrame.Navigate(new ReviewsControl());
         }
 
         private void Statistics_Click(object sender, RoutedEventArgs e)
         {
-            ContentFrame.Navigate(new StatisticsSelectionPage(this));
+            ContentFrame.Navigate(new StatisticsSelectionControl(this));
         }
     }
 }

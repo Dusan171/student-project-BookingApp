@@ -74,7 +74,7 @@ namespace BookingApp.View
                             Window guideWindow = new Window();
                             guideWindow.Width = 430;
                             guideWindow.Height = 750;
-                            var mainWindowContent = new MainWindow();
+                            var mainWindowContent = new MainPage();
                             guideWindow.Content = mainWindowContent.Content;
                             guideWindow.Show();
                             break;
