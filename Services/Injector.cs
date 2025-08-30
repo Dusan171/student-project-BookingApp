@@ -1,6 +1,8 @@
 ﻿using BookingApp.Domain.Interfaces;
+using BookingApp.Domain.Interfaces.ServiceInterfaces;
 using BookingApp.Presentation.ViewModel.Owner;
 using BookingApp.Repositories;
+using BookingApp.Services;
 using System;
 using System.Collections.Generic;
 
@@ -23,6 +25,13 @@ namespace BookingApp.Services
             _implementations[typeof(IOccupiedDateRepository)] = new OccupiedDateRepository();
             _implementations[typeof(IAccommodationReviewRepository)] = new AccommodationReviewRepository();
             _implementations[typeof(IRescheduleRequestRepository)] = new RescheduleRequestRepository();
+            _implementations[typeof(ITourReservationRepository)] = new TourReservationRepository();
+            _implementations[typeof(IReservationGuestRepository)] = new ReservationGuestRepository();
+            _implementations[typeof(ITourRepository)] = new TourRepository();
+            _implementations[typeof(IStartTourTimeRepository)] = new StartTourTimeRepository();
+
+            
+            _implementations[typeof(ITourReviewRepository)] = new TourReviewRepository();
 
             // Services
             _implementations[typeof(IUserService)] = new UserService((IUserRepository)_implementations[typeof(IUserRepository)]);
@@ -56,6 +65,35 @@ namespace BookingApp.Services
                 (IGuestReviewService)_implementations[typeof(IGuestReviewService)]
             );
             _implementations[typeof(INavigationService)] = new NavigationService();
+
+            _implementations[typeof(ITourService)] = new TourService(
+                (ITourRepository)_implementations[typeof(ITourRepository)],
+                (ILocationRepository)_implementations[typeof(ILocationRepository)],
+                (IUserRepository)_implementations[typeof(IUserRepository)]
+            );
+            _implementations[typeof(IStartTourTimeService)] = new StartTourTimeService(
+                (IStartTourTimeRepository)_implementations[typeof(IStartTourTimeRepository)]
+            );
+
+            
+            _implementations[typeof(ITourReviewService)] = new TourReviewService(
+                (ITourReviewRepository)_implementations[typeof(ITourReviewRepository)],
+                (ITourRepository)_implementations[typeof(ITourRepository)],
+                (IUserRepository)_implementations[typeof(IUserRepository)]
+            );
+
+            
+            _implementations[typeof(ITourReservationService)] = new TourReservationService(
+                (ITourReservationRepository)_implementations[typeof(ITourReservationRepository)],
+                (ITourRepository)_implementations[typeof(ITourRepository)],
+                (IStartTourTimeRepository)_implementations[typeof(IStartTourTimeRepository)],
+                (IUserRepository)_implementations[typeof(IUserRepository)],
+                (ITourReviewService)_implementations[typeof(ITourReviewService)]
+            );
+
+            _implementations[typeof(IReservationGuestService)] = new ReservationGuestService(
+                (IReservationGuestRepository)_implementations[typeof(IReservationGuestRepository)]
+            );
         }
 
         public static T CreateInstance<T>()
@@ -80,16 +118,18 @@ namespace BookingApp.Services
             var accommodationReviewService = CreateInstance<IAccommodationReviewService>();
             return new ReviewsViewModel(guestReviewService, accommodationReviewService);
         }
+
         public static ImageGalleryViewModel CreateImageGalleryViewModel(List<string> imagePaths)
         {
             var service = CreateInstance<IAccommodationImageService>();
             return new ImageGalleryViewModel(service, imagePaths);
         }
+
         public static HomeViewModel CreateHomeViewModel()
         {
-            
             return new HomeViewModel();
         }
+
         public static RequestsViewModel CreateRequestsViewModel()
         {
             var rescheduleRequestService = CreateInstance<IRescheduleRequestService>();

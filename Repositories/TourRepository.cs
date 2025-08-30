@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain.Model;
+using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 using System;
 using System.Collections.Generic;
@@ -6,210 +7,206 @@ using System.Linq;
 
 namespace BookingApp.Repositories
 {
-    public class TourRepository
+    public class TourRepository : ITourRepository
     {
         private const string FilePath = "../../../Resources/Data/tours.csv";
         private readonly Serializer<Tour> _serializer;
-        private readonly LocationRepository _locationRepository;
-        private readonly UserRepository _userRepository;
         private List<Tour> _tours;
 
         public TourRepository()
         {
             _serializer = new Serializer<Tour>();
-            _locationRepository = new LocationRepository();
-            _userRepository = new UserRepository();
-            _tours = LoadToursWithLocationsAndGuides();
-        }
-
-        private List<Tour> LoadToursWithLocationsAndGuides()
-        {
-            try
-            {
-                var tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
-
-                foreach (var tour in tours)
-                {
-                    // ➡️ Učitaj lokaciju
-                    if (tour.Location != null && tour.Location.Id > 0)
-                    {
-                        var fullLocation = _locationRepository.GetById(tour.Location.Id);
-                        if (fullLocation != null)
-                        {
-                            tour.Location = fullLocation;
-                        }
-                    }
-
-                    // ➡️ Učitaj vodiča (User)
-                    if (tour.Guide != null && tour.Guide.Id > 0)
-                    {
-                        var fullGuide = _userRepository.GetById(tour.Guide.Id);
-                        if (fullGuide != null)
-                        {
-                            tour.Guide = fullGuide;
-                        }
-                    }
-                }
-
-                return tours;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Greška pri učitavanju tura: {ex.Message}");
-                return new List<Tour>();
-            }
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
         }
 
         public List<Tour> GetAll()
         {
-            _tours = LoadToursWithLocationsAndGuides();
-            return _tours;
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            return _tours.ToList();
+        }
+
+        public Tour GetById(int id)
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            return _tours.FirstOrDefault(t => t.Id == id);
+        }
+
+        public List<Tour> GetByLocation(string city, string country)
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            return _tours.Where(t => t.Location != null &&
+                               t.Location.Id > 0).ToList();
+        }
+
+        public List<Tour> GetByLanguage(string language)
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            return _tours.Where(t => !string.IsNullOrEmpty(t.Language) &&
+                               t.Language.Equals(language, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        public List<Tour> GetByMaxTourists(int maxTourists)
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            return _tours.Where(t => t.MaxTourists >= maxTourists).ToList();
         }
 
         public List<Tour> GetAvailableTours()
         {
-            _tours = LoadToursWithLocationsAndGuides();
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
             return _tours.Where(t => t.ReservedSpots < t.MaxTourists).ToList();
         }
 
-        public List<Tour> SearchTours(string city = null, string country = null,
-            string language = null, int? maxPeople = null, double? duration = null)
+        public Tour Add(Tour tour)
         {
-            _tours = LoadToursWithLocationsAndGuides();
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            tour.Id = GetNextId();
+            _tours.Add(tour);
+            SaveAll();
+            return tour;
+        }
 
-            if (_tours == null || _tours.Count == 0)
-                return new List<Tour>();
-
-            var query = _tours.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(city))
+        public Tour Save(Tour tour)
+        {
+            if (tour.Id == 0)
             {
-                query = query.Where(t => t.Location != null &&
-                    !string.IsNullOrEmpty(t.Location.City) &&
-                    t.Location.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+                // New tour - add it
+                return Add(tour);
+            }
+            else
+            {
+                // Existing tour - update it
+                return Update(tour);
+            }
+        }
+
+        public Tour Update(Tour tour)
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            var existing = _tours.FirstOrDefault(t => t.Id == tour.Id);
+            if (existing != null)
+            {
+                int index = _tours.IndexOf(existing);
+                _tours[index] = tour;
+                SaveAll();
+            }
+            return tour;
+        }
+
+        public void Delete(int id)
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            var tour = _tours.FirstOrDefault(t => t.Id == id);
+            if (tour != null)
+            {
+                _tours.Remove(tour);
+                SaveAll();
+            }
+        }
+
+        public void SaveAll()
+        {
+            _serializer.ToCSV(FilePath, _tours);
+        }
+
+        public int GetNextId()
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            return _tours.Count == 0 ? 1 : _tours.Max(t => t.Id) + 1;
+        }
+
+        public bool UpdateReservedSpots(int tourId, int newReservedSpots)
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+            var tour = _tours.FirstOrDefault(t => t.Id == tourId);
+            if (tour != null)
+            {
+                tour.ReservedSpots = newReservedSpots;
+                SaveAll();
+                return true;
+            }
+            return false;
+        }
+
+        // Add the missing SearchTours method with correct signature
+        public List<Tour> SearchTours(string location, string country, string language, int maxPeople, double duration)
+        {
+            _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
+
+            var filteredTours = _tours.AsEnumerable(); // Use AsEnumerable() instead of AsQueryable()
+
+            if (!string.IsNullOrWhiteSpace(location))
+            {
+                filteredTours = filteredTours.Where(t => t.Location != null &&
+                    ((!string.IsNullOrEmpty(t.Location.City) && t.Location.City.Contains(location, StringComparison.OrdinalIgnoreCase)) ||
+                     (!string.IsNullOrEmpty(t.Location.Country) && t.Location.Country.Contains(location, StringComparison.OrdinalIgnoreCase))));
             }
 
             if (!string.IsNullOrWhiteSpace(country))
             {
-                query = query.Where(t => t.Location != null &&
+                filteredTours = filteredTours.Where(t => t.Location != null &&
                     !string.IsNullOrEmpty(t.Location.Country) &&
                     t.Location.Country.Contains(country, StringComparison.OrdinalIgnoreCase));
             }
 
             if (!string.IsNullOrWhiteSpace(language))
             {
-                query = query.Where(t => !string.IsNullOrEmpty(t.Language) &&
+                filteredTours = filteredTours.Where(t =>
+                    !string.IsNullOrEmpty(t.Language) &&
                     t.Language.Equals(language, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (maxPeople.HasValue)
+            if (maxPeople > 0)
             {
-                query = query.Where(t => t.AvailableSpots >= maxPeople.Value);
+                filteredTours = filteredTours.Where(t => (t.MaxTourists - t.ReservedSpots) >= maxPeople);
             }
 
-            if (duration.HasValue)
+            if (duration > 0)
             {
-                query = query.Where(t => Math.Abs(t.DurationHours - duration.Value) < 0.1);
+                filteredTours = filteredTours.Where(t => Math.Abs(t.DurationHours - duration) < 0.1);
             }
 
-            try
-            {
-                return query.ToList();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Greška u pretrazi: {ex.Message}");
-                return new List<Tour>();
-            }
+            return filteredTours.ToList();
+        }
+
+        // Overload to handle nullable parameters from TourSearch.xaml.cs
+        public List<Tour> SearchTours(string location, string country, string language, int? maxPeople, double? duration)
+        {
+            return SearchTours(location, country, language, maxPeople ?? 0, duration ?? 0.0);
         }
 
         public bool ReserveSpots(int tourId, int numberOfSpots)
         {
-            _tours = LoadToursWithLocationsAndGuides();
-            var tour = _tours?.FirstOrDefault(t => t.Id == tourId);
-
-            if (tour != null && tour.AvailableSpots >= numberOfSpots)
+            var tour = GetById(tourId);
+            if (tour != null)
             {
-                tour.ReservedSpots += numberOfSpots;
-                _serializer.ToCSV(FilePath, _tours);
-                return true;
+                int availableSpots = tour.MaxTourists - tour.ReservedSpots;
+                if (availableSpots >= numberOfSpots)
+                {
+                    int newReservedSpots = tour.ReservedSpots + numberOfSpots;
+                    return UpdateReservedSpots(tourId, newReservedSpots);
+                }
             }
             return false;
         }
 
         public List<Tour> GetAlternativeTours(int originalTourId, int requiredSpots)
         {
-            _tours = LoadToursWithLocationsAndGuides();
-            if (_tours == null || _tours.Count == 0)
-                return new List<Tour>();
+            var tours = GetAll();
+            var originalTour = GetById(originalTourId);
 
-            var originalTour = _tours.FirstOrDefault(t => t.Id == originalTourId);
             if (originalTour?.Location == null)
                 return new List<Tour>();
 
-            return _tours.Where(t =>
+            return tours.Where(t =>
                 t.Id != originalTourId &&
                 t.Location != null &&
-                t.Location.City != null && t.Location.Country != null &&
-                originalTour.Location.City != null && originalTour.Location.Country != null &&
-                t.Location.City.Trim().Equals(originalTour.Location.City.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                t.Location.Country.Trim().Equals(originalTour.Location.Country.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                t.AvailableSpots >= requiredSpots
+                t.Location.Id == originalTour.Location.Id && // Compare by ID since Location details might not be loaded
+                (t.MaxTourists - t.ReservedSpots) >= requiredSpots
             ).ToList();
         }
 
-        public Tour GetById(int id)
-        {
-            _tours = LoadToursWithLocationsAndGuides();
-            return _tours?.FirstOrDefault(t => t.Id == id);
-        }
 
-        public Tour Save(Tour tour)
-        {
-            _tours = LoadToursWithLocationsAndGuides();
-            tour.Id = NextId();
-            _tours.Add(tour);
-            _serializer.ToCSV(FilePath, _tours);
-            return tour;
-        }
 
-        public int NextId()
-        {
-            _tours = LoadToursWithLocationsAndGuides();
-            if (_tours == null || _tours.Count < 1)
-            {
-                return 1;
-            }
-            return _tours.Max(c => c.Id) + 1;
-        }
-
-        public void Delete(Tour tour)
-        {
-            _tours = LoadToursWithLocationsAndGuides();
-            if (_tours == null) return;
-
-            Tour found = _tours.Find(c => c.Id == tour.Id);
-            if (found != null)
-            {
-                _tours.Remove(found);
-                _serializer.ToCSV(FilePath, _tours);
-            }
-        }
-
-        public Tour Update(Tour tour)
-        {
-            _tours = LoadToursWithLocationsAndGuides();
-            if (_tours == null) return tour;
-
-            Tour current = _tours.Find(c => c.Id == tour.Id);
-            if (current != null)
-            {
-                int index = _tours.IndexOf(current);
-                _tours.Remove(current);
-                _tours.Insert(index, tour);
-                _serializer.ToCSV(FilePath, _tours);
-            }
-            return tour;
-        }
     }
 }

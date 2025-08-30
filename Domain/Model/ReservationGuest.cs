@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BookingApp.Serializer;
 
 namespace BookingApp.Domain.Model
@@ -11,12 +7,23 @@ namespace BookingApp.Domain.Model
     {
         public int Id { get; set; }
         public int ReservationId { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         public int Age { get; set; }
-        public string Email { get; set; } // NOVO POLJE
+        public string Email { get; set; } = string.Empty;
         public bool HasAppeared { get; set; }
         public int KeyPointJoinedAt { get; set; }
+
+        public string DisplayTitle
+        {
+            get
+            {
+                // Ovo će se postaviti u ViewModel-u kada se kreira guest
+                return $"Osoba {Index + 1}" + (Email != null ? " (glavni kontakt)" : "");
+            }
+        }
+
+        public int Index { get; set; }
 
         public ReservationGuest()
         {
@@ -29,15 +36,13 @@ namespace BookingApp.Domain.Model
         {
             Id = id;
             ReservationId = reservationId;
-            FirstName = firstName;
-            LastName = lastName;
+            FirstName = firstName ?? string.Empty;
+            LastName = lastName ?? string.Empty;
             Age = age;
-            Email = email;
+            Email = email ?? string.Empty;
             HasAppeared = hasAppeared;
             KeyPointJoinedAt = keyPointJoinedAt;
         }
-
-        public string FullName => $"{FirstName} {LastName}";
 
         public string[] ToCSV()
         {
@@ -45,10 +50,10 @@ namespace BookingApp.Domain.Model
             {
                 Id.ToString(),
                 ReservationId.ToString(),
-                FirstName,
-                LastName,
+                FirstName ?? string.Empty,
+                LastName ?? string.Empty,
                 Age.ToString(),
-                Email ?? "", 
+                Email ?? string.Empty,
                 HasAppeared.ToString(),
                 KeyPointJoinedAt.ToString()
             };
@@ -56,24 +61,35 @@ namespace BookingApp.Domain.Model
 
         public void FromCSV(string[] values)
         {
+            if (values == null || values.Length < 6)
+            {
+                throw new ArgumentException("Invalid CSV data for ReservationGuest");
+            }
+
             Id = int.Parse(values[0]);
             ReservationId = int.Parse(values[1]);
-            FirstName = values[2];
-            LastName = values[3];
+            FirstName = values[2] ?? string.Empty;
+            LastName = values[3] ?? string.Empty;
             Age = int.Parse(values[4]);
-            if (values.Length > 7)
+
+            if (values.Length >= 8)
             {
-                Email = values[5];
+                Email = values[5] ?? string.Empty;
                 HasAppeared = bool.Parse(values[6]);
                 KeyPointJoinedAt = int.Parse(values[7]);
             }
-            else
+            else if (values.Length >= 7)
             {
-                Email = "";
+                Email = string.Empty;
                 HasAppeared = bool.Parse(values[5]);
                 KeyPointJoinedAt = int.Parse(values[6]);
+            }
+            else
+            {
+                Email = string.Empty;
+                HasAppeared = false;
+                KeyPointJoinedAt = -1;
             }
         }
     }
 }
-

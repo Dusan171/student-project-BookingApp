@@ -1,8 +1,6 @@
 ﻿using System;
 using BookingApp.Serializer;
 
-
-
 namespace BookingApp.Domain.Model
 {
     public class StartTourTime : ISerializable
@@ -24,17 +22,22 @@ namespace BookingApp.Domain.Model
         {
             return new string[]
             {
-        Id.ToString(),
-        Time.ToString("yyyy-MM-dd HH:mm:ss")
+                Id.ToString(),
+                Time.ToString("yyyy-MM-dd HH:mm:ss")
             };
         }
 
-
         public void FromCSV(string[] values)
         {
+            if (values == null || values.Length < 2)
+            {
+                throw new ArgumentException("Invalid CSV data for StartTourTime");
+            }
+
             Id = int.Parse(values[0]);
             Time = DateTime.ParseExact(values[1], "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
         }
+
         public override string ToString()
         {
             return Time.ToString("yyyy-MM-dd HH:mm:ss");

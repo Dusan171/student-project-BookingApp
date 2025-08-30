@@ -1,5 +1,5 @@
 ﻿using BookingApp.Domain;
-using BookingApp.Services.DTO; // Dodano: Moraš koristiti LocationDTO
+using BookingApp.Services.DTO; 
 using System;
 using System.Globalization;
 using System.Windows.Data;
@@ -13,7 +13,7 @@ namespace BookingApp.Utilities
         {
             if (value is LocationDTO locationDto)
             {
-                // Vraća formatiran string
+                
                 return $"{locationDto.City}, {locationDto.Country}";
             }
             return string.Empty;
@@ -24,12 +24,12 @@ namespace BookingApp.Utilities
         {
             if (value is string locationString)
             {
-                // Razdvajanje stringa po zarezu
+               
                 var parts = locationString.Split(new[] { ',' }, 2);
 
                 if (parts.Length == 2)
                 {
-                    // Vraća novi LocationDTO objekat
+                    
                     return new LocationDTO
                     {
                         City = parts[0].Trim(),

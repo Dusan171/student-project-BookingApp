@@ -2,18 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Serializer;
-using System.Windows;
-using BookingApp.Domain.Model;
 
 namespace BookingApp.Domain.Model
 {
     public class Tour : ISerializable
     {
         public int Id { get; set; }
-        public string Name { get; set; }
-        public Location Location { get; set; }
-        public string Description { get; set; }
-        public string Language { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Location Location { get; set; } = new Location();
+        public string Description { get; set; } = string.Empty;
+        public string Language { get; set; } = string.Empty;
         public int MaxTourists { get; set; }
         public int ReservedSpots { get; set; }
         public List<KeyPoint> KeyPoints { get; set; }
@@ -21,7 +19,17 @@ namespace BookingApp.Domain.Model
         public double DurationHours { get; set; }
         public List<Images> Images { get; set; }
         public bool IsFinished { get; set; }
-        public User Guide { get; set; }
+        public User Guide { get; set; } = new User();
+
+       
+        public int AvailableSpots
+        {
+            get
+            {
+                int available = MaxTourists - ReservedSpots;
+                return available < 0 ? 0 : available;
+            }
+        }
 
         public Tour()
         {
@@ -31,18 +39,18 @@ namespace BookingApp.Domain.Model
         }
 
         public Tour(int id, string name, Location location, string description, string language,
-                     int maxTourists, int reservedSpots, double durationHours, bool isFinished = false, User guide = null)
+                     int maxTourists, int reservedSpots, double durationHours, bool isFinished = false, User? guide = null)
         {
             Id = id;
-            Name = name;
-            Location = location;
-            Description = description;
-            Language = language;
+            Name = name ?? string.Empty;
+            Location = location ?? new Location();
+            Description = description ?? string.Empty;
+            Language = language ?? string.Empty;
             MaxTourists = maxTourists;
             ReservedSpots = reservedSpots;
             DurationHours = durationHours;
             IsFinished = isFinished;
-            Guide = guide;
+            Guide = guide ?? new User();
 
             KeyPoints = new List<KeyPoint>();
             StartTimes = new List<StartTourTime>();
@@ -55,22 +63,21 @@ namespace BookingApp.Domain.Model
             string startTimeIds = string.Join("|", StartTimes.Select(st => st.Id));
             string imageIds = string.Join("|", Images.Select(img => img.Id));
 
-            string[] csvValues = {
-            Id.ToString(),
-            Name,
-            Location.Id.ToString(),
-            Language,
-            MaxTourists.ToString(),
-            ReservedSpots.ToString(),
-            DurationHours.ToString(),
-            IsFinished.ToString(),
-            keyPointIds,
-            startTimeIds,
-            imageIds,
-            Guide != null ? Guide.Id.ToString() : ""
-        };
-
-            return csvValues;
+            return new string[]
+            {
+                Id.ToString(),
+                Name ?? string.Empty,
+                Location?.Id.ToString() ?? "0",
+                Language ?? string.Empty,
+                MaxTourists.ToString(),
+                ReservedSpots.ToString(),
+                DurationHours.ToString(),
+                IsFinished.ToString(),
+                keyPointIds,
+                startTimeIds,
+                imageIds,
+                Guide?.Id.ToString() ?? "0"
+            };
         }
 
         public void FromCSV(string[] values)
@@ -82,7 +89,16 @@ namespace BookingApp.Domain.Model
 
             Id = int.Parse(values[0]);
             Name = values[1] ?? string.Empty;
-            Location = new Location { Id = int.Parse(values[2]) };
+
+            if (int.TryParse(values[2], out int locationId) && locationId > 0)
+            {
+                Location = new Location { Id = locationId };
+            }
+            else
+            {
+                Location = new Location();
+            }
+
             Language = values[3] ?? string.Empty;
             MaxTourists = int.Parse(values[4]);
             ReservedSpots = int.Parse(values[5]);
@@ -129,18 +145,13 @@ namespace BookingApp.Domain.Model
                 }
             }
 
-            if (values.Length > 11 && int.TryParse(values[11], out int guideId))
+            if (values.Length > 11 && int.TryParse(values[11], out int guideId) && guideId > 0)
             {
                 Guide = new User { Id = guideId };
             }
-        }
-
-        public int AvailableSpots
-        {
-            get
+            else
             {
-                int available = MaxTourists - ReservedSpots;
-                return available < 0 ? 0 : available;
+                Guide = new User();
             }
         }
     }
