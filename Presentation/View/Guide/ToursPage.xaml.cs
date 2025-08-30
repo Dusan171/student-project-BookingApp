@@ -254,15 +254,15 @@ namespace BookingApp.Presentation.View.Guide
                 CreateTourOverlay.Visibility = Visibility.Visible;
                 TourListPanel.Visibility = Visibility.Collapsed;
 
-            CreateTourForm form = new CreateTourForm(mainPage);
-            form.TourCreated += (s, e) =>
-            {
-                LoadAllTours();
-                DisplayTours(FilterToday());
+                CreateTourForm form = new CreateTourForm(mainPage);
+                form.TourCreated += (s, e) =>
+                {
+                    LoadAllTours();
+                    DisplayTours(FilterToday());
 
-            };
-            form.Cancelled += OnCreateTourCancelled;
-            mainPage.ContentFrame.Content = form;
+                };
+                form.Cancelled += OnCreateTourCancelled;
+                mainPage.ContentFrame.Content = form;
 
                 CreateTourFrame.Navigate(form);
             }
@@ -274,9 +274,10 @@ namespace BookingApp.Presentation.View.Guide
             {
                 CreateTourOverlay.Visibility = Visibility.Collapsed;
                 TourListPanel.Visibility = Visibility.Visible;
-            LoadAllTours();
-            DisplayTours(FilterToday());
-            mainPage.ContentFrame.Content = this;
+                LoadAllTours();
+                DisplayTours(FilterToday());
+                mainPage.ContentFrame.Content = this;
+            }
         }
     }
 }

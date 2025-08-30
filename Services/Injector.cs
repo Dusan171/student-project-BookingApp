@@ -55,7 +55,7 @@ namespace BookingApp.Services
                 (IReservationRepository)_implementations[typeof(IReservationRepository)],
                 (IOccupiedDateRepository)_implementations[typeof(IOccupiedDateRepository)],
                 (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
-                (IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)] 
+                (IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)]
             );
             _implementations[typeof(IAccommodationReviewService)] = new AccommodationReviewService(CreateInstance<IAccommodationReviewRepository>());
             _implementations[typeof(IRescheduleRequestService)] = new RescheduleRequestService(
@@ -73,10 +73,15 @@ namespace BookingApp.Services
                 CreateInstance<IAccommodationReviewService>(),
                 CreateInstance<IGuestReviewService>()
             );
-            _implementations[typeof(INotificationService)] = new NotificationService(
-                CreateInstance<INotificationRepository>(),
-                CreateInstance<IReservationService>()
-            );
+            _implementations[typeof(INavigationService)] = new NavigationService();
+            _implementations[typeof(INotificationService)] = new NotificationService((INotificationRepository)_implementations[typeof(INotificationRepository)], (IReservationService)_implementations[typeof(IReservationService)]);
+            _implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
+                            (IAccommodationService)_implementations[typeof(IAccommodationService)],
+                            (IReservationService)_implementations[typeof(IReservationService)]);
+            // _implementations[typeof(INotificationService)] = new NotificationService(
+            //     CreateInstance<INotificationRepository>(),
+            //     CreateInstance<IReservationService>()
+            // );
 
             // ------------------- Tour Services -------------------
             _implementations[typeof(ITourService)] = new TourService(
@@ -100,15 +105,10 @@ namespace BookingApp.Services
             _implementations[typeof(IReservationGuestService)] = new ReservationGuestService(CreateInstance<IReservationGuestRepository>());
 
             // ------------------- Other Services -------------------
-            _implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
-                CreateInstance<IAccommodationService>(),
-                CreateInstance<IReservationService>()
-            );
-            _implementations[typeof(INavigationService)] = new NavigationService();
-            _implementations[typeof(INotificationService)] = new NotificationService((INotificationRepository)_implementations[typeof(INotificationRepository)], (IReservationService)_implementations[typeof(IReservationService)]);
-            _implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
-                            (IAccommodationService)_implementations[typeof(IAccommodationService)],
-                            (IReservationService)_implementations[typeof(IReservationService)]);
+            //_implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
+            //    CreateInstance<IAccommodationService>(),
+            //    CreateInstance<IReservationService>()
+           // );
         }
         public static T CreateInstance<T>()
         {
@@ -124,7 +124,7 @@ namespace BookingApp.Services
             var notificationService = CreateInstance<INotificationService>();
             var reservationService = CreateInstance<IReservationService>();
             var guestReviewService = CreateInstance<IGuestReviewService>();
-            return new HomeViewModel( reservationService, guestReviewService);
+            return new HomeViewModel(reservationService, guestReviewService);
         }
         public static RegisterAccommodationViewModel CreateRegisterAccommodationViewModel()
         {
@@ -137,7 +137,6 @@ namespace BookingApp.Services
             var accommodationReviewService = CreateInstance<IAccommodationReviewService>();
             return new ReviewsViewModel(guestReviewService, accommodationReviewService);
         }
-
         public static ImageGalleryViewModel CreateImageGalleryViewModel(List<string> imagePaths)
         {
             var service = CreateInstance<IAccommodationImageService>();
@@ -145,6 +144,8 @@ namespace BookingApp.Services
         }
         public static RequestsViewModel CreateRequestsViewModel()
         {
+            var rescheduleRequestService = CreateInstance<IRescheduleRequestService>();
+            var accommodationService = CreateInstance<IAccommodationService>();
             var reservationService = CreateInstance<IReservationService>();
             var requestsDisplayService = new RequestsDisplayService(accommodationService, reservationService);
             return new RequestsViewModel(rescheduleRequestService, requestsDisplayService);
