@@ -11,7 +11,6 @@ namespace BookingApp.Services.DTO
 {
     public class AccommodationDTO : INotifyPropertyChanged
     {
-     
         private int _id;
         private string _name;
         private LocationDTO _geoLocation;
@@ -22,20 +21,16 @@ namespace BookingApp.Services.DTO
         private int? _minReservationDays;
         private int _cancellationDeadlineDays;
         private List<AccommodationImageDTO> _imagePaths;
-
         public event PropertyChangedEventHandler? PropertyChanged;
-
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-       
         public int Id
         {
             get => _id;
             set => _id = value;
         }
-
         public string Name
         {
             get => _name;
@@ -43,12 +38,10 @@ namespace BookingApp.Services.DTO
             {
                 if (_name != value)
                 {
-                    _name = value;
-                    OnPropertyChanged();
+                    _name = value; OnPropertyChanged();
                 }
             }
         }
-
         public LocationDTO GeoLocation
         {
             get => _geoLocation;
@@ -56,12 +49,10 @@ namespace BookingApp.Services.DTO
             {
                 if (_geoLocation != value)
                 {
-                    _geoLocation = value;
-                    OnPropertyChanged();
+                    _geoLocation = value; OnPropertyChanged();
                 }
             }
         }
-
         public string Type
         {
             get => _type;
@@ -69,12 +60,10 @@ namespace BookingApp.Services.DTO
             {
                 if (_type != value)
                 {
-                    _type = value;
-                    OnPropertyChanged();
+                    _type = value; OnPropertyChanged();
                 }
             }
         }
-
         public int? MaxGuests
         {
             get => _maxGuests;
@@ -82,12 +71,10 @@ namespace BookingApp.Services.DTO
             {
                 if (_maxGuests != value)
                 {
-                    _maxGuests = value;
-                    OnPropertyChanged();
+                    _maxGuests = value; OnPropertyChanged();
                 }
             }
         }
-
         public int? MinReservationDays
         {
             get => _minReservationDays;
@@ -95,12 +82,10 @@ namespace BookingApp.Services.DTO
     {
                 if (_minReservationDays != value)
                 {
-                    _minReservationDays = value;
-                    OnPropertyChanged();
+                    _minReservationDays = value; OnPropertyChanged();
                 }
             }
         }
-
         public int CancellationDeadlineDays
         {
             get => _cancellationDeadlineDays;
@@ -108,12 +93,10 @@ namespace BookingApp.Services.DTO
             {
                 if (_cancellationDeadlineDays != value)
                 {
-                    _cancellationDeadlineDays = value;
-                    OnPropertyChanged();
+                    _cancellationDeadlineDays = value; OnPropertyChanged();
                 }
             }
         }
-
         public List<AccommodationImageDTO> ImagePaths
         {
             get => _imagePaths;
@@ -121,19 +104,15 @@ namespace BookingApp.Services.DTO
             {
                 if (_imagePaths != value)
                 {
-                    _imagePaths = value;
-                    OnPropertyChanged();
+                    _imagePaths = value; OnPropertyChanged();
                 }
             }
         }
-
-
         public AccommodationDTO()
         {
             GeoLocation = new LocationDTO();
             _imagePaths = new List<AccommodationImageDTO>();
         }
-
         public AccommodationDTO(Accommodation a)
         {
             Id = a.Id;
@@ -145,7 +124,6 @@ namespace BookingApp.Services.DTO
             CancellationDeadlineDays = a.CancellationDeadlineDays;
             ImagePaths = a.Images.Select(i => new AccommodationImageDTO { Path = i.Path }).ToList();
         }
-
         public Accommodation ToAccommodation()
         {
             var accommodation = new Accommodation
@@ -159,7 +137,6 @@ namespace BookingApp.Services.DTO
                 CancellationDeadlineDays = this.CancellationDeadlineDays,
                 Images = this.ImagePaths.Select(i => new AccommodationImage { Path = i.Path }).ToList()
             };
-
             return accommodation;
         }
     }

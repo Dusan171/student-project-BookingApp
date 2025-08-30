@@ -1,4 +1,4 @@
-﻿using BookingApp.Domain.Model;
+using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 using System;
@@ -19,24 +19,24 @@ namespace BookingApp.Repositories
             _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
         }
 
-        public List<ReservationGuest> GetAll()
-        {
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
-            return _guests.ToList();
-        }
+        private void SaveAll() => _serializer.ToCSV(FilePath, _guests);
 
-        public ReservationGuest? GetById(int id)
-        {
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
-            return _guests.FirstOrDefault(g => g.Id == id);
-        }
+        private void Reload() => _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
+
+        public List<ReservationGuest> GetAll() => _guests.ToList();
+
+        public ReservationGuest? GetById(int id) => _guests.FirstOrDefault(g => g.Id == id);
+
+        public List<ReservationGuest> GetByReservationId(int reservationId)
+            => _guests.Where(g => g.ReservationId == reservationId).ToList();
+
+        public List<ReservationGuest> GetAppearedGuests() 
+            => _guests.Where(g => g.HasAppeared).ToList();
 
         public ReservationGuest Add(ReservationGuest guest)
         {
-            if (guest == null)
-                throw new ArgumentNullException(nameof(guest));
+            if (guest == null) throw new ArgumentNullException(nameof(guest));
 
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
             guest.Id = GetNextId();
             _guests.Add(guest);
             SaveAll();
@@ -45,69 +45,20 @@ namespace BookingApp.Repositories
 
         public ReservationGuest Update(ReservationGuest guest)
         {
-            if (guest == null)
-                throw new ArgumentNullException(nameof(guest));
+            if (guest == null) throw new ArgumentNullException(nameof(guest));
 
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
-            var existing = _guests.FirstOrDefault(g => g.Id == guest.Id);
-
-            if (existing != null)
+            var index = _guests.FindIndex(g => g.Id == guest.Id);
+            if (index >= 0)
             {
-                int index = _guests.IndexOf(existing);
                 _guests[index] = guest;
                 SaveAll();
             }
-
             return guest;
-        }
-
-        public void Delete(int id)
-        {
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
-            var guest = _guests.FirstOrDefault(g => g.Id == id);
-
-            if (guest != null)
-            {
-                _guests.Remove(guest);
-                SaveAll();
-            }
-        }
-
-        public void SaveAll()
-        {
-            _serializer.ToCSV(FilePath, _guests);
-        }
-
-        public int GetNextId()
-        {
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
-            return _guests.Count == 0 ? 1 : _guests.Max(g => g.Id) + 1;
-        }
-
-        public List<ReservationGuest> GetByReservationId(int reservationId)
-        {
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
-            return _guests.Where(g => g.ReservationId == reservationId).ToList();
-        }
-
-        public void RemoveByReservationId(int reservationId)
-        {
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
-            _guests.RemoveAll(g => g.ReservationId == reservationId);
-            SaveAll();
-        }
-
-        public List<ReservationGuest> GetAppearedGuests()
-        {
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
-            return _guests.Where(g => g.HasAppeared).ToList();
         }
 
         public bool UpdateAppearanceStatus(int guestId, bool hasAppeared, int keyPointJoinedAt = -1)
         {
-            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
             var guest = _guests.FirstOrDefault(g => g.Id == guestId);
-
             if (guest != null)
             {
                 guest.HasAppeared = hasAppeared;
@@ -115,8 +66,25 @@ namespace BookingApp.Repositories
                 SaveAll();
                 return true;
             }
-
             return false;
         }
+
+        public void Delete(int id)
+        {
+            var guest = _guests.FirstOrDefault(g => g.Id == id);
+            if (guest != null)
+            {
+                _guests.Remove(guest);
+                SaveAll();
+            }
+        }
+
+        public void RemoveByReservationId(int reservationId)
+        {
+            _guests.RemoveAll(g => g.ReservationId == reservationId);
+            SaveAll();
+        }
+
+        public int GetNextId() => _guests.Count == 0 ? 1 : _guests.Max(g => g.Id) + 1;
     }
 }

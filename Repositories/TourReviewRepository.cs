@@ -61,7 +61,7 @@ namespace BookingApp.Repositories
             return reviews;
         }
 
-        private void SaveToFile()
+        public void SaveToFile()
         {
             var lines = _reviews.Select(r =>
                 $"{r.Id}|{r.TourId}|{r.TouristId}|{r.ReservationId}|{r.GuideKnowledge}|{r.GuideLanguage}|{r.TourInterest}|{r.Comment}|{r.Date:yyyy-MM-dd HH:mm:ss}|{r.IsValid}|{string.Join(";", r.ImagePaths)}");

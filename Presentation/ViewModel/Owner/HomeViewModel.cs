@@ -1,32 +1,17 @@
-﻿using BookingApp.Domain.Interfaces;
-using BookingApp.Domain;
-using BookingApp.Repositories;
-using BookingApp.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using BookingApp.Services;
-using BookingApp.Services.DTO;
+using BookingApp.Utilities;
 using BookingApp.Presentation.View.Owner;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Services;
 
 namespace BookingApp.Presentation.ViewModel.Owner
 {
     public class HomeViewModel : INotifyPropertyChanged
     {
-        private readonly IGuestReviewRepository guestReviewRepository;
-        private readonly IOccupiedDateRepository occupiedDateRepository;
-        private readonly IReservationRepository reservationRepository;
-        private readonly IReservationService reservationService;
-        private readonly IGuestReviewService guestReviewService;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public event Action<string> ToastMessageRequested;
+        private readonly IReservationService _reservationService; 
+        private readonly IGuestReviewService _guestReviewService; 
 
         private object _currentContent;
         public object CurrentContent
@@ -35,110 +20,49 @@ namespace BookingApp.Presentation.ViewModel.Owner
             set
             {
                 _currentContent = value;
-                OnPropertyChanged(nameof(CurrentContent));
+                OnPropertyChanged();
             }
         }
-        private string _username;
-        public string Username
+
+        public ICommand ShowUnratedGuestsCommand { get; }
+        public ICommand ShowMyUnitsCommand { get; }
+        public ICommand ShowForumsCommand { get; }
+
+        public HomeViewModel(IReservationService reservationService, IGuestReviewService guestReviewService)
         {
-            get => _username;
-            set { _username = value; OnPropertyChanged(nameof(Username)); }
-        }
+            _reservationService = reservationService;
+            _guestReviewService = guestReviewService;
 
-        private bool _hasUnratedGuests;
-        public bool HasUnratedGuests
-        {
-            get => _hasUnratedGuests;
-            set { _hasUnratedGuests = value; OnPropertyChanged(nameof(HasUnratedGuests)); }
-        }
-
-        public ObservableCollection<NotificationDTO> Notifications { get; set; }
-
-        public ICommand ShowNotificationsCommand { get; }
-        public ICommand CommunityCommand { get; }
-        public ICommand LibraryCommand { get; }
-
-        public HomeViewModel()
-        {
-            //Username = username;
-
-            reservationRepository = Injector.CreateInstance<IReservationRepository>();
-            occupiedDateRepository = Injector.CreateInstance<IOccupiedDateRepository>();
-            guestReviewRepository = Injector.CreateInstance<IGuestReviewRepository>();
-
-            reservationService = Injector.CreateInstance<IReservationService>();
-            guestReviewService = Injector.CreateInstance<IGuestReviewService>();
-
-            Notifications = new ObservableCollection<NotificationDTO>();
-
-            ShowNotificationsCommand = new RelayCommand(ShowNotifications);
-            CommunityCommand = new RelayCommand(OpenCommunity);
-            LibraryCommand = new RelayCommand(OpenLibrary);
+            ShowUnratedGuestsCommand = new RelayCommand(ShowUnratedGuests);
+            ShowMyUnitsCommand = new RelayCommand(ShowMyUnits);
+            ShowForumsCommand = new RelayCommand(ShowForums);
 
             CurrentContent = new WelcomeView();
-            CheckForUnratedGuests();
         }
 
-        private void ShowNotifications()
+        private void ShowUnratedGuests()
         {
-            var allReservations = reservationService.GetAll();
-            var notifications = NotificationsGenerator.Generate(allReservations, guestReviewRepository);
+            var unratedViewModel = Injector.CreateUnratedGuestsViewModel();
 
-            Notifications.Clear();
-            foreach (var n in notifications)
-                Notifications.Add(n);
+            var unratedView = new UnratedGuestsView();
+
+            unratedView.DataContext = unratedViewModel;
+
+            CurrentContent = unratedView;
         }
 
-        private void OpenCommunity()
+        private void ShowMyUnits()
         {
-            // logika za Community
         }
 
-        private void OpenLibrary()
+        private void ShowForums()
         {
-            // logika za Library
         }
 
-        private void CheckForUnratedGuests()
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            var allReservations = reservationService.GetAll();
-            var notifications = NotificationsGenerator.Generate(allReservations, guestReviewRepository);
-
-            HasUnratedGuests = notifications.Any();
-
-            if (HasUnratedGuests && !ToastShownToday())
-            {
-                ToastMessageRequested?.Invoke("🔔 You have guests to rate!");
-                SaveToastShownDate(DateTime.Now);
-            }
-        }
-
-        #region Toast helpers
-
-        private const string ToastInfoFile = "toastShownDate.txt";
-
-        private bool ToastShownToday()
-        {
-            if (!System.IO.File.Exists(ToastInfoFile))
-                return false;
-
-            string content = System.IO.File.ReadAllText(ToastInfoFile);
-            if (DateTime.TryParse(content, out DateTime lastShown))
-            {
-                return lastShown.Date == DateTime.Today;
-            }
-
-            return false;
-        }
-
-        private void SaveToastShownDate(DateTime date)
-        {
-            System.IO.File.WriteAllText(ToastInfoFile, date.ToString("yyyy-MM-dd"));
-        }
-
-        #endregion
-
-        protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Domain.Model;
-using BookingApp.Utilities;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTO;
-using BookingApp.Repositories;
 
 namespace BookingApp.Services
 {
@@ -15,7 +13,6 @@ namespace BookingApp.Services
         private readonly IRescheduleRequestRepository _rescheduleRequestRepository;
         private readonly IAccommodationRepository _accommodationRepository;
         private readonly IReservationRepository _reservationRepository;
-
         public RescheduleRequestService(IOccupiedDateRepository occupiedDateRepository, IRescheduleRequestRepository rescheduleRequestRepository, IAccommodationRepository accommodationRepository, IReservationRepository reservationRepository)
         {
             _occupiedDateRepository = occupiedDateRepository;
@@ -43,7 +40,6 @@ namespace BookingApp.Services
                 .Select(od => od.Date)
                 .ToList();
         }
- 
         public void CreateRequest(RescheduleRequestDTO requestDto)
         {
             var reservation = _reservationRepository.GetById(requestDto.ReservationId);
@@ -77,7 +73,6 @@ namespace BookingApp.Services
                 throw new InvalidOperationException($"Minimum stay is {accommodation.MinReservationDays} days.");
             }
         }
-
         private void CheckForAvailability(Reservation originalReservation, DateTime newStart, DateTime newEnd)
         {
             var reservationDtoForCheck = new ReservationDTO(originalReservation);
@@ -92,10 +87,7 @@ namespace BookingApp.Services
             {
                 throw new InvalidOperationException("Selected period overlaps with another reservation.");
             }
-        }
-      
-
-            
+        }  
         public List<RescheduleRequestDTO> GetAll() 
         {
             return _rescheduleRequestRepository.GetAll().Select(r => new RescheduleRequestDTO(r)).ToList(); 
@@ -103,7 +95,7 @@ namespace BookingApp.Services
       
         public RescheduleRequestDTO GetById(int id) 
         { 
-            return _rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id) == null ? null : new RescheduleRequestDTO(_rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id));
+            return _rescheduleRequestRepository.GetAll().FirstOrDefault(r => r.Id == id) == null ? null : new RescheduleRequestDTO();
         }
         public void Update(RescheduleRequestDTO requestDto)
         {
@@ -118,5 +110,4 @@ namespace BookingApp.Services
             }
         }
     }
-    
 }

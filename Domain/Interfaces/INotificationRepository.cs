@@ -14,5 +14,6 @@ namespace BookingApp.Domain.Interfaces
         Notification Save(Notification notification);
         void Delete(Notification notification);
         int NextId();
+        Notification Update(Notification notification);
     }
 }

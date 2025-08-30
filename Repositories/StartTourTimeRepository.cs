@@ -1,4 +1,4 @@
-﻿using BookingApp.Domain.Model;
+using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 using System;
@@ -11,99 +11,64 @@ namespace BookingApp.Repositories
     {
         private const string FilePath = "../../../Resources/Data/startTourTimes.csv";
         private readonly Serializer<StartTourTime> _serializer;
-        private List<StartTourTime> _startTourTimes;
+        private List<StartTourTime> _startTimes;
 
         public StartTourTimeRepository()
         {
             _serializer = new Serializer<StartTourTime>();
-            _startTourTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
+            _startTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
         }
 
-        public List<StartTourTime> GetAll()
-        {
-            _startTourTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
-            return _startTourTimes.ToList();
-        }
+        private void SaveAll() => _serializer.ToCSV(FilePath, _startTimes);
 
-        public StartTourTime? GetById(int id)
-        {
-            _startTourTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
-            return _startTourTimes.FirstOrDefault(st => st.Id == id);
-        }
+        private void Reload() => _startTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
 
-        public StartTourTime Save(StartTourTime startTourTime)
-        {
-            if (startTourTime == null)
-                throw new ArgumentNullException(nameof(startTourTime));
+        public List<StartTourTime> GetAll() => _startTimes.ToList();
 
-            _startTourTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
-
-            if (startTourTime.Id == 0)
-            {
-                startTourTime.Id = GetNextId();
-            }
-
-            _startTourTimes.Add(startTourTime);
-            SaveAll();
-            return startTourTime;
-        }
-
-        public StartTourTime Update(StartTourTime startTourTime)
-        {
-            if (startTourTime == null)
-                throw new ArgumentNullException(nameof(startTourTime));
-
-            _startTourTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
-            var current = _startTourTimes.Find(c => c.Id == startTourTime.Id);
-
-            if (current != null)
-            {
-                int index = _startTourTimes.IndexOf(current);
-                _startTourTimes.Remove(current);
-                _startTourTimes.Insert(index, startTourTime);
-                SaveAll();
-            }
-
-            return startTourTime;
-        }
-
-        public void Delete(StartTourTime startTourTime)
-        {
-            if (startTourTime == null)
-                throw new ArgumentNullException(nameof(startTourTime));
-
-            _startTourTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
-            var found = _startTourTimes.Find(c => c.Id == startTourTime.Id);
-
-            if (found != null)
-            {
-                _startTourTimes.Remove(found);
-                SaveAll();
-            }
-        }
-
-        public void SaveAll()
-        {
-            _serializer.ToCSV(FilePath, _startTourTimes);
-        }
-
-        public int GetNextId()
-        {
-            _startTourTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
-            return _startTourTimes.Count == 0 ? 1 : _startTourTimes.Max(c => c.Id) + 1;
-        }
-
-        public int NextId()
-        {
-            return GetNextId();
-        }
+        public StartTourTime? GetById(int id) => _startTimes.FirstOrDefault(st => st.Id == id);
 
         public List<StartTourTime> GetByTourId(int tourId)
         {
-            // Ova implementacija zavisi od toga kako se čuva veza između Tour i StartTourTime
-            // Možda trebate dodatnu kolonu u CSV ili poseban mapping fajl
-            _startTourTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
-            return _startTourTimes.ToList(); // Placeholder implementacija
+            // Ovde treba filtrirati po TourId ako postoji kolona u CSV
+            return _startTimes.Where(st => st.TourId == tourId).ToList();
         }
+
+        public StartTourTime Add(StartTourTime startTime)
+        {
+            if (startTime == null) throw new ArgumentNullException(nameof(startTime));
+
+            startTime.Id = GetNextId();
+            _startTimes.Add(startTime);
+            SaveAll();
+            return startTime;
+        }
+
+        public StartTourTime Update(StartTourTime startTime)
+        {
+            if (startTime == null) throw new ArgumentNullException(nameof(startTime));
+
+            var index = _startTimes.FindIndex(st => st.Id == startTime.Id);
+            if (index >= 0)
+            {
+                _startTimes[index] = startTime;
+                SaveAll();
+            }
+
+            return startTime;
+        }
+
+        public void Delete(StartTourTime startTime)
+        {
+            if (startTime == null) throw new ArgumentNullException(nameof(startTime));
+
+            var existing = _startTimes.FirstOrDefault(st => st.Id == startTime.Id);
+            if (existing != null)
+            {
+                _startTimes.Remove(existing);
+                SaveAll();
+            }
+        }
+
+        public int GetNextId() => _startTimes.Count == 0 ? 1 : _startTimes.Max(st => st.Id) + 1;
     }
 }

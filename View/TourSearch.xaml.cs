@@ -1220,13 +1220,14 @@ namespace BookingApp.View
                 var lastNameBox = FindChild<TextBox>(pnlGuestDetails, $"txtLastName{i}");
                 var ageBox = FindChild<TextBox>(pnlGuestDetails, $"txtAge{i}");
                 var emailBox = i == 0 ? FindChild<TextBox>(pnlGuestDetails, $"txtEmail{i}") : null;
-
+                var touristID = _currentUser?.Id ?? 0;
                 var guest = new ReservationGuest
                 {
                     FirstName = firstNameBox?.Text ?? "",
                     LastName = lastNameBox?.Text ?? "",
                     Age = int.TryParse(ageBox?.Text, out int age) ? age : 0,
-                    Email = emailBox?.Text ?? ""
+                    Email = emailBox?.Text ?? "",
+                    TouristId = touristID
                 };
 
                 guests.Add(guest);

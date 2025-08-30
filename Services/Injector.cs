@@ -1,20 +1,23 @@
-﻿using BookingApp.Domain.Interfaces;
+using BookingApp.Domain.Interfaces;
 using BookingApp.Domain.Interfaces.ServiceInterfaces;
 using BookingApp.Presentation.ViewModel.Owner;
 using BookingApp.Repositories;
 using BookingApp.Services;
+using BookingApp.Services.DTO;
+using BookingApp.Utilities;
 using System;
 using System.Collections.Generic;
+using BookingApp.Presentation.View.Owner;
 
 namespace BookingApp.Services
 {
-    public class Injector
+    public static class Injector
     {
         private static readonly Dictionary<Type, object> _implementations = new Dictionary<Type, object>();
 
         static Injector()
         {
-            // Repositories
+            // ------------------- Repositories -------------------
             _implementations[typeof(IUserRepository)] = new UserRepository();
             _implementations[typeof(IAccommodationRepository)] = new AccommodationRepository();
             _implementations[typeof(IAccommodationImageRepository)] = new AccommodationImageRepository();
@@ -25,77 +28,82 @@ namespace BookingApp.Services
             _implementations[typeof(IOccupiedDateRepository)] = new OccupiedDateRepository();
             _implementations[typeof(IAccommodationReviewRepository)] = new AccommodationReviewRepository();
             _implementations[typeof(IRescheduleRequestRepository)] = new RescheduleRequestRepository();
-            _implementations[typeof(ITourReservationRepository)] = new TourReservationRepository();
-            _implementations[typeof(IReservationGuestRepository)] = new ReservationGuestRepository();
+
+            // Tour modules
             _implementations[typeof(ITourRepository)] = new TourRepository();
             _implementations[typeof(IStartTourTimeRepository)] = new StartTourTimeRepository();
-
-            
+            _implementations[typeof(ITourReservationRepository)] = new TourReservationRepository();
+            _implementations[typeof(IReservationGuestRepository)] = new ReservationGuestRepository();
             _implementations[typeof(ITourReviewRepository)] = new TourReviewRepository();
 
-            // Services
-            _implementations[typeof(IUserService)] = new UserService((IUserRepository)_implementations[typeof(IUserRepository)]);
+            // ------------------- Services -------------------
+            _implementations[typeof(IUserService)] = new UserService(CreateInstance<IUserRepository>());
             _implementations[typeof(IAccommodationService)] = new AccommodationService(
-                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
-                (ILocationRepository)_implementations[typeof(ILocationRepository)],
-                (IAccommodationImageRepository)_implementations[typeof(IAccommodationImageRepository)]
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<ILocationRepository>(),
+                CreateInstance<IAccommodationImageRepository>(),
+                new AccommodationValidationService()
             );
-            _implementations[typeof(IAccommodationImageService)] = new AccommodationImageService((IAccommodationImageRepository)_implementations[typeof(IAccommodationImageRepository)]);
-            _implementations[typeof(ICommentService)] = new CommentService((ICommentRepository)_implementations[typeof(ICommentRepository)]);
-            _implementations[typeof(ILocationService)] = new LocationService((ILocationRepository)_implementations[typeof(ILocationRepository)]);
-            _implementations[typeof(IGuestReviewService)] = new GuestReviewService((IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)]);
+            _implementations[typeof(IAccommodationImageService)] = new AccommodationImageService(CreateInstance<IAccommodationImageRepository>());
+            _implementations[typeof(ICommentService)] = new CommentService(CreateInstance<ICommentRepository>());
+            _implementations[typeof(ILocationService)] = new LocationService(CreateInstance<ILocationRepository>());
+            _implementations[typeof(IGuestReviewService)] = new GuestReviewService(CreateInstance<IGuestReviewRepository>());
             _implementations[typeof(IReservationService)] = new ReservationService(
-                (IReservationRepository)_implementations[typeof(IReservationRepository)],
-                (IOccupiedDateRepository)_implementations[typeof(IOccupiedDateRepository)],
-                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)]
+                CreateInstance<IReservationRepository>(),
+                CreateInstance<IOccupiedDateRepository>(),
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<IGuestReviewRepository>()
             );
-            _implementations[typeof(IAccommodationReviewService)] = new AccommodationReviewService((IAccommodationReviewRepository)_implementations[typeof(IAccommodationReviewRepository)]);
+            _implementations[typeof(IAccommodationReviewService)] = new AccommodationReviewService(CreateInstance<IAccommodationReviewRepository>());
             _implementations[typeof(IRescheduleRequestService)] = new RescheduleRequestService(
-                (IOccupiedDateRepository)_implementations[typeof(IOccupiedDateRepository)],
-                (IRescheduleRequestRepository)_implementations[typeof(IRescheduleRequestRepository)],
-                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
-                (IReservationRepository)_implementations[typeof(IReservationRepository)]
+                CreateInstance<IOccupiedDateRepository>(),
+                CreateInstance<IRescheduleRequestRepository>(),
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<IReservationRepository>()
             );
-            _implementations[typeof(IAccommodationFilterService)] = new AccommodationFilterService((IAccommodationRepository)_implementations[typeof(IAccommodationRepository)]);
+            _implementations[typeof(IAccommodationFilterService)] = new AccommodationFilterService(CreateInstance<IAccommodationRepository>());
             _implementations[typeof(IReservationDisplayService)] = new ReservationDisplayService(
-                (IReservationRepository)_implementations[typeof(IReservationRepository)],
-                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
-                (IRescheduleRequestRepository)_implementations[typeof(IRescheduleRequestRepository)],
-                (IAccommodationReviewService)_implementations[typeof(IAccommodationReviewService)],
-                (IGuestReviewService)_implementations[typeof(IGuestReviewService)]
+                CreateInstance<IReservationRepository>(),
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<IRescheduleRequestService>(),
+                CreateInstance<IAccommodationReviewService>(),
+                CreateInstance<IGuestReviewService>()
             );
             _implementations[typeof(INavigationService)] = new NavigationService();
 
+            // ------------------- Tour Services -------------------
             _implementations[typeof(ITourService)] = new TourService(
-                (ITourRepository)_implementations[typeof(ITourRepository)],
-                (ILocationRepository)_implementations[typeof(ILocationRepository)],
-                (IUserRepository)_implementations[typeof(IUserRepository)]
+                CreateInstance<ITourRepository>(),
+                CreateInstance<ILocationRepository>(),
+                CreateInstance<IUserRepository>()
             );
-            _implementations[typeof(IStartTourTimeService)] = new StartTourTimeService(
-                (IStartTourTimeRepository)_implementations[typeof(IStartTourTimeRepository)]
-            );
-
-            
+            _implementations[typeof(IStartTourTimeService)] = new StartTourTimeService(CreateInstance<IStartTourTimeRepository>());
             _implementations[typeof(ITourReviewService)] = new TourReviewService(
-                (ITourReviewRepository)_implementations[typeof(ITourReviewRepository)],
-                (ITourRepository)_implementations[typeof(ITourRepository)],
-                (IUserRepository)_implementations[typeof(IUserRepository)]
+                CreateInstance<ITourReviewRepository>(),
+                CreateInstance<ITourRepository>(),
+                CreateInstance<IUserRepository>()
             );
-
-            
             _implementations[typeof(ITourReservationService)] = new TourReservationService(
-                (ITourReservationRepository)_implementations[typeof(ITourReservationRepository)],
-                (ITourRepository)_implementations[typeof(ITourRepository)],
-                (IStartTourTimeRepository)_implementations[typeof(IStartTourTimeRepository)],
-                (IUserRepository)_implementations[typeof(IUserRepository)],
-                (ITourReviewService)_implementations[typeof(ITourReviewService)]
+                CreateInstance<ITourReservationRepository>(),
+                CreateInstance<ITourRepository>(),
+                CreateInstance<IStartTourTimeRepository>(),
+                CreateInstance<IUserRepository>(),
+                CreateInstance<ITourReviewService>()
             );
+            _implementations[typeof(IReservationGuestService)] = new ReservationGuestService(CreateInstance<IReservationGuestRepository>());
 
-            _implementations[typeof(IReservationGuestService)] = new ReservationGuestService(
-                (IReservationGuestRepository)_implementations[typeof(IReservationGuestRepository)]
+            // ------------------- Other Services -------------------
+            _implementations[typeof(INotificationService)] = new NotificationService(
+                CreateInstance<INotificationRepository>(),
+                CreateInstance<IReservationService>()
+            );
+            _implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
+                CreateInstance<IAccommodationService>(),
+                CreateInstance<IReservationService>()
             );
         }
 
+        // ------------------- Helper -------------------
         public static T CreateInstance<T>()
         {
             Type type = typeof(T);
@@ -104,6 +112,14 @@ namespace BookingApp.Services
                 return (T)_implementations[type];
             }
             throw new ArgumentException($"No implementation found for type {type}");
+        }
+
+        // ------------------- ViewModel Factories -------------------
+        public static HomeViewModel CreateHomeViewModel()
+        {
+            var reservationService = CreateInstance<IReservationService>();
+            var guestReviewService = CreateInstance<IGuestReviewService>();
+            return new HomeViewModel(reservationService, guestReviewService);
         }
 
         public static RegisterAccommodationViewModel CreateRegisterAccommodationViewModel()
@@ -125,18 +141,34 @@ namespace BookingApp.Services
             return new ImageGalleryViewModel(service, imagePaths);
         }
 
-        public static HomeViewModel CreateHomeViewModel()
-        {
-            return new HomeViewModel();
-        }
-
         public static RequestsViewModel CreateRequestsViewModel()
         {
             var rescheduleRequestService = CreateInstance<IRescheduleRequestService>();
-            var accommodationService = CreateInstance<IAccommodationService>();
-            var reservationService = CreateInstance<IReservationService>();
+            var requestsDisplayService = CreateInstance<RequestsDisplayService>();
+            return new RequestsViewModel(rescheduleRequestService, requestsDisplayService);
+        }
 
-            return new RequestsViewModel(rescheduleRequestService, accommodationService, reservationService);
+        public static RateGuestView CreateRateGuestView(int reservationId)
+        {
+            var view = new RateGuestView();
+            var guestReviewService = CreateInstance<IGuestReviewService>();
+            var viewModel = new RateGuestViewModel(guestReviewService, reservationId);
+            view.DataContext = viewModel;
+            viewModel.CloseAction = view.Close;
+            return view;
+        }
+
+        public static OwnerDashboardViewModel CreateOwnerDashboardViewModel(Action closeAction)
+        {
+            var notificationService = CreateInstance<INotificationService>();
+            return new OwnerDashboardViewModel(closeAction, notificationService);
+        }
+
+        public static UnratedGuestsViewModel CreateUnratedGuestsViewModel()
+        {
+            var reservationService = CreateInstance<IReservationService>();
+            var guestReviewService = CreateInstance<IGuestReviewService>();
+            return new UnratedGuestsViewModel(reservationService, guestReviewService);
         }
     }
 }

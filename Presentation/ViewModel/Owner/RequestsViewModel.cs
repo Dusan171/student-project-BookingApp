@@ -1,5 +1,4 @@
-﻿using BookingApp.Domain;
-using BookingApp.Utilities; 
+﻿using BookingApp.Utilities;
 using BookingApp.Services.DTO;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,22 +7,20 @@ using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
 using System.Linq;
-using System;
 using BookingApp.Domain.Model;
+using BookingApp.Services;
 
 namespace BookingApp.Presentation.ViewModel.Owner
 {
     public class RequestsViewModel : INotifyPropertyChanged
     {
+        private readonly RequestsDisplayService _requestsDisplayService;
         private readonly IRescheduleRequestService _rescheduleRequestService;
-        private readonly IAccommodationService _accommodationService;
-        private readonly IReservationService _reservationService;
 
         private ObservableCollection<RescheduleRequestDTO> _requests;
-        public ReservationDTO Reservation{ get; set; }
-        public AccommodationDTO Accommodation { get; set; }
-        public RescheduleRequestDTO Request { get; set; }
-
+        private RescheduleRequestDTO _selectedRequest;
+        private bool _isRejecting;
+        private string _rejectReason;
         public ObservableCollection<RescheduleRequestDTO> Requests
         {
             get => _requests;
@@ -33,8 +30,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 OnPropertyChanged();
             }
         }
-
-        private RescheduleRequestDTO _selectedRequest;
         public RescheduleRequestDTO SelectedRequest
         {
             get => _selectedRequest;
@@ -46,8 +41,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 (ApproveCommand as RelayCommand)?.RaiseCanExecuteChanged();
             }
         }
-
-        private bool _isRejecting;
         public bool IsRejecting
         {
             get => _isRejecting;
@@ -57,8 +50,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 OnPropertyChanged();
             }
         }
-
-        private string _rejectReason;
         public string RejectReason
         {
             get => _rejectReason;
@@ -68,16 +59,13 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 OnPropertyChanged();
             }
         }
-
         public ICommand RejectCommand { get; }
         public ICommand ApproveCommand { get; }
         public ICommand SubmitRejectCommand { get; }
-
-        public RequestsViewModel(IRescheduleRequestService rescheduleRequestService, IAccommodationService accommodationService, IReservationService reservationService)
+        public RequestsViewModel(IRescheduleRequestService rescheduleRequestService, RequestsDisplayService requestsDisplayService)
         {
             _rescheduleRequestService = rescheduleRequestService;
-            _accommodationService = accommodationService;
-            _reservationService = reservationService;
+            _requestsDisplayService = requestsDisplayService;
 
             LoadRequests();
 
@@ -92,29 +80,11 @@ namespace BookingApp.Presentation.ViewModel.Owner
 
             foreach (var request in pendingRequests)
             {
-                var reservation = _reservationService.GetById(request.ReservationId);
-
-                if (reservation != null)
-                {
-                  
-                    request.OriginalStartDate = reservation.StartDate;
-                    request.OriginalEndDate = reservation.EndDate;
-
-                    var accommodation = _accommodationService.GetAccommodationById(reservation.AccommodationId);
-
-                    if (accommodation != null)
-                    {
-                      
-                        request.AccommodationName = accommodation.Name;
-                        bool isAvailable = _reservationService.IsAccommodationAvailable(accommodation.Id, request.NewStartDate, request.NewEndDate);
-                        request.AvailabilityStatus = isAvailable ? "Available" : "Not available";
-                    }
-                }
+                _requestsDisplayService.ProcessAndSetRequestData(request);
             }
 
             Requests = new ObservableCollection<RescheduleRequestDTO>(pendingRequests);
         }
-
         private void ExecuteApprove(object parameter)
         {
             if (SelectedRequest == null)
@@ -126,20 +96,9 @@ namespace BookingApp.Presentation.ViewModel.Owner
             SelectedRequest.Status = RequestStatus.Approved;
             _rescheduleRequestService.Update(SelectedRequest);
 
-            var reservationToUpdate = _reservationService.GetById(SelectedRequest.ReservationId);
-
-
-            if (reservationToUpdate != null)
-            {
-                reservationToUpdate.StartDate = SelectedRequest.NewStartDate;
-                reservationToUpdate.EndDate = SelectedRequest.NewEndDate;
-                _reservationService.Update(reservationToUpdate); 
-            }
-
             MessageBox.Show("Request Approved.");
             LoadRequests();
         }
-
         private bool CanExecuteApprove(object parameter)
         {
             return SelectedRequest != null && SelectedRequest.Status == RequestStatus.Pending;
@@ -154,12 +113,10 @@ namespace BookingApp.Presentation.ViewModel.Owner
             }
             IsRejecting = true;
         }
-
         private bool CanExecuteReject(object parameter)
         {
             return SelectedRequest != null && SelectedRequest.Status == RequestStatus.Pending;
         }
-
         private void ExecuteSubmitReject(object parameter)
         {
             if (SelectedRequest == null)
@@ -167,10 +124,8 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 MessageBox.Show("Select Request.");
                 return;
             }
-
             SelectedRequest.Status = RequestStatus.Rejected;
             SelectedRequest.OwnerComment = RejectReason;
-
             _rescheduleRequestService.Update(SelectedRequest);
 
             MessageBox.Show("Request Rejected.");
@@ -178,17 +133,14 @@ namespace BookingApp.Presentation.ViewModel.Owner
             RejectReason = string.Empty;
             LoadRequests();
         }
-
         private bool CanExecuteSubmitReject(object parameter)
         {
             return SelectedRequest != null && IsRejecting;
         }
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        
     }
 }
