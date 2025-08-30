@@ -16,7 +16,7 @@
     </Window.Resources>
 
     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-        <!-- Umesto Click događaja, sada koristimo Command Binding -->
+      
         <Button Content="View Accommodations" Command="{Binding OpenAccommodationsCommand}"/>
         <Button Content="My Reservations" Command="{Binding OpenMyReservationsCommand}"/>
     </StackPanel>

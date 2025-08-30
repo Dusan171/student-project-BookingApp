@@ -1,4 +1,35 @@
-﻿using System;
+﻿using System.Windows;
+using System.Windows.Controls;
+
+namespace BookingApp.View.Guide
+{
+    public partial class MainWindow : Page
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+
+            ContentFrame.Navigate(new ToursPage());
+        }
+
+        private void Tours_Click(object sender, RoutedEventArgs e)
+        {
+            ContentFrame.Navigate(new ToursPage());
+        }
+
+        private void Reviews_Click(object sender, RoutedEventArgs e)
+        {
+            ContentFrame.Navigate(new ReviewsPage());
+        }
+
+        private void Statistics_Click(object sender, RoutedEventArgs e)
+        {
+            //ContentFrame.Navigate(new StatisticsPage());
+        }
+    }
+}
+
+/*using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -217,5 +248,13 @@ namespace BookingApp.View.Guide
             LoadAllTours();
             DisplayTours(FilterToday());
         }
+        private void Reviews_Click(object sender, EventArgs e)
+        {
+            ((MainWindow)Application.Current.MainWindow).MainFrame.Navigate(new ReviewsPage());
+        }
+        private void Statistics_Click(object sender, EventArgs e)
+        {
+            //this.NavigationService?.Navigate(new StatisticsPage());
+        }
     }
-}
+}*/

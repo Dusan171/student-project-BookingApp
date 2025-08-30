@@ -2,25 +2,23 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Collections.Generic;
-using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
 using BookingApp.Utilities;
 using BookingApp.Services.DTO;
-using BookingApp.Domain.Model;
 
-namespace BookingApp.Presentation.ViewModel
+namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class AccommodationReservationViewModel : ViewModelBase
     {
-        private readonly Accommodation _accommodation;
+        private readonly AccommodationDetailsDTO _accommodationDetails;
         private readonly IReservationService _reservationService;
-        
+
         public Action CloseAction { get; set; }
 
         #region Svojstva za povezivanje (Binding)
 
-       
+
 
         private DateTime? _startDate;
         public DateTime? StartDate
@@ -51,9 +49,9 @@ namespace BookingApp.Presentation.ViewModel
         public ICommand ReserveCommand { get; }
         #endregion
 
-        public AccommodationReservationViewModel(Accommodation accommodation)
+        public AccommodationReservationViewModel(AccommodationDetailsDTO accommodationDetails)
         {
-            _accommodation = accommodation ?? throw new ArgumentNullException(nameof(accommodation));
+            _accommodationDetails = accommodationDetails ?? throw new ArgumentNullException(nameof(accommodationDetails));
 
             _reservationService = Injector.CreateInstance<IReservationService>();
 
@@ -66,40 +64,34 @@ namespace BookingApp.Presentation.ViewModel
 
         private void LoadOccupiedDates()
         {
-            OccupiedDates = _reservationService.GetOccupiedDatesForAccommodation(_accommodation.Id);
+            OccupiedDates = _reservationService.GetOccupiedDatesForAccommodation(_accommodationDetails.Id);
         }
-
         private void Reserve(object obj)
         {
             if (!IsInputValid(out int guestNumber))
             {
-                return; 
+                return;
             }
-
-            try
-            {
-                var reservationDto = new ReservationDTO
-                {
-                    AccommodationId = _accommodation.Id,
-                    GuestId = Session.CurrentUser.Id,
-                    StartDate = StartDate.Value.Date,
-                    EndDate = EndDate.Value.Date,
-                    GuestsNumber = guestNumber 
-                };
-                _reservationService.Create(reservationDto);
-
-                MessageBox.Show("Reservation successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                CloseAction?.Invoke();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Reservation Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            ExecuteReservation(guestNumber);
         }
         private bool IsInputValid(out int parsedGuestNumber)
         {
-            parsedGuestNumber = 0; 
+            parsedGuestNumber = 0;
 
+            if (!AreDatesValid())
+            {
+                return false;
+            }
+
+            if (!IsGuestNumberValid(out parsedGuestNumber))
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private bool AreDatesValid()
+        {
             if (!StartDate.HasValue)
             {
                 MessageBox.Show("Please select a start date.");
@@ -115,15 +107,48 @@ namespace BookingApp.Presentation.ViewModel
                 MessageBox.Show("End date must be after the start date.");
                 return false;
             }
+            return true;
+        }
+        private bool IsGuestNumberValid(out int parsedGuestNumber)
+        {
             if (!int.TryParse(GuestsNumber, out parsedGuestNumber) || parsedGuestNumber <= 0)
             {
                 MessageBox.Show("Please enter a valid number of guests.");
                 return false;
             }
-
-            return true; 
+            return true;
         }
+        private void ExecuteReservation(int guestNumber)
+        {
+            try
+            {
+                var reservationDto = new ReservationDTO
+                {
+                    AccommodationId = _accommodationDetails.Id,
+                    GuestId = Session.CurrentUser.Id,
+                    StartDate = StartDate.Value.Date,
+                    EndDate = EndDate.Value.Date,
+                    GuestsNumber = guestNumber
+                };
 
+                _reservationService.Create(reservationDto);
+
+                HandleReservationSuccess();
+            }
+            catch (Exception ex)
+            {
+                HandleReservationFailure(ex);
+            }
+        }
+        private void HandleReservationSuccess()
+        {
+            MessageBox.Show("Reservation successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            CloseAction?.Invoke();
+        }
+        private void HandleReservationFailure(Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Reservation Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
         #endregion
     }
 }

@@ -30,7 +30,6 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <!-- Povezujemo TextBlock-ove sa svojstvima iz ViewModel-a -->
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Cleanliness:" Style="{StaticResource LabelStyle}"/>
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CleanlinessRating}" Style="{StaticResource ValueStyle}"/>
 
@@ -43,7 +42,6 @@
                 <TextBlock Text="{Binding Comment}" TextWrapping="Wrap" MinHeight="60"/>
             </Border>
 
-            <!-- Povezujemo dugme sa OkCommand iz ViewModel-a -->
             <Button Content="OK" IsDefault="True" Command="{Binding OkCommand}" HorizontalAlignment="Right" Margin="0,20,0,0" Padding="20,5"/>
         </StackPanel>
     </Border>

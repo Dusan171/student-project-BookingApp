@@ -26,7 +26,7 @@
 
     <DockPanel Margin="15">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <!-- Povezujemo dugme sa ReserveCommand iz ViewModel-a -->
+    
             <Button Content="Reserve" IsDefault="True" Command="{Binding ReserveCommand}"/>
             <Button Content="Cancel" IsCancel="True"/>
         </StackPanel>
@@ -36,7 +36,7 @@
                 <UniformGrid Columns="2" Rows="1">
                     <StackPanel Margin="5">
                         <TextBlock Text="Start Date"/>
-                        <!-- Povezujemo DatePicker sa svojstvima i BlackoutDates iz ViewModel-a -->
+                     
                         <DatePicker SelectedDate="{Binding StartDate}" utilities:DatePickerHelper.BlackoutDatesSource="{Binding OccupiedDates}"/>
 
                     </StackPanel>
@@ -50,7 +50,7 @@
             <GroupBox Header="Guest Information" Padding="5" Margin="0,10,0,0">
                 <StackPanel Margin="5">
                     <TextBlock Text="Number of guests:"/>
-                    <!-- Povezujemo TextBox sa GuestsNumber svojstvom -->
+                   
                     <TextBox Text="{Binding GuestsNumber, UpdateSourceTrigger=PropertyChanged}" MaxWidth="150"/>
                 </StackPanel>
             </GroupBox>

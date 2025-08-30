@@ -12,34 +12,12 @@
             </StackPanel>
         </Grid>
 
-        <StackPanel Margin="10,60,10,60">
-            <DockPanel Margin="0,0,0,10">
-                <TextBlock Text="Tours" FontSize="20" FontWeight="Bold" DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                <Button Content="New Tour" HorizontalAlignment="Right" DockPanel.Dock="Right" Padding="10,2" Click="NewTour_Click"/>
-            </DockPanel>
-
-            <ComboBox x:Name="TourFilterComboBox" HorizontalAlignment="Left" Width="150">
-                <ComboBoxItem Content="Tours Today" IsSelected="True"/>
-                <ComboBoxItem Content="All Tours"/>
-            </ComboBox>
-
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Height="540">
-                <ItemsControl x:Name="TourListPanel"/>
-            </ScrollViewer>
-        </StackPanel>
-
-        <Border x:Name="LiveTrackingOverlay" Background="White" Visibility="Collapsed" Panel.ZIndex="999">
-            <Frame x:Name="LiveTrackingFrame" NavigationUIVisibility="Hidden" />
-        </Border>
-
-        <Border x:Name="CreateTourOverlay" Background="White" Visibility="Collapsed" Panel.ZIndex="999">
-            <Frame x:Name="CreateTourFrame" NavigationUIVisibility="Hidden"/>
-        </Border>
+        <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" Margin="10,60,10,60" />
 
         <DockPanel Height="50" VerticalAlignment="Bottom" Background="#FF2D2D30">
-            <Button DockPanel.Dock="Left" Content="📍" FontSize="20" Width="85" Background="Transparent" Foreground="White"/>
-            <Button DockPanel.Dock="Left" Content="⭐" FontSize="20" Width="85" Background="Transparent" Foreground="White"/>
-            <Button DockPanel.Dock="Left" Content="❌" FontSize="20" Width="85" Background="Transparent" Foreground="White"/>
+            <Button DockPanel.Dock="Left" Content="📍" FontSize="20" Width="85" Background="Transparent" Foreground="White" Click="Tours_Click"/>
+            <Button DockPanel.Dock="Left" Content="⭐" FontSize="20" Width="85" Background="Transparent" Foreground="White" Click="Reviews_Click"/>
+            <Button DockPanel.Dock="Left" Content="❌" FontSize="20" Width="85" Background="Transparent" Foreground="White" Click="Statistics_Click"/>
             <Button DockPanel.Dock="Left" Content="📷" FontSize="20" Width="85" Background="Transparent" Foreground="White"/>
             <Button DockPanel.Dock="Left" Content="⚙️" FontSize="20" Width="85" Background="Transparent" Foreground="White"/>
         </DockPanel>

@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Booking App" Background="#f2f4f8" WindowState="Maximized" ResizeMode="CanResize">
     <Window.Resources>
-        
+
         <Style x:Key="NavButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -88,13 +88,11 @@
             <view:RequestsView/>
         </DataTemplate>
     </Window.Resources>
-    
+
     <Grid>
-        <!-- Gornja traka -->
         <Border Background="#003580" Height="132" CornerRadius="0,0,50,50" VerticalAlignment="Top" Padding="30,10" Panel.ZIndex="1">
             <StackPanel Orientation="Vertical" VerticalAlignment="Center">
 
-                <!-- Gornji deo: Booking app + logout -->
                 <DockPanel>
 
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
@@ -108,13 +106,11 @@
                                 Cursor="Hand">
                         </Button>
                     </StackPanel>
-                    
-                    <!-- Natpis Booking App levo -->
+
                     <TextBlock Text="Owner Dashboard" Foreground="White" FontSize="24" FontWeight="Bold" VerticalAlignment="Center" DockPanel.Dock="Left"/>
 
                 </DockPanel>
 
-                <!-- Donji deo: meni + dugme Demo -->
                 <DockPanel Margin="30,20,0,0" VerticalAlignment="Center">
                     <Button Content="🎥 Demo" Style="{StaticResource NavButtonStyle}" Command="{Binding NavigateCommand}" CommandParameter="Demo" Width="117" DockPanel.Dock="Right" />
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Height="35" Width="1176">
@@ -129,9 +125,26 @@
                 </DockPanel>
             </StackPanel>
         </Border>
-        <!-- Glavni sadržaj -->
-        <Border Margin="0,0,0,0"  Background="#f2f4f8" Effect="{StaticResource DropShadowEffect}">
+        <Border Margin="0,0,0,0" Background="#f2f4f8" Effect="{StaticResource DropShadowEffect}">
             <ContentControl x:Name="MainContentControl" Content="{Binding CurrentViewModel}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         </Border>
+
+        <Popup IsOpen="{Binding IsNotificationPopupVisible}"
+       Placement="Center"
+       AllowsTransparency="True">
+            <Border Background="#f0f0f0"  
+            BorderBrush="#c2c2c2"  
+            BorderThickness="1"
+            CornerRadius="10"
+            Padding="30"
+            Effect="{StaticResource DropShadowEffect}">
+                <TextBlock Text="🔔 You have unrated guests! 🔔" 
+                   Foreground="#333333"  
+                   FontSize="24"
+                   FontWeight="SemiBold"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+            </Border>
+        </Popup>
     </Grid>
 </Window>

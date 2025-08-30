@@ -237,7 +237,7 @@ namespace BookingApp.View.Guide
                 }
                 TourCreated?.Invoke(this, EventArgs.Empty);
 
-                NavigationService?.Navigate(new MainWindow());
+                //NavigationService?.Navigate(new MainWindow());
             }
             catch (Exception ex)
             {

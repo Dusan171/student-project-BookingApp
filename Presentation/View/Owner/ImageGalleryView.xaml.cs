@@ -20,17 +20,23 @@ namespace BookingApp.Presentation.Owner
             this.Focus();
         }
 
-
+ 
         private void UserControl_KeyDown(object sender, KeyEventArgs e)
         {
             if (DataContext is ImageGalleryViewModel vm)
             {
-                if (e.Key == Key.Left)
-                    vm.PrevCommand.Execute(null);
-                else if (e.Key == Key.Right)
-                    vm.NextCommand.Execute(null);
-                else if (e.Key == Key.Escape)
-                    vm.CloseCommand.Execute(null);
+                switch (e.Key)
+                {
+                    case Key.Left:
+                        vm.PrevCommand.Execute(null);
+                        break;
+                    case Key.Right:
+                        vm.NextCommand.Execute(null);
+                        break;
+                    case Key.Escape:
+                        vm.CloseCommand.Execute(null);
+                        break;
+                }
             }
         }
     }

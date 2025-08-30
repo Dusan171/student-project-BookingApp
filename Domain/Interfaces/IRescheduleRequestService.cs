@@ -12,5 +12,6 @@ namespace BookingApp.Domain.Interfaces
         List<RescheduleRequestDTO> GetAll();
         RescheduleRequestDTO GetById(int id);
         void Update(RescheduleRequestDTO request);
+        void Create(CreateRescheduleRequestDTO requestDto);
     }
 }

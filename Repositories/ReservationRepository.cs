@@ -17,6 +17,7 @@ namespace BookingApp.Repositories
         {
             _serializer = new Serializer<Reservation>();
             _reservations = _serializer.FromCSV(FilePath);
+
         }
 
         public List<Reservation> GetAll()
@@ -81,6 +82,10 @@ namespace BookingApp.Repositories
 
             _serializer.ToCSV(FilePath, _reservations);
             return existing;
+        }
+        public List<Reservation> GetByAccommodationId(int accommodationId)
+        {
+            return _reservations.Where(r => r.AccommodationId == accommodationId).ToList();
         }
     }
 }

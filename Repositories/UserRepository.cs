@@ -30,13 +30,9 @@ namespace BookingApp.Repositories
             _users = _serializer.FromCSV(FilePath);
             return _users.FirstOrDefault(u => u.Id == id);
         }
-
-        public User GetById(int id)
+        public List<User> GetAll()
         {
-            _users = _serializer.FromCSV(FilePath);
-            return _users.FirstOrDefault(u => u.Id == id);
+            return _serializer.FromCSV(FilePath);
         }
-
-
     }
 }

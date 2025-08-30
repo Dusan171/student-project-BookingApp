@@ -1,23 +1,19 @@
-﻿using BookingApp.Domain;
-using BookingApp.Domain.Model;
-using BookingApp.Presentation.ViewModel; // Namespace gde je ViewModel
-using System.Windows;
+﻿using System.Windows;
+using BookingApp.Presentation.ViewModel.Guest;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Presentation.View.Guest
 {
     public partial class RescheduleRequestView : Window
     {
-        public RescheduleRequestView(Reservation reservation)
+        public RescheduleRequestView(ReservationDetailsDTO reservationDetails)
         {
             InitializeComponent();
 
-            // Kreiramo ViewModel i prosleđujemo mu podatke
-            var viewModel = new RescheduleRequestViewModel(reservation);
+            var viewModel = new RescheduleRequestViewModel(reservationDetails);
 
-            // Povezujemo View sa ViewModel-om
             DataContext = viewModel;
 
-            // Dajemo ViewModel-u način da zatvori prozor
             viewModel.CloseAction = () => { this.DialogResult = true; this.Close(); };
         }
     }
