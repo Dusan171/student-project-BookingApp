@@ -19,13 +19,13 @@ namespace BookingApp.Repositories
             _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
         }
 
-        private void SaveAll() => _serializer.ToCSV(FilePath, _tours);
+        public void SaveAll() => _serializer.ToCSV(FilePath, _tours);
 
         private void Reload() => _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
 
         public List<Tour> GetAll() => _tours.ToList();
 
-        public Tour? GetById(int id) => _tours.FirstOrDefault(t => t.Id == id);
+        public Tour GetById(int id) => _tours.First(t => t.Id == id);
 
         public List<Tour> GetByLocation(string city, string country)
         {
@@ -96,30 +96,41 @@ namespace BookingApp.Repositories
             return false;
         }
 
-        public List<Tour> SearchTours(string location, string country, string language, int maxPeople, double duration)
+        public List<Tour> GetByMaxTourists(int maxTourists)
+        {
+            return _tours.Where(t => t.MaxTourists <= maxTourists).ToList();
+        }
+
+        public Tour Save(Tour tour)
+        {
+            var existing = _tours.FirstOrDefault(t => t.Id == tour.Id);
+            if (existing == null)
+                return Add(tour);
+            else
+                return Update(tour);
+        }
+
+        public List<Tour> SearchTours(string location, string country, string language, int? maxPeople, double? duration)
         {
             var filtered = _tours.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(location))
-                filtered = filtered.Where(t => t.Location != null &&
-                    t.Location.City?.Contains(location, StringComparison.OrdinalIgnoreCase) == true);
+                filtered = filtered.Where(t => t.Location?.City?.Contains(location, StringComparison.OrdinalIgnoreCase) == true);
 
             if (!string.IsNullOrWhiteSpace(country))
-                filtered = filtered.Where(t => t.Location != null &&
-                    t.Location.Country?.Contains(country, StringComparison.OrdinalIgnoreCase) == true);
+                filtered = filtered.Where(t => t.Location?.Country?.Contains(country, StringComparison.OrdinalIgnoreCase) == true);
 
             if (!string.IsNullOrWhiteSpace(language))
                 filtered = filtered.Where(t => t.Language?.Equals(language, StringComparison.OrdinalIgnoreCase) == true);
 
-            if (maxPeople > 0)
-                filtered = filtered.Where(t => (t.MaxTourists - t.ReservedSpots) >= maxPeople);
+            if (maxPeople.HasValue)
+                filtered = filtered.Where(t => (t.MaxTourists - t.ReservedSpots) >= maxPeople.Value);
 
-            if (duration > 0)
-                filtered = filtered.Where(t => Math.Abs(t.DurationHours - duration) < 0.1);
+            if (duration.HasValue)
+                filtered = filtered.Where(t => Math.Abs(t.DurationHours - duration.Value) < 0.1);
 
             return filtered.ToList();
         }
-
         public List<Tour> GetAlternativeTours(int originalTourId, int requiredSpots)
         {
             var originalTour = GetById(originalTourId);

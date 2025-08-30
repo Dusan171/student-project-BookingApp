@@ -50,6 +50,13 @@ namespace BookingApp.Services.DTO
             }
         }
 
+        private int _tourId;
+
+        public int TourId
+        {
+            get => _tourId;
+            set { _tourId = value; OnPropertyChanged(); }
+        }
         public string TimeText
         {
             get => _timeText;
@@ -101,6 +108,7 @@ namespace BookingApp.Services.DTO
 
             Id = startTourTime.Id;
             Time = startTourTime.Time;
+            TourId = startTourTime.TourId;
         }
 
         private void UpdateDisplayTexts()
@@ -112,7 +120,7 @@ namespace BookingApp.Services.DTO
 
         public StartTourTime ToStartTourTime()
         {
-            return new StartTourTime(Id, Time);
+            return new StartTourTime(Id, Time, TourId);
         }
 
         public static StartTourTimeDTO FromDomain(StartTourTime startTourTime)

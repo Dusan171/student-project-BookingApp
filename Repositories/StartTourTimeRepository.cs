@@ -19,7 +19,7 @@ namespace BookingApp.Repositories
             _startTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
         }
 
-        private void SaveAll() => _serializer.ToCSV(FilePath, _startTimes);
+        public void SaveAll() => _serializer.ToCSV(FilePath, _startTimes);
 
         private void Reload() => _startTimes = _serializer.FromCSV(FilePath) ?? new List<StartTourTime>();
 
@@ -33,6 +33,14 @@ namespace BookingApp.Repositories
             return _startTimes.Where(st => st.TourId == tourId).ToList();
         }
 
+        public StartTourTime Save(StartTourTime startTourTime)
+        {
+            var existing = _startTimes.FirstOrDefault(st => st.Id == startTourTime.Id);
+            if (existing == null)
+                return Add(startTourTime);
+            else
+                return Update(startTourTime);
+        }
         public StartTourTime Add(StartTourTime startTime)
         {
             if (startTime == null) throw new ArgumentNullException(nameof(startTime));
@@ -68,6 +76,8 @@ namespace BookingApp.Repositories
                 SaveAll();
             }
         }
+
+        public int NextId() => GetNextId();
 
         public int GetNextId() => _startTimes.Count == 0 ? 1 : _startTimes.Max(st => st.Id) + 1;
     }

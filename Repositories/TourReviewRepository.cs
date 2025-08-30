@@ -47,7 +47,7 @@ namespace BookingApp.Repositories
                         GuideLanguage = int.Parse(parts[5]),
                         TourInterest = int.Parse(parts[6]),
                         Comment = parts[7],
-                        Date = DateTime.ParseExact(parts[8], "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                        ReviewDate = DateTime.ParseExact(parts[8], "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
                         IsValid = bool.Parse(parts[9]),
                         ImagePaths = parts.Length > 10 && !string.IsNullOrWhiteSpace(parts[10])
                             ? parts[10].Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()
@@ -64,7 +64,7 @@ namespace BookingApp.Repositories
         public void SaveToFile()
         {
             var lines = _reviews.Select(r =>
-                $"{r.Id}|{r.TourId}|{r.TouristId}|{r.ReservationId}|{r.GuideKnowledge}|{r.GuideLanguage}|{r.TourInterest}|{r.Comment}|{r.Date:yyyy-MM-dd HH:mm:ss}|{r.IsValid}|{string.Join(";", r.ImagePaths)}");
+                $"{r.Id}|{r.TourId}|{r.TouristId}|{r.ReservationId}|{r.GuideKnowledge}|{r.GuideLanguage}|{r.TourInterest}|{r.Comment}|{r.ReviewDate:yyyy-MM-dd HH:mm:ss}|{r.IsValid}|{string.Join(";", r.ImagePaths)}");
 
             Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
             File.WriteAllLines(FilePath, lines);
@@ -79,7 +79,7 @@ namespace BookingApp.Repositories
         public void AddReview(TourReview review)
         {
             review.Id = _nextId++;
-            review.Date = DateTime.Now;
+            review.ReviewDate = DateTime.Now;
             _reviews.Add(review);
             SaveToFile();
         }

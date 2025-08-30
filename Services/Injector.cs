@@ -28,6 +28,7 @@ namespace BookingApp.Services
             _implementations[typeof(IOccupiedDateRepository)] = new OccupiedDateRepository();
             _implementations[typeof(IAccommodationReviewRepository)] = new AccommodationReviewRepository();
             _implementations[typeof(IRescheduleRequestRepository)] = new RescheduleRequestRepository();
+            _implementations[typeof(INotificationRepository)] = new NotificationRepository();
 
             // Tour modules
             _implementations[typeof(ITourRepository)] = new TourRepository();
@@ -65,11 +66,15 @@ namespace BookingApp.Services
             _implementations[typeof(IReservationDisplayService)] = new ReservationDisplayService(
                 CreateInstance<IReservationRepository>(),
                 CreateInstance<IAccommodationRepository>(),
-                CreateInstance<IRescheduleRequestService>(),
+                CreateInstance<IRescheduleRequestRepository>(),
+                //CreateInstance<IRescheduleRequestService>(),
                 CreateInstance<IAccommodationReviewService>(),
                 CreateInstance<IGuestReviewService>()
             );
-            _implementations[typeof(INavigationService)] = new NavigationService();
+            _implementations[typeof(INotificationService)] = new NotificationService(
+                CreateInstance<INotificationRepository>(),
+                CreateInstance<IReservationService>()
+            );
 
             // ------------------- Tour Services -------------------
             _implementations[typeof(ITourService)] = new TourService(
@@ -93,10 +98,6 @@ namespace BookingApp.Services
             _implementations[typeof(IReservationGuestService)] = new ReservationGuestService(CreateInstance<IReservationGuestRepository>());
 
             // ------------------- Other Services -------------------
-            _implementations[typeof(INotificationService)] = new NotificationService(
-                CreateInstance<INotificationRepository>(),
-                CreateInstance<IReservationService>()
-            );
             _implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
                 CreateInstance<IAccommodationService>(),
                 CreateInstance<IReservationService>()

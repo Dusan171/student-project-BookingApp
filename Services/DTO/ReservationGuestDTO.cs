@@ -142,7 +142,7 @@ namespace BookingApp.Services.DTO
         public ReservationGuest ToReservationGuest()
         {
             return new ReservationGuest(Id, ReservationId, FirstName, LastName,
-                                      Age, Email, HasAppeared, KeyPointJoinedAt);
+                                        Age, Email, KeyPointJoinedAt, HasAppeared);
         }
 
         public static ReservationGuestDTO FromDomain(ReservationGuest guest)

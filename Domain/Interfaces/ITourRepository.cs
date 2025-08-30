@@ -20,7 +20,7 @@ namespace BookingApp.Domain.Interfaces
         int GetNextId();
 
         bool UpdateReservedSpots(int tourId, int newReservedSpots);
-        List<Tour> SearchTours(string location, string country, string language, int maxPeople, double duration);
+        //List<Tour> SearchTours(string location, string country, string language, int maxPeople, double duration);
         List<Tour> SearchTours(string location, string country, string language, int? maxPeople, double? duration);
         bool ReserveSpots(int tourId, int numberOfSpots);
         List<Tour> GetAlternativeTours(int originalTourId, int requiredSpots);

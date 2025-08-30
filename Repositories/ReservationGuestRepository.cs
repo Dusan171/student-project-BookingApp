@@ -19,7 +19,7 @@ namespace BookingApp.Repositories
             _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
         }
 
-        private void SaveAll() => _serializer.ToCSV(FilePath, _guests);
+        public void SaveAll() => _serializer.ToCSV(FilePath, _guests);
 
         private void Reload() => _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
 
