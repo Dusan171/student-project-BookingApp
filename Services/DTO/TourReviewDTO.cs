@@ -40,7 +40,7 @@ namespace BookingApp.Services.DTO
             GuideLanguage = review.GuideLanguage;
             TourInterest = review.TourInterest;
             Comment = review.Comment;
-            ReviewDate = review.Date;
+            ReviewDate = review.ReviewDate;
             IsValid = review.IsValid;
             ImagePaths = review.ImagePaths?.ToList() ?? new List<string>();
             TourName = review.Tour?.Name;
@@ -54,7 +54,7 @@ namespace BookingApp.Services.DTO
                                   Comment)
             {
                 Id = Id,
-                Date = ReviewDate,
+                ReviewDate = ReviewDate,
                 IsValid = IsValid,
                 ImagePaths = ImagePaths.ToList()
             };

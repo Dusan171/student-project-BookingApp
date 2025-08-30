@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Serializer;
+using BookingApp.Domain.Model;
 
 public enum TourStatus { NONE, ACTIVE, FINISHED, CANCELLED }
 

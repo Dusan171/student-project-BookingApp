@@ -489,7 +489,7 @@ namespace BookingApp.View
                 TourInterest = _tourInterestRating,
                 Comment = txtReviewComment.Text.Trim(),
                 ImagePaths = new List<string>(_selectedImagePaths),
-                Date = DateTime.Now
+                ReviewDate = DateTime.Now
             };
 
             try

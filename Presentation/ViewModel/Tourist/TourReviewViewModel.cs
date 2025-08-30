@@ -162,7 +162,8 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 TourInterest = TourInterestRating,
                 Comment = ReviewComment,
                 TouristId = Session.CurrentUser?.Id ?? 0,
-                Date = DateTime.Now
+                
+                ReviewDate = DateTime.Now
             };
 
             _reviewRepository.AddReview(review);
