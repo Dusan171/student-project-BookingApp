@@ -202,6 +202,7 @@ namespace BookingApp.Presentation.View.Guide
 
             Tour newTour = new Tour
             {
+                //Id = 0,
                 GuideId = Session.CurrentUser.Id,
                 Name = NameTextBox.Text.Trim(),
                 Location = new Location
