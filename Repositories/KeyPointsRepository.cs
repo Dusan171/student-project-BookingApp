@@ -3,10 +3,11 @@ using BookingApp.Serializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Repositories
 {
-    public class KeyPointRepository
+    public class KeyPointRepository : IKeyPointRepository
     {
         private const string FilePath = "../../../Resources/Data/keypoints.csv";
 

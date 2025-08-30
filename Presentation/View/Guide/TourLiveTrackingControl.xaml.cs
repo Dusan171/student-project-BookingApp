@@ -9,7 +9,7 @@ using BookingApp.Domain.Model;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class TourLiveTracking : UserControl
+    public partial class TourLiveTrackingControl : UserControl
     {
         private Tour currentTour;
         private List<TourReservation> reservations;
@@ -18,8 +18,8 @@ namespace BookingApp.Presentation.View.Guide
         private TouristAttendanceRepository attendanceRepo = new TouristAttendanceRepository();
         private ReservationGuestRepository guestsRepository = new ReservationGuestRepository();
         private DateTime startTime;
-        MainWindow mainPage;
-        public TourLiveTracking(Tour tour, DateTime start, MainWindow main)
+        MainPage mainPage;
+        public TourLiveTrackingControl(Tour tour, DateTime start, MainPage main)
         {
             InitializeComponent();
             mainPage = main;

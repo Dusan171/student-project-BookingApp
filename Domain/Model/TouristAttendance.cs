@@ -16,7 +16,17 @@ namespace BookingApp.Domain.Model
         public bool HasAppeared { get; set; }
         public int KeyPointJoinedAt { get; set; }
 
-        
+        public TouristAttendance() { }
+        public TouristAttendance(int id, int guestId, int tourId, DateTime startTourTime, bool hasAppeared, int keyPointJoinedAt)
+        {
+            Id = id;
+            GuestId = guestId;
+            TourId = tourId;
+            StartTourTime = startTourTime;
+            HasAppeared = hasAppeared;
+            KeyPointJoinedAt = keyPointJoinedAt;
+        }
+
         public void FromCSV(string[] values)
         {
             if (values.Length < 6)

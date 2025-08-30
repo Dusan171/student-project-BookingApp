@@ -13,7 +13,7 @@ using BookingApp.Utilities;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class CreateTourForm : UserControl
+    public partial class CreateTourControl : UserControl
     {
         public event EventHandler Cancelled;
         public event EventHandler TourCreated;
@@ -31,9 +31,9 @@ namespace BookingApp.Presentation.View.Guide
         private int _localImageIdCounter = 0;
 
         private ObservableCollection<Images> images = new ObservableCollection<Images>();
-        private MainWindow mainPage;
+        private MainPage mainPage;
 
-        public CreateTourForm(MainWindow main)
+        public CreateTourControl(MainPage main)
         {
             InitializeComponent();
             ImagesListBox.ItemsSource = images;
@@ -240,11 +240,7 @@ namespace BookingApp.Presentation.View.Guide
                     imageRepository.Save(image);
                 }
                 TourCreated?.Invoke(this, EventArgs.Empty);
-                ///ISPROBAVANJE
-                /*if (mainPage.ContentFrame.CanGoBack)
-                {
-                    mainPage.ContentFrame.GoBack();
-                }*/
+                
                 mainPage.ContentFrame.Content = new ToursPage(mainPage);
             }
             catch (Exception ex)

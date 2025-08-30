@@ -18,11 +18,11 @@ namespace BookingApp.Presentation.View.Guide
     {
         private List<Tour> allTours;
         private List<TourReservation> allReservations;
-        MainWindow mainPage;
+        MainPage mainPage;
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
-        public ToursPage(MainWindow main)
+        public ToursPage(MainPage main)
         {
             AllocConsole();
             InitializeComponent();
@@ -205,7 +205,7 @@ namespace BookingApp.Presentation.View.Guide
 
                 if (LiveTrackingFrame != null)
                 {
-                    var liveTrackingPage = new TourLiveTracking(tour, time, mainPage);
+                    var liveTrackingPage = new TourLiveTrackingControl(tour, time, mainPage);
                     LiveTrackingFrame.Navigate(liveTrackingPage);
                     LiveTrackingOverlay.Visibility = Visibility.Visible;
                     TourListPanel.Visibility = Visibility.Collapsed;
@@ -249,7 +249,7 @@ namespace BookingApp.Presentation.View.Guide
         private void NewTour_Click(object sender, RoutedEventArgs e)
         {
 
-            CreateTourForm form = new CreateTourForm(mainPage);
+            CreateTourControl form = new CreateTourControl(mainPage);
             form.TourCreated += (s, e) =>
             {
                 LoadAllTours();

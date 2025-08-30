@@ -3,9 +3,9 @@ using System.Windows.Controls;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class MainWindow : Page
+    public partial class MainPage : Page
     {
-        public MainWindow()
+        public MainPage()
         {
             InitializeComponent();
 
@@ -19,12 +19,12 @@ namespace BookingApp.Presentation.View.Guide
 
         private void Reviews_Click(object sender, RoutedEventArgs e)
         {
-            ContentFrame.Navigate(new ReviewsPage());
+            ContentFrame.Navigate(new ReviewsControl());
         }
 
         private void Statistics_Click(object sender, RoutedEventArgs e)
         {
-            ContentFrame.Navigate(new StatisticsSelectionPage(this));
+            ContentFrame.Navigate(new StatisticsSelectionControl(this));
         }
     }
 }

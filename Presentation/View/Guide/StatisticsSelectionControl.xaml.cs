@@ -10,10 +10,10 @@ using BookingApp.Presentation.View.Guide;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class StatisticsSelectionPage : UserControl
+    public partial class StatisticsSelectionControl : UserControl
     {
-        MainWindow mainPage; 
-        public StatisticsSelectionPage(MainWindow main)
+        MainPage mainPage; 
+        public StatisticsSelectionControl(MainPage main)
         {
             InitializeComponent();
             mainPage = main;

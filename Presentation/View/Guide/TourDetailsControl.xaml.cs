@@ -10,9 +10,9 @@ namespace BookingApp.Presentation.View.Guide
         private ReservationGuestRepository _guestRepository;
         private TouristAttendanceRepository _attendanceRepository;
         private Tour _tour;
-        MainWindow mainPage;
+        MainPage mainPage;
 
-        public TourDetailsControl(Tour tour, MainWindow main)
+        public TourDetailsControl(Tour tour, MainPage main)
         {
             InitializeComponent();
             _tour = tour;
