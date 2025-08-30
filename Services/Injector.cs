@@ -1,12 +1,16 @@
 ﻿using BookingApp.Domain.Interfaces;
-using BookingApp.Presentation.ViewModel.Owner;
 using BookingApp.Repositories;
+using BookingApp.Services;
+using BookingApp.Utilities;
+using BookingApp.Presentation.ViewModel.Owner;
 using System;
 using System.Collections.Generic;
+using BookingApp.Presentation.View.Owner;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Services
 {
-    public class Injector
+    public static class Injector
     {
         private static readonly Dictionary<Type, object> _implementations = new Dictionary<Type, object>();
 
@@ -23,22 +27,27 @@ namespace BookingApp.Services
             _implementations[typeof(IOccupiedDateRepository)] = new OccupiedDateRepository();
             _implementations[typeof(IAccommodationReviewRepository)] = new AccommodationReviewRepository();
             _implementations[typeof(IRescheduleRequestRepository)] = new RescheduleRequestRepository();
-
+            _implementations[typeof(INotificationRepository)] = new NotificationRepository();
+            _implementations[typeof(AccommodationValidationService)] = new AccommodationValidationService();
             // Services
             _implementations[typeof(IUserService)] = new UserService((IUserRepository)_implementations[typeof(IUserRepository)]);
             _implementations[typeof(IAccommodationService)] = new AccommodationService(
                 (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
                 (ILocationRepository)_implementations[typeof(ILocationRepository)],
-                (IAccommodationImageRepository)_implementations[typeof(IAccommodationImageRepository)]
+                (IAccommodationImageRepository)_implementations[typeof(IAccommodationImageRepository)], (AccommodationValidationService)_implementations[typeof(AccommodationValidationService)]
             );
             _implementations[typeof(IAccommodationImageService)] = new AccommodationImageService((IAccommodationImageRepository)_implementations[typeof(IAccommodationImageRepository)]);
             _implementations[typeof(ICommentService)] = new CommentService((ICommentRepository)_implementations[typeof(ICommentRepository)]);
             _implementations[typeof(ILocationService)] = new LocationService((ILocationRepository)_implementations[typeof(ILocationRepository)]);
-            _implementations[typeof(IGuestReviewService)] = new GuestReviewService((IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)]);
+
+            _implementations[typeof(IGuestReviewService)] = new GuestReviewService(
+                (IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)]);
+
             _implementations[typeof(IReservationService)] = new ReservationService(
                 (IReservationRepository)_implementations[typeof(IReservationRepository)],
                 (IOccupiedDateRepository)_implementations[typeof(IOccupiedDateRepository)],
-                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)]
+                (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
+                (IGuestReviewRepository)_implementations[typeof(IGuestReviewRepository)] 
             );
             _implementations[typeof(IAccommodationReviewService)] = new AccommodationReviewService((IAccommodationReviewRepository)_implementations[typeof(IAccommodationReviewRepository)]);
             _implementations[typeof(IRescheduleRequestService)] = new RescheduleRequestService(
@@ -56,8 +65,11 @@ namespace BookingApp.Services
                 (IGuestReviewService)_implementations[typeof(IGuestReviewService)]
             );
             _implementations[typeof(INavigationService)] = new NavigationService();
+            _implementations[typeof(INotificationService)] = new NotificationService((INotificationRepository)_implementations[typeof(INotificationRepository)], (IReservationService)_implementations[typeof(IReservationService)]);
+            _implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
+                            (IAccommodationService)_implementations[typeof(IAccommodationService)],
+                            (IReservationService)_implementations[typeof(IReservationService)]);
         }
-
         public static T CreateInstance<T>()
         {
             Type type = typeof(T);
@@ -67,13 +79,18 @@ namespace BookingApp.Services
             }
             throw new ArgumentException($"No implementation found for type {type}");
         }
-
+        public static HomeViewModel CreateHomeViewModel()
+        {
+            var notificationService = CreateInstance<INotificationService>();
+            var reservationService = CreateInstance<IReservationService>();
+            var guestReviewService = CreateInstance<IGuestReviewService>();
+            return new HomeViewModel( reservationService, guestReviewService);
+        }
         public static RegisterAccommodationViewModel CreateRegisterAccommodationViewModel()
         {
             var accommodationService = CreateInstance<IAccommodationService>();
             return new RegisterAccommodationViewModel(accommodationService);
         }
-
         public static ReviewsViewModel CreateReviewsViewModel()
         {
             var guestReviewService = CreateInstance<IGuestReviewService>();
@@ -85,18 +102,34 @@ namespace BookingApp.Services
             var service = CreateInstance<IAccommodationImageService>();
             return new ImageGalleryViewModel(service, imagePaths);
         }
-        public static HomeViewModel CreateHomeViewModel()
-        {
-            
-            return new HomeViewModel();
-        }
         public static RequestsViewModel CreateRequestsViewModel()
         {
             var rescheduleRequestService = CreateInstance<IRescheduleRequestService>();
             var accommodationService = CreateInstance<IAccommodationService>();
             var reservationService = CreateInstance<IReservationService>();
+            var requestsDisplayService = new RequestsDisplayService(accommodationService, reservationService);
+            return new RequestsViewModel(rescheduleRequestService, requestsDisplayService);
+        }
+        public static RateGuestView CreateRateGuestView(int reservationId)
+        {
+            var view = new RateGuestView();
+            var guestReviewService = CreateInstance<IGuestReviewService>();
+            var viewModel = new RateGuestViewModel(guestReviewService, reservationId);
+            view.DataContext = viewModel;
+            viewModel.CloseAction = view.Close;
+            return view;
+        }
+        public static OwnerDashboardViewModel CreateOwnerDashboardViewModel(Action closeAction)
+        {
+            var notificationService = CreateInstance<INotificationService>();
+            return new OwnerDashboardViewModel(closeAction, notificationService);
+        }
+        public static UnratedGuestsViewModel CreateUnratedGuestsViewModel()
+        {
+            var reservationService = CreateInstance<IReservationService>();
+            var guestReviewService = CreateInstance<IGuestReviewService>();
 
-            return new RequestsViewModel(rescheduleRequestService, accommodationService, reservationService);
+            return new UnratedGuestsViewModel(reservationService, guestReviewService);
         }
     }
 }

@@ -24,14 +24,12 @@ namespace BookingApp.Presentation.View.Owner
             DataContext = reviewsViewModel;
         }
         private void ShowImageGallery(List<string> images)
-        {
-               
+        {      
                     var viewModel = Injector.CreateImageGalleryViewModel(images);
                     ImageGallery.DataContext = viewModel;
                     ImageGallery.Visibility = Visibility.Visible;
                     ImageGallery.Focus();
                     viewModel.CloseRequested += () => ImageGallery.Visibility = Visibility.Collapsed;
-
         }
     }
 }

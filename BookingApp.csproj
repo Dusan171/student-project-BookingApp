@@ -16,6 +16,7 @@
     <None Remove="Resources\Images\cats.jpg" />
     <None Remove="Resources\Images\delete.png" />
     <None Remove="Resources\Images\edit.png" />
+    <None Remove="Resources\Images\kej.jpg" />
     <None Remove="Resources\Images\location.png" />
     <None Remove="Resources\Images\photos.png" />
     <None Remove="Resources\Images\promo-banner.jpg" />
@@ -40,6 +41,9 @@
     </Content>
     <Content Include="Resources\Images\edit.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\kej.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Resource Include="Resources\Images\amsterdam.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

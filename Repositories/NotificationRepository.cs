@@ -1,11 +1,9 @@
 ﻿using BookingApp.Domain.Interfaces;
 using BookingApp.Domain.Model;
 using BookingApp.Serializer;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace BookingApp.Repositories
 {
@@ -21,8 +19,8 @@ namespace BookingApp.Repositories
             public NotificationRepository()
             {
                 _serializer = new Serializer<Notification>();
-                _notifications = _serializer.FromCSV(FilePath);
-            }
+                _notifications = _serializer.FromCSV(FilePath) ?? new List<Notification>();
+        }
 
             public List<Notification> GetAll()
             {
@@ -31,13 +29,11 @@ namespace BookingApp.Repositories
 
             public Notification GetById(int id)
             {
-                _notifications = _serializer.FromCSV(FilePath);
                 return _notifications.FirstOrDefault(a => a.Id == id);
             }
             public Notification Save(Notification notification)
             {
                 notification.Id = NextId();
-                _notifications = _serializer.FromCSV(FilePath);
                 _notifications.Add(notification);
                 _serializer.ToCSV(FilePath, _notifications);
                 return notification;
@@ -55,7 +51,6 @@ namespace BookingApp.Repositories
 
             public void Delete(Notification notification)
             {
-                _notifications = _serializer.FromCSV(FilePath);
                 Notification founded = _notifications.Find(a => a.Id == notification.Id);
                 _notifications.Remove(founded);
                 _serializer.ToCSV(FilePath, _notifications);
@@ -63,7 +58,6 @@ namespace BookingApp.Repositories
 
             public Notification Update(Notification notification)
             {
-                _notifications = _serializer.FromCSV(FilePath);
                 Notification current = _notifications.Find(a => a.Id == notification.Id);
                 int index = _notifications.IndexOf(current);
                 _notifications.Remove(current);

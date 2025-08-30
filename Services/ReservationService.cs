@@ -4,6 +4,7 @@ using System.Linq;
 using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTO;
+using BookingApp.Repositories;
 
 namespace BookingApp.Services
 {
@@ -12,13 +13,15 @@ namespace BookingApp.Services
         private readonly IReservationRepository _reservationRepository;
         private readonly IOccupiedDateRepository _occupiedDateRepository;
         private readonly IAccommodationRepository _accommodationRepository;
+        private readonly IGuestReviewRepository _guestReviewRepository;
 
 
-        public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository, IAccommodationRepository accommodationRepository)
+        public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository, IAccommodationRepository accommodationRepository, IGuestReviewRepository guestReviewRepository)
         {
             _reservationRepository = reservationRepository;
             _occupiedDateRepository = occupiedDateRepository;
             _accommodationRepository = accommodationRepository;
+            _guestReviewRepository = guestReviewRepository;
         }
         
         public ReservationDTO Create(ReservationDTO reservationDto)
@@ -130,6 +133,23 @@ namespace BookingApp.Services
                 }
             }
             return true; 
+        }
+
+        public List<ReservationDTO> GetUnratedReservations()
+        {
+            var allReservations = _reservationRepository.GetAll();
+            var allGuestReviews = _guestReviewRepository.GetAll();
+
+            var unratedReservations = allReservations
+                .Where(r => r.EndDate < DateTime.Now &&
+                            (DateTime.Now - r.EndDate).TotalDays <= 5 &&
+                            !allGuestReviews.Any(gr => gr.ReservationId == r.Id))
+                .ToList();
+            if (unratedReservations == null)
+            {
+                return new List<ReservationDTO>();
+            }
+            return unratedReservations.Select(r => new ReservationDTO(r)).ToList();
         }
 
     }

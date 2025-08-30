@@ -1,5 +1,6 @@
 ﻿using BookingApp.Presentation.View.Owner;
 using BookingApp.Presentation.ViewModel.Owner;
+using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.View;
@@ -25,7 +26,7 @@ namespace BookingApp.Presentation.View.Owner
         {
             InitializeComponent();
 
-            DataContext = new OwnerDashboardViewModel(Close);
+            DataContext = Injector.CreateOwnerDashboardViewModel(Close);
         }
 
     }

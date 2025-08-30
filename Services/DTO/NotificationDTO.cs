@@ -1,23 +1,17 @@
 ﻿using BookingApp.Domain.Model;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BookingApp.Services.DTO
 {
     public class NotificationDTO : INotifyPropertyChanged
     {
- 
         private int _id;
         private int _reservationId;
         private int _guestId;
         private DateTime _deadline;
         private bool _isRead;
-
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -28,7 +22,6 @@ namespace BookingApp.Services.DTO
             get => _id;
             set => _id = value;
         }
-
         public int ReservationId
         {
             get => _reservationId;
@@ -41,7 +34,6 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
-
         public int GuestId
         {
             get => _guestId;
@@ -54,7 +46,6 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
-
         public DateTime Deadline
         {
             get => _deadline;
@@ -67,7 +58,6 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
-
         public bool IsRead
         {
             get => _isRead;
@@ -80,10 +70,7 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
-    
         public NotificationDTO() { }
-
-        
         public NotificationDTO(Notification notification)
         {
             _id = notification.Id;
@@ -91,9 +78,7 @@ namespace BookingApp.Services.DTO
             _guestId = notification.GuestId;
             _deadline = notification.Deadline;
             _isRead = notification.IsRead;
-        }
-
-        
+        }        
         public Notification ToNotification()
         {
             return new Notification
