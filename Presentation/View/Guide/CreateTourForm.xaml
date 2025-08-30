@@ -1,109 +1,103 @@
-﻿<Page x:Class="BookingApp.View.Guide.CreateTourForm"
+﻿<UserControl x:Class="BookingApp.Presentation.View.Guide.CreateTourForm"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="Create Tour">
+      Background="White">
 
-    <Grid Width="430" Height="750" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-            <Grid Margin="10">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="10" Orientation="Vertical">
 
-                <StackPanel Grid.Row="0" VerticalAlignment="Top" Orientation="Vertical">
-                    <TextBlock Text="Create a New Tour" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <TextBlock Text="Create a New Tour" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,8"/>
 
+            <!-- Basic info -->
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <Label Content="Name:" Width="100"/>
+                <TextBox x:Name="NameTextBox" Width="200"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <Label Content="City:" Width="100"/>
+                <TextBox x:Name="CityTextBox" Width="200"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <Label Content="Country:" Width="100"/>
+                <TextBox x:Name="CountryTextBox" Width="200"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <Label Content="Description:" Width="100"/>
+                <TextBox x:Name="DescriptionTextBox" AcceptsReturn="True" Height="60" Width="220" TextWrapping="Wrap"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <Label Content="Language:" Width="100"/>
+                <TextBox x:Name="LanguageTextBox" Width="200"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <Label Content="Max Tourists:" Width="100"/>
+                <TextBox x:Name="TouristsTextBox" Width="50"/>
+            </StackPanel>
+
+            <!-- Start Date and Time -->
+            <GroupBox Header="Start Date and Time" Margin="0,5,0,5">
+                <StackPanel Margin="5">
                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                        <Label Content="Name:" Width="100"/>
-                        <TextBox x:Name="NameTextBox" Width="150"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                        <Label Content="City:" Width="100"/>
-                        <TextBox x:Name="CityTextBox" Width="150"/>
+                        <DatePicker x:Name="StartDatePicker" Width="150"/>
+                        <TextBox x:Name="StartTimeHourTextBox" Width="35" Margin="5,0,0,0" />
+                        <TextBox x:Name="StartTimeMinuteTextBox" Width="35" Margin="5,0,0,0"/>
+                        <Button Content="Add" Width="70" Margin="5,0,0,0" Click="AddStartTime_Click"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,2">
-                        <Label Content="Country:" Width="100"/>
-                        <TextBox x:Name="CountryTextBox" Width="150"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                        <Label Content="Description:" Width="100"/>
-                        <TextBox x:Name="DescriptionTextBox" AcceptsReturn="True" Height="50" Width="150" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                        <Label Content="Language:" Width="100"/>
-                        <TextBox x:Name="LanguageTextBox" Width="150"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                        <Label Content="Max Tourists:" Width="100"/>
-                        <TextBox x:Name="TouristsTextBox" Width="50"/>
-                    </StackPanel>
-
-                    <GroupBox Header="Start Date and Time" Margin="0,10,0,0">
-                        <StackPanel Margin="5">
-                            <StackPanel Orientation="Horizontal" Margin="0,5">
-                                <DatePicker x:Name="StartDatePicker" Width="150"/>
-                                <TextBox x:Name="StartTimeHourTextBox" Width="50" Margin="10,0,0,0"/>
-                                <TextBox x:Name="StartTimeMinuteTextBox" Width="50" Margin="10,0,0,0"/>
-                                <Button Content="Add Start Time" Width="110" Margin="10,0,0,0" Click="AddStartTime_Click"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,5">
-                                <ListBox x:Name="StartTimesListBox" Height="60" Width="290" HorizontalAlignment="Left"/>
-                                <Button Content="Remove Selected" Width="100" Click="RemoveStartTourTime_Click"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </GroupBox>
-
-                    <StackPanel Orientation="Horizontal" Margin="0">
-                        <Label Content="Duration (min):" Width="100"/>
-                        <TextBox x:Name="DurationTextBox" Width="50"/>
-                        <Label Content="h" Width="20"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                        <Label Content="Key Point:" Width="100"/>
-                        <TextBox x:Name="KeyPointTextBox" Width="180"/>
-                        <Button Content="Add" Width="40" Click="AddKeyPoint_Click"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,5">
-                        <ListBox x:Name="KeyPointsListBox" Width="200" Height="50" Margin="100,5,0,0"/>
-                        <Button Content="Remove Selected" Width="100" Height="50" Click="RemoveKeyPoint_Click"/>
-                    </StackPanel>
-
-                    <StackPanel Margin="10">
-                        <TextBlock x:Name="ImageTextBlock" Text="Image Path:"/>
-                        <TextBox x:Name="ImagePathTextBox" Width="250" />
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                            <Button Content="Add Image" Click="AddImage_Click" Width="100" />
-                            <Button Content="Remove Selected" Click="RemoveImage_Click" Margin="10,0,0,0" Width="120"/>
-                        </StackPanel>
-
-                        <ListBox x:Name="ImagesListBox" Height="200" SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ListBox.ItemsPanel>
-
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Image Source="{Binding Path}" Width="90" Height="90" Margin="5"/>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                        <ListBox x:Name="StartTimesListBox" Height="60" Width="200"/>
+                        <Button Content="Remove" Width="70" Margin="5,0,0,0" Click="RemoveStartTourTime_Click"/>
                     </StackPanel>
                 </StackPanel>
+            </GroupBox>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                    <Button Content="Create Tour" Width="80" Height="30" Margin="5" Click="CreateTour_Click"/>
-                    <Button Content="Cancel" Width="80" Height="30" Margin="5" Click="Cancel_Click"/>
-                </StackPanel>
-            </Grid>
-        </ScrollViewer>
-    </Grid>
-</Page>
+            <!-- Duration -->
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <Label Content="Duration (h):" Width="100"/>
+                <TextBox x:Name="DurationTextBox" Width="50"/>
+            </StackPanel>
+
+            <!-- Key Points -->
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <Label Content="Key Point:" Width="100"/>
+                <TextBox x:Name="KeyPointTextBox" Width="150"/>
+                <Button Content="Add" Width="50" Click="AddKeyPoint_Click"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,2">
+                <ListBox x:Name="KeyPointsListBox" Width="200" Height="50"/>
+                <Button Content="Remove" Width="70" Margin="5,0,0,0" Click="RemoveKeyPoint_Click"/>
+            </StackPanel>
+
+            <!-- Images -->
+            <TextBlock Text="Images:" Margin="0,5,0,2"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="ImagePathTextBox" Width="200"/>
+                <Button Content="Add" Width="60" Margin="5,0,0,0" Click="AddImage_Click"/>
+                <Button Content="Remove" Width="70" Margin="5,0,0,0" Click="RemoveImage_Click"/>
+            </StackPanel>
+            <ListBox x:Name="ImagesListBox" Height="150" SelectionMode="Single">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding Path}" Width="70" Height="70" Margin="3"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- Buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button Content="Create" Width="80" Margin="5" Click="CreateTour_Click"/>
+                <Button Content="Cancel" Width="80" Margin="5" Click="Cancel_Click"/>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

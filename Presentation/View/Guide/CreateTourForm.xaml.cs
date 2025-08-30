@@ -8,18 +8,19 @@ using BookingApp.Repositories;
 using System.Collections.ObjectModel;
 using System.IO;
 using BookingApp.Domain.Model;
+using BookingApp.Utilities;
 
 
-namespace BookingApp.View.Guide
+namespace BookingApp.Presentation.View.Guide
 {
-    public partial class CreateTourForm : Page
+    public partial class CreateTourForm : UserControl
     {
         public event EventHandler Cancelled;
         public event EventHandler TourCreated;
         private List<KeyPoint> keyPoints = new();
         private List<StartTourTime> startTimes = new();
 
-        private readonly TourRepository tourRepository = new();
+        private readonly TourRepository tourRepository = new TourRepository();
         private readonly KeyPointRepository keyPointRepository = new();
         private readonly ImageRepository imageRepository = new();
         private readonly StartTourTimeRepository startTimeRepository = new();
@@ -30,12 +31,13 @@ namespace BookingApp.View.Guide
         private int _localImageIdCounter = 0;
 
         private ObservableCollection<Images> images = new ObservableCollection<Images>();
+        private MainWindow mainPage;
 
-
-        public CreateTourForm()
+        public CreateTourForm(MainWindow main)
         {
             InitializeComponent();
             ImagesListBox.ItemsSource = images;
+            mainPage = main;
 
         }
 
@@ -200,6 +202,7 @@ namespace BookingApp.View.Guide
 
             Tour newTour = new Tour
             {
+                GuideId = Session.CurrentUser.Id,
                 Name = NameTextBox.Text.Trim(),
                 Location = new Location
                 {
@@ -236,8 +239,12 @@ namespace BookingApp.View.Guide
                     imageRepository.Save(image);
                 }
                 TourCreated?.Invoke(this, EventArgs.Empty);
-
-                //NavigationService?.Navigate(new MainWindow());
+                ///ISPROBAVANJE
+                /*if (mainPage.ContentFrame.CanGoBack)
+                {
+                    mainPage.ContentFrame.GoBack();
+                }*/
+                mainPage.ContentFrame.Content = new ToursPage(mainPage);
             }
             catch (Exception ex)
             {
@@ -253,3 +260,6 @@ namespace BookingApp.View.Guide
         }
     }
 }
+
+
+
