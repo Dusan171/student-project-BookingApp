@@ -213,7 +213,7 @@ namespace BookingApp.Presentation.View.Guide
             tourRepository.Update(currentTour);
             MessageBox.Show("Sve ključne tačke su prošle. Tura je uspešno završena.", "Kraj Ture", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            mainPage.ContentFrame.Content = new ToursPage(mainPage);
+            mainPage.ContentFrame.Content = new ToursControl(mainPage);
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)

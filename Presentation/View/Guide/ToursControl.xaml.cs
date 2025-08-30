@@ -14,7 +14,7 @@ using BookingApp.Presentation.View.Guide;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class ToursPage : UserControl
+    public partial class ToursControl : UserControl
     {
         private List<Tour> allTours;
         private List<TourReservation> allReservations;
@@ -22,7 +22,7 @@ namespace BookingApp.Presentation.View.Guide
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
-        public ToursPage(MainPage main)
+        public ToursControl(MainPage main)
         {
             AllocConsole();
             InitializeComponent();
@@ -255,12 +255,10 @@ namespace BookingApp.Presentation.View.Guide
                 LoadAllTours();
                 DisplayTours(FilterToday());
 
-                };
-                form.Cancelled += OnCreateTourCancelled;
-                mainPage.ContentFrame.Content = form;
+            };
+            form.Cancelled += OnCreateTourCancelled;
+            mainPage.ContentFrame.Content = form;
 
-                CreateTourFrame.Navigate(form);
-            }
         }
 
         private void OnCreateTourCancelled(object sender, EventArgs e)

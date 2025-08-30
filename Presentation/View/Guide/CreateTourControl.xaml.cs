@@ -241,7 +241,7 @@ namespace BookingApp.Presentation.View.Guide
                 }
                 TourCreated?.Invoke(this, EventArgs.Empty);
                 
-                mainPage.ContentFrame.Content = new ToursPage(mainPage);
+                mainPage.ContentFrame.Content = new ToursControl(mainPage);
             }
             catch (Exception ex)
             {
