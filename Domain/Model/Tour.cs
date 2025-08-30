@@ -2,49 +2,49 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BookingApp.Serializer;
-using System.Windows;
-using BookingApp.Domain.Model;
 
-public enum TourStatus { NONE, ACTIVE, FINISHED, CANCELLED };
+public enum TourStatus { NONE, ACTIVE, FINISHED, CANCELLED }
+
 public class Tour : ISerializable
-
 {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public Location Location { get; set; }
-    public string Description { get; set; }
-    public string Language { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public Location Location { get; set; } = new Location();
+    public string Description { get; set; } = string.Empty;
+    public string Language { get; set; } = string.Empty;
     public int MaxTourists { get; set; }
     public int ReservedSpots { get; set; }
-    public List<KeyPoint> KeyPoints { get; set; }
-    public List<StartTourTime> StartTimes { get; set; }
+    public List<KeyPoint> KeyPoints { get; set; } = new List<KeyPoint>();
+    public List<StartTourTime> StartTimes { get; set; } = new List<StartTourTime>();
     public double DurationHours { get; set; }
-    public List<Images> Images { get; set; }
-    public TourStatus Status { get; set; }
+    public List<Images> Images { get; set; } = new List<Images>();
+    public TourStatus Status { get; set; } = TourStatus.NONE;
+    public User Guide { get; set; } = new User();
 
-
-    public User Guide { get; set; }
-
-    public Tour()
+    public int AvailableSpots
     {
-        KeyPoints = new List<KeyPoint>();
-        StartTimes = new List<StartTourTime>();
-        Images = new List<Images>();
+        get
+        {
+            int available = MaxTourists - ReservedSpots;
+            return available < 0 ? 0 : available;
+        }
     }
 
+    public Tour() { }
+
     public Tour(int id, string name, Location location, string description, string language,
-                 int maxTourists, int reservedSpots, double durationHours, TourStatus status, User guide = null)
+                int maxTourists, int reservedSpots, double durationHours, TourStatus status = TourStatus.NONE, User? guide = null)
     {
         Id = id;
-        Name = name;
-        Location = location;
-        Description = description;
-        Language = language;
+        Name = name ?? string.Empty;
+        Location = location ?? new Location();
+        Description = description ?? string.Empty;
+        Language = language ?? string.Empty;
         MaxTourists = maxTourists;
         ReservedSpots = reservedSpots;
         DurationHours = durationHours;
         Status = status;
-        Guide = guide;
+        Guide = guide ?? new User();
 
         KeyPoints = new List<KeyPoint>();
         StartTimes = new List<StartTourTime>();
@@ -57,7 +57,8 @@ public class Tour : ISerializable
         string startTimeIds = string.Join(",", StartTimes.Select(st => st.Id));
         string imageIds = string.Join(",", Images.Select(img => img.Id));
 
-        string[] csvValues = {
+        return new string[]
+        {
             Id.ToString(),
             Name,
             Location.Id.ToString(),
@@ -69,19 +70,14 @@ public class Tour : ISerializable
             keyPointIds,
             startTimeIds,
             imageIds,
-            Guide != null ? Guide.Id.ToString() : ""
+            Guide?.Id.ToString() ?? "0"
         };
-
-        return csvValues;
     }
-
 
     public void FromCSV(string[] values)
     {
         if (values == null || values.Length < 7)
-        {
             throw new ArgumentException("Invalid CSV data for Tour");
-        }
 
         Id = int.Parse(values[0]);
         Name = values[1] ?? string.Empty;
@@ -96,60 +92,28 @@ public class Tour : ISerializable
         StartTimes = new List<StartTourTime>();
         Images = new List<Images>();
 
-
-        if (values.Length > 7 && !string.IsNullOrEmpty(values[8]))
+        if (values.Length > 8 && !string.IsNullOrEmpty(values[8]))
         {
-            var keyPointIds = values[8].Split(',');
-            foreach (var id in keyPointIds)
-            {
-                if (int.TryParse(id, out int keyPointId))
-                {
-                    KeyPoints.Add(new KeyPoint { Id = keyPointId });
-                }
-            }
+            foreach (var id in values[8].Split(','))
+                if (int.TryParse(id, out int kpId))
+                    KeyPoints.Add(new KeyPoint { Id = kpId });
         }
-
 
         if (values.Length > 9 && !string.IsNullOrEmpty(values[9]))
         {
-            var startTimeIds = values[9].Split(',');
-            foreach (var id in startTimeIds)
-            {
-                if (int.TryParse(id, out int startTimeId))
-                {
-                    StartTimes.Add(new StartTourTime { Id = startTimeId });
-                }
-            }
+            foreach (var id in values[9].Split(','))
+                if (int.TryParse(id, out int stId))
+                    StartTimes.Add(new StartTourTime { Id = stId });
         }
-
 
         if (values.Length > 10 && !string.IsNullOrEmpty(values[10]))
         {
-            var imageIds = values[10].Split(',');
-            foreach (var id in imageIds)
-            {
-                if (int.TryParse(id, out int imageId))
-                {
-                    Images.Add(new Images { Id = imageId });
-                }
-            }
+            foreach (var id in values[10].Split(','))
+                if (int.TryParse(id, out int imgId))
+                    Images.Add(new Images { Id = imgId });
         }
-
 
         if (values.Length > 11 && int.TryParse(values[11], out int guideId))
-        {
             Guide = new User { Id = guideId };
-
-        }
     }
-
-    public int AvailableSpots
-    {
-        get
-        {
-            int available = MaxTourists - ReservedSpots;
-            return available < 0 ? 0 : available;
-        }
-    }
-
 }

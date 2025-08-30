@@ -13,6 +13,7 @@ namespace BookingApp.Domain.Interfaces
         Location Save(Location location);
         void Delete(Location location);
         Location Update(Location location);
-        
+        Location? GetById(int id);
+        Location? GetByName(string city, string country);
     }
 }

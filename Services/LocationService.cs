@@ -1,4 +1,4 @@
-﻿using BookingApp.Domain.Interfaces;
+﻿using BookingApp.Domain.Interfaces.ServiceInterfaces;
 using BookingApp.Domain.Model;
 using System;
 using System.Collections.Generic;
@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Services.DTO;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Services
 {
@@ -27,7 +28,8 @@ namespace BookingApp.Services
 
         public LocationDTO AddLocation(LocationDTO location)
         {
-            return new LocationDTO(_repository.Save(location.ToLocation()));
+            var savedLocation = _repository.Save(location.ToLocation());
+            return new LocationDTO(savedLocation);
         }
 
         public void DeleteLocation(LocationDTO location)
@@ -37,7 +39,8 @@ namespace BookingApp.Services
 
         public LocationDTO UpdateLocation(LocationDTO location)
         {
-            return new LocationDTO(_repository.Update(location.ToLocation()));
+            var updatedLocation = _repository.Update(location.ToLocation());
+            return new LocationDTO(updatedLocation);
         }
     }
 }

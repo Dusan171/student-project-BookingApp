@@ -1,4 +1,5 @@
-﻿using BookingApp.Domain.Model;
+﻿// UserService.cs (fixed)
+using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTO;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BookingApp.Serializer;
 
 namespace BookingApp.Services
 {
@@ -18,10 +20,11 @@ namespace BookingApp.Services
             _userRepository = userRepository;
         }
 
-
-        public UserDTO GetUserByUsername(string username)
+        public UserDTO? GetUserByUsername(string username)
         {
-            return _userRepository.GetByUsername(username) is User user ? new UserDTO(user) : null;
+            var user = _userRepository.GetByUsername(username);
+            return user != null ? new UserDTO(user) : null;
         }
     }
 }
+

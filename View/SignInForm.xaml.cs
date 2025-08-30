@@ -9,6 +9,7 @@ using BookingApp.Domain;
 using BookingApp.Repositories;
 using BookingApp.Presentation.View.Owner;
 using BookingApp.Domain.Model;
+using BookingApp.Presentation.View.Tourist;
 
 namespace BookingApp.View
 {
@@ -79,8 +80,8 @@ namespace BookingApp.View
                             break;
 
                         case UserRole.TOURIST:
-                            var touristView = new TourSearch();
-                            touristView.Show();
+                            var touristWindow = new TouristDashboardWindow();
+                            touristWindow.Show();
                             break;
 
                         default:

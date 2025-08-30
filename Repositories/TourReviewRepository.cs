@@ -1,14 +1,14 @@
-﻿using System;
+﻿using BookingApp.Domain.Model;
+using BookingApp.Domain.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using BookingApp.Domain;
-using BookingApp.Domain.Model;
 
 namespace BookingApp.Repositories
 {
-    public class TourReviewRepository
+    public class TourReviewRepository : ITourReviewRepository
     {
         private const string FilePath = "../../../Resources/Data/tourreviews.csv";
         private List<TourReview> _reviews;
@@ -23,50 +23,39 @@ namespace BookingApp.Repositories
         private List<TourReview> LoadFromFile()
         {
             var reviews = new List<TourReview>();
-
             if (!File.Exists(FilePath))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
                 return reviews;
             }
 
-            var lines = File.ReadAllLines(FilePath);
-            foreach (var line in lines)
+            foreach (var line in File.ReadAllLines(FilePath))
             {
                 if (string.IsNullOrWhiteSpace(line)) continue;
-
                 var parts = line.Split('|');
-                if (parts.Length >= 8) 
+                if (parts.Length < 10) continue;
+
+                try
                 {
-                    try
+                    var review = new TourReview
                     {
-                        var review = new TourReview
-                        {
-                            Id = int.Parse(parts[0]),
-                            TourId = int.Parse(parts[1]),
-                            TouristId = int.Parse(parts[2]),
-                            GuideKnowledgeRating = int.Parse(parts[3]),
-                            GuideLanguageRating = int.Parse(parts[4]),
-                            TourInterestRating = int.Parse(parts[5]),
-                            Comment = parts[6],
-                            ReviewDate = DateTime.ParseExact(parts[7], "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
-                            IsValid = parts.Length > 8 ? bool.Parse(parts[8]) : true
-                        };
-
-                        
-                        if (parts.Length > 9 && !string.IsNullOrWhiteSpace(parts[9]))
-                        {
-                            review.ImagePaths = parts[9].Split(';').Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
-                        }
-
-                        reviews.Add(review);
-                    }
-                    catch (Exception ex)
-                    {
-                        
-                        Console.WriteLine($"Error parsing review line: {line}, Error: {ex.Message}");
-                    }
+                        Id = int.Parse(parts[0]),
+                        TourId = int.Parse(parts[1]),
+                        TouristId = int.Parse(parts[2]),
+                        ReservationId = int.Parse(parts[3]),
+                        GuideKnowledge = int.Parse(parts[4]),
+                        GuideLanguage = int.Parse(parts[5]),
+                        TourInterest = int.Parse(parts[6]),
+                        Comment = parts[7],
+                        Date = DateTime.ParseExact(parts[8], "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                        IsValid = bool.Parse(parts[9]),
+                        ImagePaths = parts.Length > 10 && !string.IsNullOrWhiteSpace(parts[10])
+                            ? parts[10].Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()
+                            : new List<string>()
+                    };
+                    reviews.Add(review);
                 }
+                catch { /* ignorisati nevalidan red */ }
             }
 
             return reviews;
@@ -74,69 +63,44 @@ namespace BookingApp.Repositories
 
         public void SaveToFile()
         {
-            try
-            {
-                var lines = _reviews.Select(r =>
-                    $"{r.Id}|{r.TourId}|{r.TouristId}|{r.GuideKnowledgeRating}|{r.GuideLanguageRating}|{r.TourInterestRating}|{r.Comment}|{r.ReviewDate:yyyy-MM-dd HH:mm:ss}|{r.IsValid}|{string.Join(";", r.ImagePaths)}");
+            var lines = _reviews.Select(r =>
+                $"{r.Id}|{r.TourId}|{r.TouristId}|{r.ReservationId}|{r.GuideKnowledge}|{r.GuideLanguage}|{r.TourInterest}|{r.Comment}|{r.Date:yyyy-MM-dd HH:mm:ss}|{r.IsValid}|{string.Join(";", r.ImagePaths)}");
 
-                Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-                File.WriteAllLines(FilePath, lines);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error saving reviews to file: {ex.Message}");
-            }
+            Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+            File.WriteAllLines(FilePath, lines);
         }
 
-        public List<TourReview> GetAll()
-        {
-            return _reviews.ToList();
-        }
+        public List<TourReview> GetAll() => _reviews.ToList();
+        public TourReview? GetById(int id) => _reviews.FirstOrDefault(r => r.Id == id);
+        public List<TourReview> GetByTourId(int tourId) => _reviews.Where(r => r.TourId == tourId && r.IsValid).ToList();
+        public List<TourReview> GetByTouristId(int touristId) => _reviews.Where(r => r.TouristId == touristId && r.IsValid).ToList();
+        public bool HasReview(int touristId, int tourId) => _reviews.Any(r => r.TouristId == touristId && r.TourId == tourId && r.IsValid);
 
-        public TourReview? GetById(int id)
-        {
-            return _reviews.FirstOrDefault(r => r.Id == id);
-        }
-
-        public List<TourReview> GetByTourId(int tourId)
-        {
-            return _reviews.Where(r => r.TourId == tourId && r.IsValid).ToList();
-        }
-
-        public List<TourReview> GetByTouristId(int touristId)
-        {
-            return _reviews.Where(r => r.TouristId == touristId && r.IsValid).ToList();
-        }
-
-        public bool HasTouristReviewedTour(int touristId, int tourId)
-        {
-            return _reviews.Any(r => r.TouristId == touristId && r.TourId == tourId && r.IsValid);
-        }
-
-        public void Add(TourReview review)
+        public void AddReview(TourReview review)
         {
             review.Id = _nextId++;
-            review.ReviewDate = DateTime.Now;
+            review.Date = DateTime.Now;
             _reviews.Add(review);
             SaveToFile();
         }
 
-        public void Update(TourReview review)
+
+        public void UpdateReview(TourReview review)
         {
-            var existingReview = _reviews.FirstOrDefault(r => r.Id == review.Id);
-            if (existingReview != null)
+            var existing = _reviews.FirstOrDefault(r => r.Id == review.Id);
+            if (existing != null)
             {
-                existingReview.GuideKnowledgeRating = review.GuideKnowledgeRating;
-                existingReview.GuideLanguageRating = review.GuideLanguageRating;
-                existingReview.TourInterestRating = review.TourInterestRating;
-                existingReview.Comment = review.Comment;
-                existingReview.ImagePaths = review.ImagePaths;
-                existingReview.IsValid = review.IsValid;
+                existing.GuideKnowledge = review.GuideKnowledge;
+                existing.GuideLanguage = review.GuideLanguage;
+                existing.TourInterest = review.TourInterest;
+                existing.Comment = review.Comment;
+                existing.ImagePaths = review.ImagePaths;
+                existing.IsValid = review.IsValid;
                 SaveToFile();
             }
         }
 
-        public void Delete(int id)
+        public void DeleteReview(int id)
         {
             var review = _reviews.FirstOrDefault(r => r.Id == id);
             if (review != null)
@@ -149,30 +113,7 @@ namespace BookingApp.Repositories
         public double GetAverageRatingForTour(int tourId)
         {
             var tourReviews = GetByTourId(tourId);
-            return tourReviews.Count > 0 ? tourReviews.Average(r => r.GetAverageRating()) : 0.0;
-        }
-
-        public int GetReviewCountForTour(int tourId)
-        {
-            return GetByTourId(tourId).Count;
-        }
-
-        public List<TourReview> GetReviewsForCompletedTours(int touristId)
-        {
-            var tourRepository = new TourRepository();
-            var reservationRepository = new TourReservationRepository();
-
-            // Pronađi sve završene rezervacije korisnika
-            var completedReservations = reservationRepository.GetReservationsByTourist(touristId)
-                ?.Where(r => r.Status == TourReservationStatus.COMPLETED)
-                .ToList() ?? new List<TourReservation>();
-
-            var completedTourIds = completedReservations.Select(r => r.TourId).Distinct().ToList();
-
-            // Vrati recenzije samo za završene ture
-            return _reviews.Where(r => r.TouristId == touristId &&
-                                      completedTourIds.Contains(r.TourId) &&
-                                      r.IsValid).ToList();
+            return tourReviews.Count > 0 ? tourReviews.Average(r => (r.GuideKnowledge + r.GuideLanguage + r.TourInterest) / 3.0) : 0.0;
         }
     }
 }

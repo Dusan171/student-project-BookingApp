@@ -1,5 +1,5 @@
 ﻿using BookingApp.Domain.Model;
-using BookingApp.Repositories;
+using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
 using System;
 using System.Collections.Generic;
@@ -7,117 +7,139 @@ using System.Linq;
 
 namespace BookingApp.Repositories
 {
-    public class TourReservationRepository
+    public class TourReservationRepository : ITourReservationRepository
     {
         private const string FilePath = "../../../Resources/Data/tourReservations.csv";
         private readonly Serializer<TourReservation> _serializer;
         private List<TourReservation> _tourReservations;
-        private readonly ReservationGuestRepository _guestRepository;
-        private readonly TourRepository _tourRepository;
-        private readonly UserRepository _userRepository;
-        private readonly StartTourTimeRepository _startTourTimeRepository;
 
         public TourReservationRepository()
         {
             _serializer = new Serializer<TourReservation>();
             _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
-            _guestRepository = new ReservationGuestRepository();
-            _tourRepository = new TourRepository();
-            _userRepository = new UserRepository();
-            _startTourTimeRepository = new StartTourTimeRepository();
-            LoadGuests();
-            LoadTourDetails();
-        }
-
-        private void LoadTourDetails()
-        {
-            foreach (var reservation in _tourReservations)
-            {
-                reservation.Tour = _tourRepository.GetById(reservation.TourId);
-                reservation.StartTourTime = _startTourTimeRepository.GetById(reservation.StartTourTimeId);
-            }
-        }
-
-        public List<TourReservation> GetCompletedReservationsByTourist(int touristId)
-        {
-            return _tourReservations
-                .Where(tr => tr.TouristId == touristId && tr.Status == TourReservationStatus.COMPLETED)
-                .ToList();
-        }
-
-        private void LoadGuests()
-        {
-            foreach (var reservation in _tourReservations)
-            {
-                reservation.Guests = _guestRepository.GetByReservationId(reservation.Id);
-            }
-        }
-
-        
-        public int NextId()
-        {
-            if (_tourReservations.Count < 1)
-                return 1;
-            return _tourReservations.Max(r => r.Id) + 1;
         }
 
         public List<TourReservation> GetAll()
         {
-            return _tourReservations;
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            return _tourReservations.ToList();
         }
 
-        public List<TourReservation> GetByTouristId(int touristId)
+        public TourReservation? GetById(int id)
         {
-            return _tourReservations.Where(tr => tr.TouristId == touristId).ToList();
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            return _tourReservations.FirstOrDefault(tr => tr.Id == id);
         }
 
-        
-        public List<TourReservation> GetReservationsByTourist(int touristId)
-        {
-            return GetByTouristId(touristId);
-        }
-
-        public List<TourReservation> GetTodaysReservations()
-        {
-            var today = DateTime.Today;
-            return _tourReservations
-                .Where(tr => tr.ReservationDate.Date == today)
-                .ToList();
-        }
-
-
-
-        public List<TourReservation> GetCompletedUnreviewedReservationsByTourist(int touristId)
-        {
-            var completedReservations = _tourReservations
-                .Where(tr => tr.TouristId == touristId && tr.Status == TourReservationStatus.COMPLETED)
-                .ToList();
-
-            // Filtriranje već ocenjenih tura
-            var reviewRepository = new TourReviewRepository();
-            var existingReviews = reviewRepository.GetByTouristId(touristId);
-
-            return completedReservations
-                .Where(reservation => !existingReviews.Any(review => review.TourId == reservation.TourId))
-                .ToList();
-        }
         public TourReservation Add(TourReservation reservation)
         {
-            reservation.Id = NextId();
-            _tourReservations.Add(reservation);
-            _serializer.ToCSV(FilePath, _tourReservations);
+            if (reservation == null)
+                throw new ArgumentNullException(nameof(reservation));
 
-            foreach (var guest in reservation.Guests)
-            {
-                guest.ReservationId = reservation.Id;
-                _guestRepository.Add(guest);
-            }
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            reservation.Id = GetNextId();
+            _tourReservations.Add(reservation);
+            SaveAll();
             return reservation;
+        }
+
+        public TourReservation Update(TourReservation reservation)
+        {
+            if (reservation == null)
+                throw new ArgumentNullException(nameof(reservation));
+
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            var existing = _tourReservations.FirstOrDefault(tr => tr.Id == reservation.Id);
+
+            if (existing != null)
+            {
+                int index = _tourReservations.IndexOf(existing);
+                _tourReservations[index] = reservation;
+                SaveAll();
+            }
+
+            return reservation;
+        }
+
+        public void Delete(int id)
+        {
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            var reservation = _tourReservations.FirstOrDefault(tr => tr.Id == id);
+
+            if (reservation != null)
+            {
+                _tourReservations.Remove(reservation);
+                SaveAll();
+            }
         }
 
         public void SaveAll()
         {
             _serializer.ToCSV(FilePath, _tourReservations);
+        }
+
+        public int GetNextId()
+        {
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            return _tourReservations.Count == 0 ? 1 : _tourReservations.Max(tr => tr.Id) + 1;
+        }
+
+        public List<TourReservation> GetByTouristId(int touristId)
+        {
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            return _tourReservations.Where(tr => tr.TouristId == touristId).ToList();
+        }
+
+        public List<TourReservation> GetByTourId(int tourId)
+        {
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            return _tourReservations.Where(tr => tr.TourId == tourId).ToList();
+        }
+
+        public List<TourReservation> GetByStatus(TourReservationStatus status)
+        {
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            return _tourReservations.Where(tr => tr.Status == status).ToList();
+        }
+
+        public List<TourReservation> GetByDateRange(DateTime startDate, DateTime endDate)
+        {
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            return _tourReservations.Where(tr =>
+                tr.ReservationDate.Date >= startDate.Date &&
+                tr.ReservationDate.Date <= endDate.Date).ToList();
+        }
+
+        public List<TourReservation> GetTodaysReservations()
+        {
+            var today = DateTime.Today;
+            return GetByDateRange(today, today);
+        }
+
+        public List<TourReservation> GetCompletedReservationsByTourist(int touristId)
+        {
+            _tourReservations = _serializer.FromCSV(FilePath) ?? new List<TourReservation>();
+            return _tourReservations
+                .Where(tr => tr.TouristId == touristId && tr.Status == TourReservationStatus.COMPLETED)
+                .ToList();
+        }
+
+
+        public List<TourReservation> GetReservationsByTourist(int touristId)
+        {
+            return GetByTouristId(touristId);
+        }
+
+        public List<TourReservation> GetCompletedUnreviewedReservationsByTourist(int touristId)
+        {
+            var completedReservations = GetCompletedReservationsByTourist(touristId);
+            // Placeholder - trebalo bi proveriti postojanje review-a
+            return completedReservations;
+        }
+
+        public List<TourReservation> GetReservationsForTourist(int touristId)
+        {
+            return _tourReservations.Where(r => r.TouristId == touristId).ToList();
         }
     }
 }

@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Serializer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BookingApp.Repositories
 {
-
-    public class ReservationGuestRepository
-
+    public class ReservationGuestRepository : IReservationGuestRepository
     {
         private const string FilePath = "../../../Resources/Data/reservationGuests.csv";
         private readonly Serializer<ReservationGuest> _serializer;
@@ -20,42 +16,67 @@ namespace BookingApp.Repositories
         public ReservationGuestRepository()
         {
             _serializer = new Serializer<ReservationGuest>();
-            _guests = _serializer.FromCSV(FilePath);
+            _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
         }
 
-        public int NextId()
-        {
-            if (_guests.Count < 1)
-                return 1;
-            return _guests.Max(g => g.Id) + 1;
-        }
+        private void SaveAll() => _serializer.ToCSV(FilePath, _guests);
 
-        public List<ReservationGuest> GetAll()
-        {
-            return _guests;
-        }
+        private void Reload() => _guests = _serializer.FromCSV(FilePath) ?? new List<ReservationGuest>();
+
+        public List<ReservationGuest> GetAll() => _guests.ToList();
+
+        public ReservationGuest? GetById(int id) => _guests.FirstOrDefault(g => g.Id == id);
 
         public List<ReservationGuest> GetByReservationId(int reservationId)
-        {
-            return _guests.Where(g => g.ReservationId == reservationId).ToList();
-        }
+            => _guests.Where(g => g.ReservationId == reservationId).ToList();
 
-        public ReservationGuest GetById(int id)
-        {
-            return _guests.FirstOrDefault(g => g.Id == id);
-        }
-
-        public void SaveAll()
-        {
-            _serializer.ToCSV(FilePath, _guests);
-        }
+        public List<ReservationGuest> GetAppearedGuests() 
+            => _guests.Where(g => g.HasAppeared).ToList();
 
         public ReservationGuest Add(ReservationGuest guest)
         {
-            guest.Id = NextId();
+            if (guest == null) throw new ArgumentNullException(nameof(guest));
+
+            guest.Id = GetNextId();
             _guests.Add(guest);
             SaveAll();
             return guest;
+        }
+
+        public ReservationGuest Update(ReservationGuest guest)
+        {
+            if (guest == null) throw new ArgumentNullException(nameof(guest));
+
+            var index = _guests.FindIndex(g => g.Id == guest.Id);
+            if (index >= 0)
+            {
+                _guests[index] = guest;
+                SaveAll();
+            }
+            return guest;
+        }
+
+        public bool UpdateAppearanceStatus(int guestId, bool hasAppeared, int keyPointJoinedAt = -1)
+        {
+            var guest = _guests.FirstOrDefault(g => g.Id == guestId);
+            if (guest != null)
+            {
+                guest.HasAppeared = hasAppeared;
+                guest.KeyPointJoinedAt = keyPointJoinedAt;
+                SaveAll();
+                return true;
+            }
+            return false;
+        }
+
+        public void Delete(int id)
+        {
+            var guest = _guests.FirstOrDefault(g => g.Id == id);
+            if (guest != null)
+            {
+                _guests.Remove(guest);
+                SaveAll();
+            }
         }
 
         public void RemoveByReservationId(int reservationId)
@@ -63,20 +84,7 @@ namespace BookingApp.Repositories
             _guests.RemoveAll(g => g.ReservationId == reservationId);
             SaveAll();
         }
-        public ReservationGuest Update(ReservationGuest guest)
-        {
-            _guests = _serializer.FromCSV(FilePath);
-            var current = _guests.FirstOrDefault(g => g.Id == guest.Id);
 
-            if (current != null)
-            {
-                int index = _guests.IndexOf(current);
-                _guests.Remove(current);
-                _guests.Insert(index, guest);
-                _serializer.ToCSV(FilePath, _guests);
-            }
-            return guest;
-        }
-
+        public int GetNextId() => _guests.Count == 0 ? 1 : _guests.Max(g => g.Id) + 1;
     }
 }

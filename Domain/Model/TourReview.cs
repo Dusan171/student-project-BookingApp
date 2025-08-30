@@ -1,21 +1,22 @@
-﻿using BookingApp.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace BookingApp.Domain
+namespace BookingApp.Domain.Model
 {
     public class TourReview : INotifyPropertyChanged
     {
         public int Id { get; set; }
         public int TourId { get; set; }
         public int TouristId { get; set; }
-        public int GuideKnowledgeRating { get; set; } // 1-5 znanje vodiča
-        public int GuideLanguageRating { get; set; } // 1-5 jezik vodiča
-        public int TourInterestRating { get; set; } // 1-5 zanimljivost ture
+        public int ReservationId { get; set; }   // novo polje
+        public int GuideKnowledge { get; set; }  // 1-5
+        public int GuideLanguage { get; set; }   // 1-5
+        public int TourInterest { get; set; }    // 1-5
         public string Comment { get; set; } = string.Empty;
-        public DateTime ReviewDate { get; set; }
-        private bool _isValid;
+        public DateTime ReviewDate { get; set; } = DateTime.Now;
+
+        private bool _isValid = true;
         public bool IsValid
         {
             get => _isValid;
@@ -29,29 +30,24 @@ namespace BookingApp.Domain
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
         public List<string> ImagePaths { get; set; } = new List<string>(); // Putanje do slika
 
         // Navigation properties
         public Tour? Tour { get; set; }
         public User? Tourist { get; set; }
 
-        public TourReview()
-        {
-            ReviewDate = DateTime.Now;
-        }
+        public TourReview() { }
 
-        public TourReview(int tourId, int touristId, int guideKnowledgeRating, int guideLanguageRating, int tourInterestRating, string comment)
+        public TourReview(int tourId, int touristId, int reservationId,
+                          int guideKnowledge, int guideLanguage, int tourInterest,
+                          string comment)
         {
             TourId = tourId;
             TouristId = touristId;
-            GuideKnowledgeRating = guideKnowledgeRating;
-            GuideLanguageRating = guideLanguageRating;
-            TourInterestRating = tourInterestRating;
+            ReservationId = reservationId;
+            GuideKnowledge = guideKnowledge;
+            GuideLanguage = guideLanguage;
+            TourInterest = tourInterest;
             Comment = comment;
             ReviewDate = DateTime.Now;
             _isValid = true;
@@ -59,17 +55,24 @@ namespace BookingApp.Domain
 
         public double GetAverageRating()
         {
-            return (GuideKnowledgeRating + GuideLanguageRating + TourInterestRating) / 3.0;
+            return (GuideKnowledge + GuideLanguage + TourInterest) / 3.0;
         }
 
         public string GetRatingText()
         {
-            return $"Znanje vodiča: {GuideKnowledgeRating}/5, Jezik vodiča: {GuideLanguageRating}/5, Zanimljivost: {TourInterestRating}/5";
+            return $"Znanje vodiča: {GuideKnowledge}/5, Jezik vodiča: {GuideLanguage}/5, Zanimljivost: {TourInterest}/5";
         }
 
         public string GetFormattedDate()
         {
             return ReviewDate.ToString("dd.MM.yyyy HH:mm");
+        }
+
+        // INotifyPropertyChanged implementacija
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
