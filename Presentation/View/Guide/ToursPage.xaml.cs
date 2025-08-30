@@ -203,6 +203,7 @@ namespace BookingApp.Presentation.View.Guide
 
                 tour.Status = TourStatus.ACTIVE;
 
+                // LiveTrackingFrame mora postojati u XAML-u
                 if (LiveTrackingFrame != null)
                 {
                     var liveTrackingPage = new TourLiveTracking(tour, time, mainPage);
@@ -248,24 +249,35 @@ namespace BookingApp.Presentation.View.Guide
 
         private void NewTour_Click(object sender, RoutedEventArgs e)
         {
-
-            CreateTourForm form = new CreateTourForm(mainPage);
-            form.TourCreated += (s, e) =>
+            if (CreateTourFrame != null && CreateTourOverlay != null)
             {
-                LoadAllTours();
-                DisplayTours(FilterToday());
+                CreateTourOverlay.Visibility = Visibility.Visible;
+                TourListPanel.Visibility = Visibility.Collapsed;
 
-            };
-            form.Cancelled += OnCreateTourCancelled;
-            mainPage.ContentFrame.Content = form;
+                CreateTourForm form = new CreateTourForm(mainPage);
+                form.TourCreated += (s, e) =>
+                {
+                    LoadAllTours();
+                    DisplayTours(FilterToday());
 
+                };
+                form.Cancelled += OnCreateTourCancelled;
+                mainPage.ContentFrame.Content = form;
+
+                CreateTourFrame.Navigate(form);
+            }
         }
 
         private void OnCreateTourCancelled(object sender, EventArgs e)
         {
-            LoadAllTours();
-            DisplayTours(FilterToday());
-            mainPage.ContentFrame.Content = this;
+            if (CreateTourOverlay != null)
+            {
+                CreateTourOverlay.Visibility = Visibility.Collapsed;
+                TourListPanel.Visibility = Visibility.Visible;
+                LoadAllTours();
+                DisplayTours(FilterToday());
+                mainPage.ContentFrame.Content = this;
+            }
         }
     }
 }

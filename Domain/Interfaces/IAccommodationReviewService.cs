@@ -13,5 +13,8 @@ namespace BookingApp.Domain.Interfaces
         bool HasGuestRated(int reservationId);
         AccommodationReview GetByReservationId(int reservationId); 
         List<AccommodationReviewDTO> GetAll();
+        void SubmitReview(CreateAccommodationReviewDTO reviewDto, DateTime reservationEndDate);
+        AccommodationReviewDetailsDTO GetDetailsByReservationId(int reservationId);
+
     }
 }

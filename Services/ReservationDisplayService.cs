@@ -4,7 +4,6 @@ using System.Linq;
 using BookingApp.Domain.Model;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTO;
-using BookingApp.Utilities;
 
 namespace BookingApp.Services
 {
@@ -28,42 +27,56 @@ namespace BookingApp.Services
         public List<ReservationDetailsDTO> GetReservationsForGuest(int guestId)
         {
             var allAccommodations = _accommodationRepository.GetAll();
-            var myReservations = _reservationRepository.GetByGuestId(guestId)
-                                                      .OrderByDescending(r => r.StartDate)
-                                                      .ToList();
 
-            var dtoList = new List<ReservationDetailsDTO>();
+            return _reservationRepository.GetByGuestId(guestId)
+                .OrderByDescending(r => r.StartDate)
+                .Select(reservation => MapToDetailsDTO(reservation, allAccommodations))
+                .ToList();
+        }
 
-            foreach (var reservation in myReservations)
+        private ReservationDetailsDTO MapToDetailsDTO(Reservation reservation, List<Accommodation> allAccommodations)
+        {
+            var accommodation = allAccommodations.FirstOrDefault(a => a.Id == reservation.AccommodationId);
+            var request = _rescheduleRequestRepository.GetByReservationId(reservation.Id);
+
+            bool hasGuestRated = _accommodationReviewService.HasGuestRated(reservation.Id);
+
+            return new ReservationDetailsDTO
             {
-                var accommodation = allAccommodations.FirstOrDefault(a => a.Id == reservation.AccommodationId);
-                var request = _rescheduleRequestRepository.GetByReservationId(reservation.Id);
+                ReservationId = reservation.Id,
+                StartDate = reservation.StartDate,
+                EndDate = reservation.EndDate,
+                GuestsNumber = reservation.GuestsNumber,
+                AccommodationName = accommodation?.Name ?? "N/A",
+                RequestStatusText = request?.Status.ToString() ?? "Not requested",
+                OwnerComment = request?.OwnerComment ?? "",
+                OriginalReservation = reservation,
 
-                var dto = new ReservationDetailsDTO
-                {
-                    ReservationId = reservation.Id,
-                    StartDate = reservation.StartDate,
-                    EndDate = reservation.EndDate,
-                    GuestsNumber = reservation.GuestsNumber,
-                    AccommodationName = accommodation?.Name ?? "N/A", 
-                    RequestStatusText = request?.Status.ToString() ?? "Not requested",
-                    OwnerComment = request?.OwnerComment ?? "",
-                    OriginalReservation = reservation
-                };
+                IsRescheduleEnabled = CalculateIsRescheduleEnabled(reservation, request),
+                IsRatingEnabled = CalculateIsRatingEnabled(reservation, hasGuestRated),
+                IsGuestReviewVisible = CalculateIsGuestReviewVisible(reservation, hasGuestRated)
+            };
+        }
 
-                bool hasPendingRequest = (request != null && request.Status == RequestStatus.Pending);
-                dto.IsRescheduleEnabled = reservation.StartDate > DateTime.Now && !hasPendingRequest;
-                bool isReservationFinished = reservation.EndDate < DateTime.Now;
-                bool isWithinReviewPeriod = (DateTime.Now - reservation.EndDate).TotalDays <= 5;
-                bool hasGuestAlreadyRated = _accommodationReviewService.HasGuestRated(reservation.Id);
+        private bool CalculateIsRescheduleEnabled(Reservation reservation, RescheduleRequest request)
+        {
+            bool hasPendingRequest = (request != null && request.Status == RequestStatus.Pending);
+            return reservation.StartDate > DateTime.Now && !hasPendingRequest;
+        }
 
-                dto.IsRatingEnabled = isReservationFinished && isWithinReviewPeriod && !hasGuestAlreadyRated;
-                var reviewFromOwner = _guestReviewService.GetReviewsByReservation(new ReservationDTO(reservation));
-                bool hasOwnerRatedGuest = reviewFromOwner != null;
-                dto.IsGuestReviewVisible = hasGuestAlreadyRated && hasOwnerRatedGuest;
-                dtoList.Add(dto);
-            }
-            return dtoList;
+        private bool CalculateIsRatingEnabled(Reservation reservation, bool hasGuestAlreadyRated)
+        {
+            bool isFinished = reservation.EndDate < DateTime.Now;
+            bool isWithinReviewPeriod = (DateTime.Now - reservation.EndDate).TotalDays <= 5;
+            return isFinished && isWithinReviewPeriod && !hasGuestAlreadyRated;
+        }
+
+        private bool CalculateIsGuestReviewVisible(Reservation reservation, bool hasGuestAlreadyRated)
+        {
+            if (!hasGuestAlreadyRated) return false;
+
+            var reviewFromOwner = _guestReviewService.GetReviewForReservation(reservation.Id);
+            return reviewFromOwner != null;
         }
     }
 }

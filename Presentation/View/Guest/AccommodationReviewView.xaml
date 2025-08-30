@@ -5,7 +5,7 @@
         WindowStartupLocation="CenterScreen" MinHeight="400" MinWidth="300">
 
     <Window.Resources>
-        <!-- Stilovi ostaju isti -->
+
         <Style TargetType="TextBlock">
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Margin" Value="0,0,0,3"/>
@@ -21,7 +21,7 @@
 
     <DockPanel Margin="15">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <!-- Povezujemo dugme sa SubmitCommand iz ViewModel-a -->
+           
             <Button Content="Submit" IsDefault="True" Command="{Binding SubmitCommand}"/>
             <Button Content="Cancel" IsCancel="True"/>
         </StackPanel>

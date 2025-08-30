@@ -1,5 +1,5 @@
-﻿using BookingApp.Presentation.ViewModel; // Namespace gde je ViewModel
-using System.Windows;
+﻿using System.Windows;
+using BookingApp.Presentation.ViewModel.Guest;
 
 namespace BookingApp.Presentation.View.Guest
 {
@@ -8,7 +8,7 @@ namespace BookingApp.Presentation.View.Guest
         public GuestMainView()
         {
             InitializeComponent();
-            // Povezujemo View sa ViewModel-om
+
             DataContext = new GuestMainViewModel();
         }
     }

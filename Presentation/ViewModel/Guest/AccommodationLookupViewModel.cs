@@ -1,128 +1,62 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel; 
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
-using BookingApp.Presentation.View.Guest; 
+using BookingApp.Presentation.View.Guest;
 using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.View;
 
-namespace BookingApp.Presentation.ViewModel
+namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class AccommodationLookupViewModel : ViewModelBase
     {
         private readonly IAccommodationService _accommodationService;
-        private readonly IAccommodationFilterService _filterService;
 
-        #region Svojstva za povezivanje (Binding)
+        public AccommodationSearchViewModel SearchViewModel { get; }
 
-        private string _nameSearch;
-        public string NameSearch
-        {
-            get => _nameSearch;
-            set { _nameSearch = value; OnPropertyChanged(); }
-        }
+        public ObservableCollection<AccommodationDetailsDTO> Accommodations { get; set; }
 
-        private string _countrySearch;
-        public string CountrySearch
-        {
-            get => _countrySearch;
-            set { _countrySearch = value; OnPropertyChanged(); }
-        }
-
-        private string _citySearch;
-        public string CitySearch
-        {
-            get => _citySearch;
-            set { _citySearch = value; OnPropertyChanged(); }
-        }
-
-        private string _typeSearch;
-        public string TypeSearch
-        {
-            get => _typeSearch;
-            set { _typeSearch = value; OnPropertyChanged(); }
-        }
-
-        private string _maxGuestsSearch;
-        public string MaxGuestsSearch
-        {
-            get => _maxGuestsSearch;
-            set { _maxGuestsSearch = value; OnPropertyChanged(); }
-        }
-
-        private string _minDaysSearch;
-        public string MinDaysSearch
-        {
-            get => _minDaysSearch;
-            set { _minDaysSearch = value; OnPropertyChanged(); }
-        }
-
-        public ObservableCollection<AccommodationDTO> Accommodations { get; set; }
-
-        private AccommodationDTO _selectedAccommodation;
-        public AccommodationDTO SelectedAccommodation
+        private AccommodationDetailsDTO _selectedAccommodation;
+        public AccommodationDetailsDTO SelectedAccommodation
         {
             get => _selectedAccommodation;
             set { _selectedAccommodation = value; OnPropertyChanged(); }
         }
 
-        #endregion
-
-        #region Komande (Commands)
-        public ICommand SearchCommand { get; }
         public ICommand ReserveCommand { get; }
         public ICommand LogoutCommand { get; }
-        public ICommand ResetSearchCommand { get; } 
-        #endregion
 
         public AccommodationLookupViewModel()
         {
             _accommodationService = Injector.CreateInstance<IAccommodationService>();
-            _filterService = Injector.CreateInstance<IAccommodationFilterService>();
+            var filterService = Injector.CreateInstance<IAccommodationFilterService>();
 
-            SearchCommand = new RelayCommand(Search);
+            SearchViewModel = new AccommodationSearchViewModel(filterService);
+
+            SearchViewModel.SearchCompleted += OnSearchCompleted;
+
             ReserveCommand = new RelayCommand(Reserve, CanReserve);
             LogoutCommand = new RelayCommand(Logout);
-            ResetSearchCommand = new RelayCommand(ResetSearch);
 
-            Accommodations = new ObservableCollection<AccommodationDTO>();
-            InitializeAccommodations();
+            Accommodations = new ObservableCollection<AccommodationDetailsDTO>();
+
+            SearchViewModel.ResetSearchCommand.Execute(null);
         }
 
         #region Logika Komandi
 
-        private void Search(object obj)
-        {
-            var searchParams = CreateSearchParameters(); 
-            var result = _filterService.Filter(searchParams);
-            UpdateAccommodations(result);
-        }
-
-        private void ResetSearch(object obj)
-        {
-            ClearSearchFields(); 
-            InitializeAccommodations();
-        }
-
         private void Reserve(object obj)
         {
-            if (SelectedAccommodation == null) return;
-
-            var fullAccommodation = _accommodationService.GetAccommodationById(SelectedAccommodation.Id);
-
-            if (fullAccommodation != null)
+            if (SelectedAccommodation == null)
             {
-                var reservationWindow = new AccommodationReservationView(fullAccommodation.ToAccommodation());
-                reservationWindow.ShowDialog();
+                return;
             }
-            else
-            {
-                MessageBox.Show("Could not find details for the selected accommodation.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            var reservationWindow = new AccommodationReservationView(SelectedAccommodation);
+            reservationWindow.ShowDialog();
         }
 
         private bool CanReserve(object obj)
@@ -138,46 +72,20 @@ namespace BookingApp.Presentation.ViewModel
                 Session.CurrentUser = null;
                 var signInWindow = new SignInForm();
                 signInWindow.Show();
-
                 Application.Current.Windows.OfType<AccommodationLookup>().FirstOrDefault()?.Close();
             }
         }
+
         #endregion
-        #region Pomocne (privatne) metode - Ciste Funkcije
-        private void InitializeAccommodations()
+
+        #region Pomoćne metode
+
+        private void OnSearchCompleted(List<AccommodationDetailsDTO> result)
         {
-            var allAccommodations = _filterService.Filter(new AccommodationSearchParameters());
-            UpdateAccommodations(allAccommodations);
+            Accommodations = new ObservableCollection<AccommodationDetailsDTO>(result);
+            OnPropertyChanged(nameof(Accommodations));
         }
-        private AccommodationSearchParameters CreateSearchParameters()
-        {
-            return new AccommodationSearchParameters
-            {
-                Name = NameSearch,
-                Country = CountrySearch,
-                City = CitySearch,
-                Type = TypeSearch,
-                MaxGuests = int.TryParse(MaxGuestsSearch, out int guests) ? guests : 0,
-                MinDays = int.TryParse(MinDaysSearch, out int days) ? days : 0
-            };
-        }
-        private void UpdateAccommodations(List<AccommodationDTO> accommodations)
-        {
-            Accommodations.Clear();
-            foreach (var accommodation in accommodations)
-            {
-                Accommodations.Add(accommodation);
-            }
-        }
-        private void ClearSearchFields()
-        {
-            NameSearch = string.Empty;
-            CountrySearch = string.Empty;
-            CitySearch = string.Empty;
-            TypeSearch = null;
-            MaxGuestsSearch = string.Empty;
-            MinDaysSearch = string.Empty;
-        }
+
         #endregion
     }
 }

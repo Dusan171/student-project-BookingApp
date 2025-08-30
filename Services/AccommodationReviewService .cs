@@ -60,5 +60,42 @@ namespace BookingApp.Services
             var reviews = _accommodationReviewRepository.GetAll();
             return reviews.Select(r => new AccommodationReviewDTO(r)).ToList();
         }
+        public void SubmitReview(CreateAccommodationReviewDTO reviewDto, DateTime reservationEndDate)
+        {
+            if ((DateTime.Now - reservationEndDate).TotalDays > DaysToLeaveReview)
+            {
+                throw new InvalidOperationException("Review period has expired.");
+            }
+
+            var reviewToSave = new AccommodationReview
+            {
+                ReservationId = reviewDto.ReservationId,
+                CleanlinessRating = reviewDto.CleanlinessRating,
+                OwnerRating = reviewDto.OwnerRating,
+                Comment = reviewDto.Comment,
+                ImagePaths = reviewDto.ImagePaths,
+                CreatedAt = DateTime.Now
+            };
+            _accommodationReviewRepository.Save(reviewToSave);
+        }
+        public AccommodationReviewDetailsDTO GetDetailsByReservationId(int reservationId)
+        {
+            var reviewModel = _accommodationReviewRepository.GetByReservationId(reservationId).FirstOrDefault();
+
+            if (reviewModel == null)
+            {
+                return null;
+            }
+
+            return new AccommodationReviewDetailsDTO
+            {
+                Id = reviewModel.Id,
+                ReservationId = reviewModel.ReservationId,
+                CleanlinessRating = reviewModel.CleanlinessRating,
+                OwnerRating = reviewModel.OwnerRating,
+                Comment = reviewModel.Comment,
+                CreatedAt = reviewModel.CreatedAt
+            };
+        }
     }
 }

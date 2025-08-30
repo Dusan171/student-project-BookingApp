@@ -16,25 +16,25 @@ namespace BookingApp.Services
             _accommodationRepository = accommodationRepository;
         }
 
-        public List<AccommodationDTO> Filter(AccommodationSearchParameters parameters)
+        public List<AccommodationDetailsDTO> Filter(AccommodationSearchParameters parameters)
         {
-          return _accommodationRepository.GetAll()
-                 .Where(acc => MatchesFilter(acc, parameters))
-                 .Select(acc => new AccommodationDTO(acc))
-                 .ToList();
+            return _accommodationRepository.GetAll()
+                   .Where(acc => MatchesFilter(acc, parameters))
+                   .Select(acc => new AccommodationDetailsDTO(acc))
+                   .ToList();
         }
-        private static bool MatchesFilter(Accommodation acc, AccommodationSearchParameters parameters)
+        private static bool MatchesFilter(Accommodation accommodation, AccommodationSearchParameters parameters)
         {
-            if (acc == null || acc.GeoLocation == null || parameters == null)
+            if (accommodation == null || accommodation.GeoLocation == null || parameters == null)
             {
                 return false;
             }
-            return NameMatches(acc, parameters.Name) &&
-                   CountryMatches(acc, parameters.Country) &&
-                   CityMatches(acc, parameters.City) &&
-                   TypeMatches(acc, parameters.Type) &&
-                   MaxGuestsMatches(acc, parameters.MaxGuests) &&
-                   MinDaysMatches(acc, parameters.MinDays);
+            return NameMatches(accommodation, parameters.Name) &&
+                   CountryMatches(accommodation, parameters.Country) &&
+                   CityMatches(accommodation, parameters.City) &&
+                   TypeMatches(accommodation, parameters.Type) &&
+                   MaxGuestsMatches(accommodation, parameters.MaxGuests) &&
+                   MinDaysMatches(accommodation, parameters.MinDays);
         }
 
         private static bool NameMatches(Accommodation acc, string name) =>
@@ -50,9 +50,9 @@ namespace BookingApp.Services
             string.IsNullOrEmpty(type) || type == "All" || acc.Type.ToString() == type;
 
         private static bool MaxGuestsMatches(Accommodation acc, int maxGuests) =>
-            maxGuests == 0 || acc.MaxGuests <= maxGuests; 
+            maxGuests == 0 || acc.MaxGuests <= maxGuests;
 
         private static bool MinDaysMatches(Accommodation acc, int minDays) =>
-            minDays == 0 || acc.MinReservationDays >= minDays; 
+            minDays == 0 || acc.MinReservationDays >= minDays;
     }
 }
