@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,20 +36,24 @@ namespace BookingApp.Domain.Model
             Id = int.Parse(values[0]);
             GuestId = int.Parse(values[1]);
             TourId = int.Parse(values[2]);
+
+            // Pobrinuti se da booleans budu na pravom mestu
             HasAppeared = bool.Parse(values[3]);
             KeyPointJoinedAt = int.Parse(values[4]);
-            StartTourTime = DateTime.Parse(values[5]);
+
+            // Parse DateTime sa poznatim formatom i invariant culture
+            StartTourTime = DateTime.ParseExact(values[5], "M/d/yyyy h:mm:ss tt", CultureInfo.InvariantCulture);
         }
         public string[] ToCSV()
         {
             return new string[]
             {
-            Id.ToString(),
-            GuestId.ToString(),
-            TourId.ToString(),
-            HasAppeared.ToString(),
-            KeyPointJoinedAt.ToString(),
-            StartTourTime.ToString()
+        Id.ToString(),
+        GuestId.ToString(),
+        TourId.ToString(),
+        HasAppeared.ToString(),
+        KeyPointJoinedAt.ToString(),
+        StartTourTime.ToString("M/d/yyyy h:mm:ss tt", CultureInfo.InvariantCulture)
             };
         }
     }
