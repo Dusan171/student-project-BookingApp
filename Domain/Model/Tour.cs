@@ -33,6 +33,8 @@ public class Tour : ISerializable
     }
     public Tour() { }
 
+    public Tour() { }
+
     public Tour(int id, int guideID, string name, Location location, string description, string language,
                  int maxTourists, int reservedSpots, double durationHours, TourStatus status, User guide = null)
     {

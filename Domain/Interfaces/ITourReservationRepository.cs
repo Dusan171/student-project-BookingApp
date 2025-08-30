@@ -14,6 +14,8 @@ namespace BookingApp.Domain.Interfaces
         void SaveAll();
         int GetNextId();
 
+        List<TourReservation> GetByUserId(int userId);
+
         List<TourReservation> GetByTouristId(int touristId);
         List<TourReservation> GetByTourId(int tourId);
         List<TourReservation> GetByStatus(TourReservationStatus status);

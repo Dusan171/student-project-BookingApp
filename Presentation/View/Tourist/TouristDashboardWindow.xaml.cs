@@ -5,6 +5,10 @@ using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.View;
 using BookingApp.Presentation.ViewModel.Tourist;
+using System.Windows.Controls;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Services;
+
 
 namespace BookingApp.Presentation.View.Tourist
 {
@@ -16,8 +20,17 @@ namespace BookingApp.Presentation.View.Tourist
         {
             InitializeComponent();
             DataContext = this;
+            InitializeViews();
             SetupEventHandlers();
             ShowSearchToursView();
+        }
+
+        private void InitializeViews()
+        {
+            var currentUserId = Session.CurrentUser?.Id ?? 0;
+
+            TourPresenceContent?.InitializeViewModel(currentUserId);
+            TourRequestsContent?.InitializeViewModel(currentUserId);
         }
 
         private void SetupEventHandlers()
@@ -102,6 +115,21 @@ namespace BookingApp.Presentation.View.Tourist
             SetActiveTab(ReviewsTab);
         }
 
+        private void TourPresence_Click(object sender, RoutedEventArgs e)
+        {
+            HideAllViews();
+            TourPresenceContent.Visibility = Visibility.Visible;
+            SetActiveTab(TourPresenceTab);
+        }
+
+        private void TourRequests_Click(object sender, RoutedEventArgs e)
+        {
+            HideAllViews();
+            TourRequestsContent.Visibility = Visibility.Visible;
+            SetActiveTab(TourRequestsTab);
+        }
+
+
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show(
@@ -152,7 +180,7 @@ namespace BookingApp.Presentation.View.Tourist
 
                 if (TourReviewViewContent.ViewModel != null)
                 {
-         
+
                     TourReviewViewContent.ViewModel.ReviewSubmitted -= OnReviewSubmitted; // ukloni stari
                     TourReviewViewContent.ViewModel.ReviewSubmitted += OnReviewSubmitted; // dodaj novi
 
@@ -161,29 +189,35 @@ namespace BookingApp.Presentation.View.Tourist
             }
         }
 
+
+
         private void HideAllViews()
         {
-            if (TourSearchView != null)
-                TourSearchView.Visibility = Visibility.Collapsed;
-            if (TourReservationView != null)
-                TourReservationView.Visibility = Visibility.Collapsed;
-            if (MyReservationsContent != null)
-                MyReservationsContent.Visibility = Visibility.Collapsed;
-            if (ReviewsContent != null)
-                ReviewsContent.Visibility = Visibility.Collapsed;
-            if (TourReviewViewContent != null)
-                TourReviewViewContent.Visibility = Visibility.Collapsed;
+            TourSearchView.Visibility = Visibility.Collapsed;
+            TourReservationView.Visibility = Visibility.Collapsed;
+            MyReservationsContent.Visibility = Visibility.Collapsed;
+            TourReviewViewContent.Visibility = Visibility.Collapsed;
+            ReviewsContent.Visibility = Visibility.Collapsed;
+            TourPresenceContent.Visibility = Visibility.Collapsed;
+            TourRequestsContent.Visibility = Visibility.Collapsed;
 
             TourReservationView?.ClearForm();
         }
 
-        private void SetActiveTab(System.Windows.Controls.Button activeTab)
+        private void HideAllContent()
         {
-            if (SearchToursTab != null) SearchToursTab.IsDefault = false;
-            if (MyReservationsTab != null) MyReservationsTab.IsDefault = false;
-            if (ReviewsTab != null) ReviewsTab.IsDefault = false;
+            HideAllViews();
+        }
 
-            if (activeTab != null) activeTab.IsDefault = true;
+        private void SetActiveTab(Button activeTab)
+        {
+            SearchToursTab.IsDefault = false;
+            MyReservationsTab.IsDefault = false;
+            ReviewsTab.IsDefault = false;
+            TourPresenceTab.IsDefault = false;
+            TourRequestsTab.IsDefault = false;
+
+            activeTab.IsDefault = true;
         }
 
         private void TouristDashboardWindow_Closing(object? sender, CancelEventArgs e)
