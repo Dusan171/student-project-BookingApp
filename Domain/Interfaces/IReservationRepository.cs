@@ -16,5 +16,7 @@ namespace BookingApp.Domain.Interfaces
         public void Delete(Reservation reservation);
         public Reservation UpdateReservation(Reservation reservation);
         void Update(Reservation reservation);
+        List<Reservation> GetByAccommodationId(int accommodationId);
+
     }
 }

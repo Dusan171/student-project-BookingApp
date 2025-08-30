@@ -1,17 +1,16 @@
-﻿using BookingApp.Domain;
-using BookingApp.Domain.Model;
-using BookingApp.Presentation.ViewModel; // Namespace gde je ViewModel
-using System.Windows;
+﻿using System.Windows;
+using BookingApp.Presentation.ViewModel.Guest;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Presentation.View.Guest
 {
     public partial class GuestReviewDetailsView : Window
     {
-        public GuestReviewDetailsView(GuestReview review)
+        public GuestReviewDetailsView(GuestReviewDTO reviewDto)
         {
             InitializeComponent();
-            // Kreiramo ViewModel, prosleđujemo mu podatke i postavljamo ga kao DataContext
-            DataContext = new GuestReviewDetailsViewModel(review);
+
+            DataContext = new GuestReviewDetailsViewModel(reviewDto);
         }
     }
 }

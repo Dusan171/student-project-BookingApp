@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text; 
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
-using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
-using BookingApp.Domain.Model;
 using BookingApp.Presentation.View.Guest;
 using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 
-namespace BookingApp.Presentation.ViewModel
+namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class MyReservationsViewModel : ViewModelBase
     {
@@ -58,7 +56,7 @@ namespace BookingApp.Presentation.ViewModel
         {
             if (SelectedReservation == null) return;
 
-            var rescheduleWindow = new RescheduleRequestView(SelectedReservation.OriginalReservation);
+            var rescheduleWindow = new RescheduleRequestView(SelectedReservation);
             ShowDialogAndRefresh(rescheduleWindow);
         }
 
@@ -66,7 +64,7 @@ namespace BookingApp.Presentation.ViewModel
         {
             if (SelectedReservation == null) return;
 
-            var rateWindow = new AccommodationReviewView(SelectedReservation.OriginalReservation);
+            var rateWindow = new AccommodationReviewView(SelectedReservation);
             ShowDialogAndRefresh(rateWindow);
         }
 
@@ -74,11 +72,11 @@ namespace BookingApp.Presentation.ViewModel
         {
             if (SelectedReservation == null) return;
 
-            GuestReviewDTO reviewFromOwner = _guestReviewService.GetReviewForReservation(SelectedReservation.OriginalReservation.Id);
+            GuestReviewDTO reviewDto = _guestReviewService.GetReviewForReservation(SelectedReservation.ReservationId);
 
-            if (reviewFromOwner != null)
+            if (reviewDto != null)
             {
-                string message = FormatReviewMessage(reviewFromOwner.ToGuestReview());
+                string message = FormatReviewMessage(reviewDto);
                 MessageBox.Show(message, "Review from Owner", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
@@ -124,7 +122,7 @@ namespace BookingApp.Presentation.ViewModel
             LoadReservations();
         }
 
-        private string FormatReviewMessage(GuestReview review)
+        private string FormatReviewMessage(GuestReviewDTO review)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Rating for cleanliness: {review.CleanlinessRating}");

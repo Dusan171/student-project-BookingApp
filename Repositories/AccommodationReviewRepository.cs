@@ -9,7 +9,7 @@ namespace BookingApp.Repositories
 {
     public class AccommodationReviewRepository : IAccommodationReviewRepository
     {
-        private const string FilePath = "../../../Resources/Data/guestReviewsD.csv";
+        private const string FilePath = "../../../Resources/Data/accommodationReviews.csv";
         private readonly Serializer<AccommodationReview> _serializer;
 
         public AccommodationReviewRepository()

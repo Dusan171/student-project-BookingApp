@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterScreen" MinHeight="320" MinWidth="400">
 
     <Window.Resources>
-        <!-- ... (Stilovi ostaju isti) ... -->
+
         <Style TargetType="Button">
             <Setter Property="Padding" Value="15,5"/>
             <Setter Property="Margin" Value="5,0,0,0"/>
@@ -19,7 +19,7 @@
 
     <DockPanel Margin="15">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-            <!-- Povezujemo dugme sa SendRequestCommand iz ViewModel-a -->
+ 
             <Button Content="Send Request" IsDefault="True" Command="{Binding SendRequestCommand}"/>
             <Button Content="Cancel" IsCancel="True"/>
         </StackPanel>
@@ -31,7 +31,7 @@
                 <StackPanel Margin="5">
                     <TextBlock>
                         <Run Text="Accommodation:"/>
-                        <!-- Povezujemo Text sa svojstvom iz ViewModel-a -->
+
                         <Run Text="{Binding AccommodationName, Mode=OneWay}" FontWeight="Bold"/>
                     </TextBlock>
                     <TextBlock Margin="0,5,0,0">
@@ -45,7 +45,7 @@
                 <UniformGrid Columns="2" Rows="1">
                     <StackPanel Margin="5">
                         <TextBlock Text="New Start Date:"/>
-                        <!-- Povezujemo DatePicker sa svojstvima i BlackoutDates -->
+
                         <DatePicker SelectedDate="{Binding NewStartDate}"
                                     utilities:DatePickerHelper.BlackoutDatesSource="{Binding BlackoutDates}"/>
                     </StackPanel>

@@ -14,8 +14,6 @@ namespace BookingApp.Services
         private readonly IOccupiedDateRepository _occupiedDateRepository;
         private readonly IAccommodationRepository _accommodationRepository;
         private readonly IGuestReviewRepository _guestReviewRepository;
-
-
         public ReservationService(IReservationRepository reservationRepository, IOccupiedDateRepository occupiedDateRepository, IAccommodationRepository accommodationRepository, IGuestReviewRepository guestReviewRepository)
         {
             _reservationRepository = reservationRepository;
@@ -27,16 +25,11 @@ namespace BookingApp.Services
         public ReservationDTO Create(ReservationDTO reservationDto)
         {
             var accommodation = GetAndValidateAccommodation(reservationDto.AccommodationId);
-
             ValidateReservationRules(accommodation, reservationDto.StartDate, reservationDto.EndDate, reservationDto.GuestsNumber);
-
             CheckForOverlappingDates(accommodation.Id, reservationDto.StartDate, reservationDto.EndDate);
-
             var reservationToSave = reservationDto.ToReservation();
             var savedReservation = _reservationRepository.Save(reservationToSave);
-
             CreateOccupiedDates(accommodation.Id, savedReservation.Id, savedReservation.StartDate, savedReservation.EndDate);
-
             return new ReservationDTO(savedReservation);
         }
         private Accommodation GetAndValidateAccommodation(int accommodationId)
@@ -87,34 +80,27 @@ namespace BookingApp.Services
             }
             _occupiedDateRepository.Save(occupiedDatesToSave);
         }
-
         public List<ReservationDTO> GetAll()
         {
             return _reservationRepository.GetAll()  
-                                         .Select(reservation => new ReservationDTO(reservation))  // mapiranje u DTO
+                                         .Select(reservation => new ReservationDTO(reservation))  
                                          .ToList();
         }
         public List<DateTime> GetOccupiedDatesForAccommodation(int accommodationId)
         { 
-            
             var occupiedDateObjects = _occupiedDateRepository.GetByAccommodationId(accommodationId);
-
-            
             return occupiedDateObjects.Select(occupiedDate => occupiedDate.Date).ToList();
         }
-
         public ReservationDTO GetById(int id)
         {
             var reservation = _reservationRepository.GetAll().FirstOrDefault(r => r.Id == id);
             return reservation == null ? null : new ReservationDTO(reservation);
         }
-
         public void Update(ReservationDTO reservationDto)
         {
             var reservation = reservationDto.ToReservation();
             _reservationRepository.UpdateReservation(reservation);
         }
-
         public bool IsAccommodationAvailable(int accommodationId, DateTime newStartDate, DateTime newEndDate)
         {
             var allReservations = _reservationRepository.GetAll();
@@ -134,7 +120,6 @@ namespace BookingApp.Services
             }
             return true; 
         }
-
         public List<ReservationDTO> GetUnratedReservations()
         {
             var allReservations = _reservationRepository.GetAll();
@@ -145,12 +130,8 @@ namespace BookingApp.Services
                             (DateTime.Now - r.EndDate).TotalDays <= 5 &&
                             !allGuestReviews.Any(gr => gr.ReservationId == r.Id))
                 .ToList();
-            if (unratedReservations == null)
-            {
-                return new List<ReservationDTO>();
-            }
+            
             return unratedReservations.Select(r => new ReservationDTO(r)).ToList();
         }
-
     }
 }

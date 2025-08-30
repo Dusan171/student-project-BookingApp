@@ -1,30 +1,25 @@
 ﻿using System;
-using System.Windows;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Input;
-using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
-using BookingApp.Services.DTO;
-using BookingApp.Domain.Model;
 
-namespace BookingApp.Presentation.ViewModel
+namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class RescheduleRequestViewModel : ViewModelBase
     {
-        private readonly Reservation _reservation;
-        private readonly Accommodation _accommodation;
+        private readonly ReservationDetailsDTO _reservationDetails;
         private readonly IRescheduleRequestService _rescheduleRequestService;
-        private readonly IAccommodationService _accommodationService;
 
         public Action CloseAction { get; set; }
 
         #region Svojstva za povezivanje (Binding)
 
-        public string AccommodationName => _accommodation?.Name;
-        public string CurrentPeriod => $"{_reservation.StartDate:dd.MM.yyyy} - {_reservation.EndDate:dd.MM.yyyy}";
+        public string AccommodationName => _reservationDetails?.AccommodationName;
+        public string CurrentPeriod => $"{_reservationDetails?.StartDate:dd.MM.yyyy} - {_reservationDetails?.EndDate:dd.MM.yyyy}";
 
         private DateTime? _newStartDate;
         public DateTime? NewStartDate
@@ -40,28 +35,16 @@ namespace BookingApp.Presentation.ViewModel
             set { _newEndDate = value; OnPropertyChanged(); }
         }
 
-        public List<DateTime> BlackoutDates { get; set; }
+        public List<DateTime> OccupiedDates { get; private set; }
 
         #endregion
 
-        #region Komande
         public ICommand SendRequestCommand { get; }
-        #endregion
 
-        public RescheduleRequestViewModel(Reservation reservation)
+        public RescheduleRequestViewModel(ReservationDetailsDTO reservationDetails)
         {
-            _reservation = reservation ?? throw new ArgumentNullException(nameof(reservation));
-
+            _reservationDetails = reservationDetails ?? throw new ArgumentNullException(nameof(reservationDetails));
             _rescheduleRequestService = Injector.CreateInstance<IRescheduleRequestService>();
-            _accommodationService = Injector.CreateInstance<IAccommodationService>();
-
-            _accommodation = _accommodationService.GetAccommodationById(_reservation.AccommodationId).ToAccommodation();
-            if (_accommodation == null)
-            {
-                MessageBox.Show("Could not find accommodation details. The window will close.");
-                CloseAction?.Invoke();
-                return;
-            }
 
             SendRequestCommand = new RelayCommand(SendRequest);
 
@@ -72,13 +55,10 @@ namespace BookingApp.Presentation.ViewModel
 
         private void LoadInitialData()
         {
-            var reservationDto = new ReservationDTO(_reservation);
+            var reservationDto = new ReservationDTO(_reservationDetails.OriginalReservation);
 
-            var blackoutDates = _rescheduleRequestService.GetBlackoutDatesForReschedule(reservationDto);
-
-            this.BlackoutDates = blackoutDates;
-
-            OnPropertyChanged(nameof(BlackoutDates));
+            OccupiedDates = _rescheduleRequestService.GetBlackoutDatesForReschedule(reservationDto);
+            OnPropertyChanged(nameof(OccupiedDates));
         }
 
         private void SendRequest(object obj)
@@ -90,9 +70,11 @@ namespace BookingApp.Presentation.ViewModel
 
             try
             {
+
                 var requestDto = new RescheduleRequestDTO
                 {
-                    ReservationId = _reservation.Id,
+                    ReservationId = _reservationDetails.ReservationId,
+                    GuestId = _reservationDetails.OriginalReservation.GuestId,
                     NewStartDate = NewStartDate.Value.Date,
                     NewEndDate = NewEndDate.Value.Date
                 };
@@ -106,6 +88,7 @@ namespace BookingApp.Presentation.ViewModel
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
         private bool IsInputValid()
         {
             if (!NewStartDate.HasValue || !NewEndDate.HasValue)
@@ -115,7 +98,7 @@ namespace BookingApp.Presentation.ViewModel
             }
             if (NewEndDate.Value <= NewStartDate.Value)
             {
-                MessageBox.Show("End date must be after start date.");
+                MessageBox.Show("End date must be after the start date.");
                 return false;
             }
             return true;

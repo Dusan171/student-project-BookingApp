@@ -1,22 +1,19 @@
-﻿using BookingApp.Domain.Model;
-using BookingApp.Presentation.ViewModel; // Namespace gde je vaš novi ViewModel
+﻿using BookingApp.Presentation.ViewModel.Guest;
+using BookingApp.Services.DTO;
 using System.Windows;
 
 namespace BookingApp.Presentation.View.Guest
 {
     public partial class AccommodationReservationView : Window
     {
-        public AccommodationReservationView(Accommodation accommodation)
+        public AccommodationReservationView(AccommodationDetailsDTO accommodationDetails)
         {
             InitializeComponent();
 
-            // Kreiramo ViewModel i prosleđujemo mu podatke koji su mu potrebni
-            var viewModel = new AccommodationReservationViewModel(accommodation);
+            var viewModel = new AccommodationReservationViewModel(accommodationDetails);
 
-            // Povezujemo View sa ViewModel-om
             DataContext = viewModel;
 
-            // Dajemo ViewModel-u način da zatvori prozor, bez da on zna za prozor
             viewModel.CloseAction = new System.Action(this.Close);
         }
     }

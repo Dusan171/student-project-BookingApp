@@ -1,35 +1,64 @@
-﻿using BookingApp.Domain.Model;
-using BookingApp.Repositories;
-using System;
+﻿using System.Windows;
+using System.Windows.Controls;
+
+namespace BookingApp.Presentation.View.Guide
+{
+    public partial class MainPage : Page
+    {
+        public MainPage()
+        {
+            InitializeComponent();
+
+            ContentFrame.Navigate(new ToursControl(this));
+        }
+
+        private void Tours_Click(object sender, RoutedEventArgs e)
+        {
+            ContentFrame.Navigate(new ToursControl(this));
+        }
+
+        private void Reviews_Click(object sender, RoutedEventArgs e)
+        {
+            ContentFrame.Navigate(new ReviewsControl());
+        }
+
+        private void Statistics_Click(object sender, RoutedEventArgs e)
+        {
+            ContentFrame.Navigate(new StatisticsSelectionControl(this));
+        }
+    }
+}
+
+/*using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.IO;
-using BookingApp.Utilities;
-using BookingApp.Presentation.View.Guide;
+using BookingApp.Domain;
+using BookingApp.Domain.Model;
+using BookingApp.Repositories;
 
-namespace BookingApp.Presentation.View.Guide
+namespace BookingApp.View.Guide
 {
-    public partial class ToursPage : UserControl
+    public partial class MainWindow : Page
     {
         private List<Tour> allTours;
         private List<TourReservation> allReservations;
-        MainWindow mainPage;
+
         [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
 
-        public ToursPage(MainWindow main)
+        public MainWindow()
         {
             AllocConsole();
             InitializeComponent();
 
             LoadAllTours();
             LoadAllReservations();
-            mainPage = main;
 
             TourFilterComboBox.SelectionChanged += TourFilterComboBox_SelectionChanged;
 
@@ -39,15 +68,8 @@ namespace BookingApp.Presentation.View.Guide
         private void LoadAllTours()
         {
             var tourRepository = new TourRepository();
-            //ovde si menjala
             allTours = tourRepository.GetAll();
-            FilterGuideTours();
             FillTourDetails(allTours);
-        }
-
-        private void FilterGuideTours()
-        {
-            allTours = allTours.Where(t => t.GuideId == Session.CurrentUser.Id).ToList();
         }
 
         private void FillTourDetails(List<Tour> tours)
@@ -112,14 +134,10 @@ namespace BookingApp.Presentation.View.Guide
             foreach (var tour in tours)
             {
                 bool hasActiveReservation = HasActiveReservation(tour);
-                //foreach (var startTime in tour.StartTimes)
-                //{
-                if (tour.StartTimes != null && tour.StartTimes.Any())
+                foreach (var startTime in tour.StartTimes)
                 {
-                    CreateTourCard(tour, tour.StartTimes.First().Time, isToursToday, hasActiveReservation);
+                    CreateTourCard(tour, startTime.Time, isToursToday, hasActiveReservation);
                 }
-
-                //}
             }
         }
 
@@ -127,13 +145,11 @@ namespace BookingApp.Presentation.View.Guide
         {
             return allTours.Any(t => t.Status == TourStatus.ACTIVE);
         }
-
         private bool IsNotFinished(Tour tour)
         {
             var foundTour = allTours.FirstOrDefault(t => t.Id == tour.Id);
             return foundTour != null && foundTour.Status == TourStatus.NONE;
         }
-
         private void CreateTourCard(Tour tour, DateTime time, bool isToursToday, bool hasActiveReservation)
         {
             Border card = new Border
@@ -195,14 +211,10 @@ namespace BookingApp.Presentation.View.Guide
                 }
 
                 tour.Status = TourStatus.ACTIVE;
-
-                if (LiveTrackingFrame != null)
-                {
-                    var liveTrackingPage = new TourLiveTracking(tour, time, mainPage);
-                    LiveTrackingFrame.Navigate(liveTrackingPage);
-                    LiveTrackingOverlay.Visibility = Visibility.Visible;
-                    TourListPanel.Visibility = Visibility.Collapsed;
-                }
+                var liveTrackingPage = new TourLiveTracking(tour, time);
+                LiveTrackingFrame.Navigate(liveTrackingPage);
+                LiveTrackingOverlay.Visibility = Visibility.Visible;
+                TourListPanel.Visibility = Visibility.Collapsed;
             };
 
             horizontal.Children.Add(image);
@@ -216,24 +228,33 @@ namespace BookingApp.Presentation.View.Guide
 
         private void NewTour_Click(object sender, RoutedEventArgs e)
         {
+            CreateTourOverlay.Visibility = Visibility.Visible;
+            TourListPanel.Visibility = Visibility.Collapsed;
 
-            CreateTourForm form = new CreateTourForm(mainPage);
+            CreateTourForm form = new CreateTourForm();
             form.TourCreated += (s, e) =>
             {
                 LoadAllTours();
                 DisplayTours(FilterToday());
-
             };
             form.Cancelled += OnCreateTourCancelled;
-            mainPage.ContentFrame.Content = form;
-
+            CreateTourFrame.Navigate(form);
         }
 
         private void OnCreateTourCancelled(object sender, EventArgs e)
         {
+            CreateTourOverlay.Visibility = Visibility.Collapsed;
+            TourListPanel.Visibility = Visibility.Visible;
             LoadAllTours();
             DisplayTours(FilterToday());
-            mainPage.ContentFrame.Content = this;
+        }
+        private void Reviews_Click(object sender, EventArgs e)
+        {
+            ((MainWindow)Application.Current.MainWindow).MainFrame.Navigate(new ReviewsPage());
+        }
+        private void Statistics_Click(object sender, EventArgs e)
+        {
+            //this.NavigationService?.Navigate(new StatisticsPage());
         }
     }
-}
+}*/

@@ -2,7 +2,7 @@
 using BookingApp.Domain;
 using BookingApp.Domain.Model;
 
-public class TourReviewDisplay
+public class TourReviewDisplayDTO
 {
     public int Id { get; set; }
     public string TourName { get; set; }
@@ -17,7 +17,7 @@ public class TourReviewDisplay
     // referenca na original
     public TourReview OriginalReview { get; set; }
 
-    public TourReviewDisplay(
+    public TourReviewDisplayDTO(
         int id,
         string tourName,
         bool isvalid,

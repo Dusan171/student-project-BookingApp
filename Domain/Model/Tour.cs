@@ -31,6 +31,7 @@ public class Tour : ISerializable
             return available < 0 ? 0 : available;
         }
     }
+    public Tour() { }
 
     public Tour() { }
 

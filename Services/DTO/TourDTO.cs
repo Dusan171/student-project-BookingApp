@@ -1,12 +1,14 @@
 ﻿using System.Windows.Media;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Domain.Model;
+using BookingApp.Utilities;
 
 namespace BookingApp.Services.DTO
 {
     public class TourDTO
     {
         public int Id { get; set; }
+        public int GuideId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string LocationText { get; set; } = string.Empty;
         public string DurationText { get; set; } = string.Empty;
@@ -34,6 +36,7 @@ namespace BookingApp.Services.DTO
             return new TourDTO
             {
                 Id = tour.Id,
+                GuideId = Session.CurrentUser.Id,
                 Name = tour.Name ?? "Nepoznata tura",
                 LocationText = GetLocationText(tour.Location),
                 DurationText = $"{tour.DurationHours}h",
