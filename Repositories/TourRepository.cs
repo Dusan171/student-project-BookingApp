@@ -30,7 +30,6 @@ namespace BookingApp.Repositories
 
                 foreach (var tour in tours)
                 {
-                    // ➡️ Učitaj lokaciju
                     if (tour.Location != null && tour.Location.Id > 0)
                     {
                         var fullLocation = _locationRepository.GetById(tour.Location.Id);
@@ -40,7 +39,6 @@ namespace BookingApp.Repositories
                         }
                     }
 
-                    // ➡️ Učitaj vodiča (User)
                     if (tour.Guide != null && tour.Guide.Id > 0)
                     {
                         var fullGuide = _userRepository.GetById(tour.Guide.Id);

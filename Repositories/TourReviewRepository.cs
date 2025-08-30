@@ -72,7 +72,7 @@ namespace BookingApp.Repositories
             return reviews;
         }
 
-        private void SaveToFile()
+        public void SaveToFile()
         {
             try
             {

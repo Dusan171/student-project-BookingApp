@@ -13,7 +13,7 @@ namespace BookingApp.Repositories
     public class ReservationGuestRepository
 
     {
-        private const string FilePath = "../../Resources/Data/reservationGuests.csv";
+        private const string FilePath = "../../../Resources/Data/reservationGuests.csv";
         private readonly Serializer<ReservationGuest> _serializer;
         private List<ReservationGuest> _guests;
 
@@ -63,5 +63,20 @@ namespace BookingApp.Repositories
             _guests.RemoveAll(g => g.ReservationId == reservationId);
             SaveAll();
         }
+        public ReservationGuest Update(ReservationGuest guest)
+        {
+            _guests = _serializer.FromCSV(FilePath);
+            var current = _guests.FirstOrDefault(g => g.Id == guest.Id);
+
+            if (current != null)
+            {
+                int index = _guests.IndexOf(current);
+                _guests.Remove(current);
+                _guests.Insert(index, guest);
+                _serializer.ToCSV(FilePath, _guests);
+            }
+            return guest;
+        }
+
     }
 }

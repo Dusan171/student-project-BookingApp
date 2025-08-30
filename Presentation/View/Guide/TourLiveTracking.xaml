@@ -6,6 +6,7 @@
 
     <DockPanel>
 
+        <!-- Header -->
         <Border Background="#2C3E50" Height="40" DockPanel.Dock="Top">
             <Grid>
                 <Button Content="←" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5"
@@ -25,6 +26,7 @@
             </Grid>
         </Border>
 
+        <!-- Stop tour dugme ostaje dole -->
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,20" HorizontalAlignment="Center">
             <Button Content="Stop Tour"
                     Width="150"
@@ -35,6 +37,7 @@
                     Click="StopTourButton_Click"/>
         </StackPanel>
 
+        <!-- Sadržaj sa skrolom -->
         <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="15" VerticalAlignment="Top">
 
@@ -52,6 +55,16 @@
 
                 <StackPanel x:Name="KeyPointsPanel" />
 
+                <!-- Dugme za turiste ide ispod KeyPoints -->
+                <Button Name="TouristButton" Content="Check Tourists"
+                        Width="150"
+                        Height="40"
+                        Margin="0,20,0,0"
+                        Background="Blue"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        HorizontalAlignment="Center"
+                        Click="TouristsButton_Click"/>
             </StackPanel>
         </ScrollViewer>
 

@@ -17,6 +17,7 @@ namespace BookingApp.Domain.Model
         public string Email { get; set; } // NOVO POLJE
         public bool HasAppeared { get; set; }
         public int KeyPointJoinedAt { get; set; }
+        public int TouristId { get; set; }
 
         public ReservationGuest()
         {
@@ -25,7 +26,7 @@ namespace BookingApp.Domain.Model
         }
 
         public ReservationGuest(int id, int reservationId, string firstName, string lastName,
-                               int age, string email, bool hasAppeared = false, int keyPointJoinedAt = -1)
+                               int age, string email, int touristId, bool hasAppeared = false, int keyPointJoinedAt = -1)
         {
             Id = id;
             ReservationId = reservationId;
@@ -35,6 +36,7 @@ namespace BookingApp.Domain.Model
             Email = email;
             HasAppeared = hasAppeared;
             KeyPointJoinedAt = keyPointJoinedAt;
+            TouristId = touristId;
         }
 
         public string FullName => $"{FirstName} {LastName}";
@@ -48,9 +50,10 @@ namespace BookingApp.Domain.Model
                 FirstName,
                 LastName,
                 Age.ToString(),
-                Email ?? "", 
+                Email ?? "",
                 HasAppeared.ToString(),
-                KeyPointJoinedAt.ToString()
+                KeyPointJoinedAt.ToString(),
+                TouristId.ToString()
             };
         }
 
@@ -61,17 +64,20 @@ namespace BookingApp.Domain.Model
             FirstName = values[2];
             LastName = values[3];
             Age = int.Parse(values[4]);
+
             if (values.Length > 7)
             {
                 Email = values[5];
                 HasAppeared = bool.Parse(values[6]);
                 KeyPointJoinedAt = int.Parse(values[7]);
+                TouristId = int.Parse(values[8]);
             }
             else
             {
                 Email = "";
                 HasAppeared = bool.Parse(values[5]);
                 KeyPointJoinedAt = int.Parse(values[6]);
+                TouristId = int.Parse(values[7]);
             }
         }
     }

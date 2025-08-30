@@ -15,8 +15,8 @@ namespace BookingApp.View.Guide
     public partial class CreateTourForm : Page
     {
         public event EventHandler Cancelled;
+        public event EventHandler TourCreated;
         private List<KeyPoint> keyPoints = new();
-        //private List<Images> images = new();
         private List<StartTourTime> startTimes = new();
 
         private readonly TourRepository tourRepository = new();
@@ -203,6 +203,7 @@ namespace BookingApp.View.Guide
                 Name = NameTextBox.Text.Trim(),
                 Location = new Location
                 {
+                    Id = locationRepository.NextId(),
                     City = CityTextBox.Text.Trim(),
                     Country = CountryTextBox.Text.Trim()
                 },
@@ -234,8 +235,9 @@ namespace BookingApp.View.Guide
                 {
                     imageRepository.Save(image);
                 }
+                TourCreated?.Invoke(this, EventArgs.Empty);
 
-                NavigationService?.Navigate(new MainWindow());
+                //NavigationService?.Navigate(new MainWindow());
             }
             catch (Exception ex)
             {
