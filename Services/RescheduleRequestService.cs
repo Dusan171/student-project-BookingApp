@@ -109,5 +109,31 @@ namespace BookingApp.Services
                 _rescheduleRequestRepository.SaveAll(allRequests);
             }
         }
+        public void Create(CreateRescheduleRequestDTO requestDto)
+        {
+            var reservation = _reservationRepository.GetById(requestDto.ReservationId);
+            if (reservation == null)
+                throw new InvalidOperationException("Reservation to reschedule could not be found.");
+
+            var accommodation = _accommodationRepository.GetById(reservation.AccommodationId);
+            if (accommodation == null)
+                throw new InvalidOperationException("Associated accommodation could not be found.");
+
+            ValidateRequestRules(accommodation, requestDto.NewStartDate, requestDto.NewEndDate);
+            CheckForAvailability(reservation, requestDto.NewStartDate, requestDto.NewEndDate);
+
+            var newRequest = new RescheduleRequest
+            {
+                ReservationId = requestDto.ReservationId,
+                GuestId = requestDto.GuestId,
+                NewStartDate = requestDto.NewStartDate,
+                NewEndDate = requestDto.NewEndDate,
+                Status = RequestStatus.Pending,
+                IsSeenByGuest = false,
+                OwnerComment = string.Empty
+            };
+
+            _rescheduleRequestRepository.Save(newRequest);
+        }
     }
 }

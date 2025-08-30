@@ -7,6 +7,6 @@ namespace BookingApp.Domain.Interfaces
 {
     public interface IAccommodationFilterService
     {
-        public List<AccommodationDTO> Filter(AccommodationSearchParameters parameters);
+        public List<AccommodationDetailsDTO> Filter(AccommodationSearchParameters parameters);
     }
 }

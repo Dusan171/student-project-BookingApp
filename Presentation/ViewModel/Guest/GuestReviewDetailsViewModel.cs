@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Linq;
-using System.Windows;
 using System.Windows.Input;
-using BookingApp.Domain;
-using BookingApp.Domain.Model;
 using BookingApp.Presentation.View.Guest;
 using BookingApp.Utilities;
+using BookingApp.Services.DTO;
 
-namespace BookingApp.Presentation.ViewModel
+namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class GuestReviewDetailsViewModel : ViewModelBase
     {
         #region Svojstva za prikaz
 
- 
+
 
         public int CleanlinessRating { get; }
         public int RuleRespectingRating { get; }
@@ -27,14 +24,14 @@ namespace BookingApp.Presentation.ViewModel
 
         public Action CloseAction { get; set; }
 
-        public GuestReviewDetailsViewModel(GuestReview review)
+        public GuestReviewDetailsViewModel(GuestReviewDTO reviewDto)
         {
-            if (review == null)
-                throw new ArgumentNullException(nameof(review), "Review cannot be null.");
+            if (reviewDto == null)
+                throw new ArgumentNullException(nameof(reviewDto), "Review cannot be null.");
 
-            CleanlinessRating = review.CleanlinessRating;
-            RuleRespectingRating = review.RuleRespectingRating;
-            Comment = review.Comment;
+            CleanlinessRating = reviewDto.CleanlinessRating;
+            RuleRespectingRating = reviewDto.RuleRespectingRating;
+            Comment = reviewDto.Comment;
 
             OkCommand = new RelayCommand(CloseWindow);
         }

@@ -1,4 +1,4 @@
-﻿using BookingApp.Presentation.ViewModel; // Namespace gde je vaš novi ViewModel
+﻿using BookingApp.Presentation.ViewModel.Guest; 
 using System.Windows;
 
 namespace BookingApp.Presentation.View.Guest
@@ -8,7 +8,7 @@ namespace BookingApp.Presentation.View.Guest
         public AccommodationLookup()
         {
             InitializeComponent();
-            // Povezujemo View sa ViewModel-om
+  
             DataContext = new AccommodationLookupViewModel();
         }
     }

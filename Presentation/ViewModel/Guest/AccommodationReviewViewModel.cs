@@ -1,66 +1,34 @@
-﻿using BookingApp.Domain;
-using BookingApp.Domain.Interfaces;
-using BookingApp.Services;
-using BookingApp.Utilities;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Services;
 using BookingApp.Services.DTO;
-using BookingApp.Domain.Model;
+using BookingApp.Utilities;
 
-namespace BookingApp.Presentation.ViewModel
+namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class AccommodationReviewViewModel : ViewModelBase
     {
-        private readonly Reservation _reservation;
+        private readonly ReservationDetailsDTO _reservationDetails;
         private readonly IAccommodationReviewService _accommodationReviewService;
 
         public Action CloseAction { get; set; }
 
-        #region Svojstva za povezivanje (Binding)
-
-        private string _cleanlinessRating;
-        public string CleanlinessRating
-        {
-            get => _cleanlinessRating;
-            set { _cleanlinessRating = value; OnPropertyChanged(); }
-        }
-
-        private string _ownerRating;
-        public string OwnerRating
-        {
-            get => _ownerRating;
-            set { _ownerRating = value; OnPropertyChanged(); }
-        }
-
-        private string _comment;
-        public string Comment
-        {
-            get => _comment;
-            set { _comment = value; OnPropertyChanged(); }
-        }
-
-        private string _imagePaths;
-        public string ImagePaths
-        {
-            get => _imagePaths;
-            set { _imagePaths = value; OnPropertyChanged(); }
-        }
-
+        #region Svojstva za unos
+        public string CleanlinessRating { get; set; }
+        public string OwnerRating { get; set; }
+        public string Comment { get; set; }
+        public string ImagePaths { get; set; }
         #endregion
 
-        #region Komande
         public ICommand SubmitCommand { get; }
-        #endregion
 
-        public AccommodationReviewViewModel(Reservation reservation)
+        public AccommodationReviewViewModel(ReservationDetailsDTO reservationDetails)
         {
-            _reservation = reservation ?? throw new ArgumentNullException(nameof(reservation));
-
+            _reservationDetails = reservationDetails ?? throw new ArgumentNullException(nameof(reservationDetails));
             _accommodationReviewService = Injector.CreateInstance<IAccommodationReviewService>();
-
             SubmitCommand = new RelayCommand(Submit);
-
         }
 
         #region Logika
@@ -69,14 +37,23 @@ namespace BookingApp.Presentation.ViewModel
         {
             if (!IsInputValid(out int cleanliness, out int ownerRating))
             {
-                return; 
+                return;
             }
 
             try
             {
-                _accommodationReviewService.Create(new ReservationDTO(_reservation), cleanliness, ownerRating, Comment, ImagePaths);
-                MessageBox.Show("Thank you for your review!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                var reviewDto = new CreateAccommodationReviewDTO
+                {
+                    ReservationId = _reservationDetails.ReservationId,
+                    CleanlinessRating = cleanliness,
+                    OwnerRating = ownerRating,
+                    Comment = this.Comment,
+                    ImagePaths = this.ImagePaths
+                };
 
+                _accommodationReviewService.SubmitReview(reviewDto, _reservationDetails.EndDate);
+
+                MessageBox.Show("Thank you for your review!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 CloseAction?.Invoke();
             }
             catch (Exception ex)
@@ -100,7 +77,6 @@ namespace BookingApp.Presentation.ViewModel
                 MessageBox.Show("Enter a valid owner rating (1-5).");
                 return false;
             }
-
             return true;
         }
 

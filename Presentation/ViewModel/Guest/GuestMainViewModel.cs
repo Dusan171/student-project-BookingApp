@@ -4,7 +4,7 @@ using BookingApp.Domain.Interfaces;
 using System.Windows.Input;
 using BookingApp.Services;
 
-namespace BookingApp.Presentation.ViewModel
+namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class GuestMainViewModel : ViewModelBase
     {
@@ -17,7 +17,7 @@ namespace BookingApp.Presentation.ViewModel
         public GuestMainViewModel()
         {
             _navigationService = Injector.CreateInstance<INavigationService>();
-            // Inicijalizacija komandi
+
             OpenAccommodationsCommand = new RelayCommand(OpenAccommodations);
             OpenMyReservationsCommand = new RelayCommand(OpenMyReservations);
         }

@@ -14,6 +14,6 @@ namespace BookingApp.Domain.Interfaces
         void Delete(Location location);
         Location Update(Location location);
         Location? GetById(int id);
-        Location? GetByName(string city, string country);
+        //Location? GetByName(string city, string country);
     }
 }

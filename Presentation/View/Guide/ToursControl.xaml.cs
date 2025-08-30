@@ -255,10 +255,12 @@ namespace BookingApp.Presentation.View.Guide
                 LoadAllTours();
                 DisplayTours(FilterToday());
 
-            };
-            form.Cancelled += OnCreateTourCancelled;
-            mainPage.ContentFrame.Content = form;
+                };
+                form.Cancelled += OnCreateTourCancelled;
+                mainPage.ContentFrame.Content = form;
 
+                CreateTourFrame.Navigate(form);
+            }
         }
 
         private void OnCreateTourCancelled(object sender, EventArgs e)
