@@ -160,7 +160,8 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                     FirstName = "",
                     LastName = "",
                     Age = 0,
-                    Email = i == 0 ? "" : null // Email samo za glavnog kontakta
+                    Email = i == 0 ? "" : null,
+                    IsMainContact = i == 0
                 });
             }
 
@@ -173,24 +174,17 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
             var alternatives = _reservationService.GetAlternativeToursForLocation(_selectedTour.Id);
 
-            System.Diagnostics.Debug.WriteLine($"Tražim alternative za turu ID {_selectedTour.Id}, potrebno mesta: {requiredSpots}");
-            System.Diagnostics.Debug.WriteLine($"Pronađeno {alternatives.Count} alternativa");
-
             AlternativeTours.Clear();
 
             var suitableAlternatives = alternatives.Where(alt => alt.AvailableSpots >= requiredSpots).ToList();
 
-            System.Diagnostics.Debug.WriteLine($"Pogodnih alternativa sa dovoljno mesta: {suitableAlternatives.Count}");
-
             foreach (var alt in suitableAlternatives)
             {
-                System.Diagnostics.Debug.WriteLine($"Alternativa: {alt.Name}, Dostupna mesta: {alt.AvailableSpots}");
                 AlternativeTours.Add(alt);
             }
 
             if (suitableAlternatives.Count == 0 && alternatives.Count > 0)
             {
-                StatusMessage = $"Nema alternativnih tura sa dovoljno mesta ({requiredSpots}). Evo svih dostupnih tura na istoj lokaciji:";
                 foreach (var alt in alternatives.Where(a => a.AvailableSpots > 0))
                 {
                     AlternativeTours.Add(alt);
@@ -200,12 +194,15 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             {
                 StatusMessage = "Nema dostupnih alternativnih tura na ovoj lokaciji.";
             }
+            else
+            {
+                StatusMessage = $"Odaberite alternativnu turu (potrebno je {requiredSpots} mesta):";
+            }
 
             OnPropertyChanged(nameof(HasAlternativeTours));
             OnPropertyChanged(nameof(CanAttemptReservation));
         }
 
-        // Modifikujte ExecuteSelectAlternative
         private void ExecuteSelectAlternative(AlternativeTourDTO alternative)
         {
             if (alternative == null) return;
@@ -218,7 +215,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 return;
             }
 
-            // Kreiraj novi TourDTO iz alternative
             _selectedTour = new TourDTO
             {
                 Id = alternative.Id,
@@ -231,24 +227,36 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 AvailableSpotsColor = alternative.AvailableSpotsColor
             };
 
-            // Resetuj stanje
             ShowingAlternatives = false;
             AlternativeTours.Clear();
 
             InitializeProperties();
             StatusMessage = $"Izabrana alternativa: {alternative.Name}. Možete nastaviti sa rezervacijom.";
 
+            OnPropertyChanged(nameof(TourName));
+            OnPropertyChanged(nameof(LocationText));
+            OnPropertyChanged(nameof(DurationText));
+            OnPropertyChanged(nameof(Language));
+            OnPropertyChanged(nameof(AvailableSpotsText));
+            OnPropertyChanged(nameof(AvailableSpotsColor));
             OnPropertyChanged(nameof(HasAlternativeTours));
             OnPropertyChanged(nameof(CanAttemptReservation));
         }
+
         private void ExecuteConfirmReservation()
         {
             try
             {
                 IsLoading = true;
                 StatusMessage = "";
+                _reservationInProgress = true;
 
-                if (!ValidateReservation()) return;
+                RefreshTourData();
+
+                if (!ValidateReservation())
+                {
+                    return;
+                }
 
                 var peopleCount = int.Parse(NumberOfPeople);
                 var currentUser = Session.CurrentUser;
@@ -258,7 +266,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                     return;
                 }
 
-                // Kreiraj DTO
                 var reservationDto = new TourReservationDTO
                 {
                     TourId = _selectedTour.Id,
@@ -269,26 +276,20 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                     Guests = GuestDetails.ToList()
                 };
 
-                // KLJUČNO: Koristi ValidateReservation iz servisa koji proverava real-time
                 if (!_reservationService.ValidateReservation(reservationDto))
                 {
-                    // Ako validacija ne prođe, prikaži alternative
                     var availableSpots = _reservationService.GetAvailableSpotsForTour(_selectedTour.Id);
                     StatusMessage = $"Nema dovoljno slobodnih mesta. Dostupno je {availableSpots}. Odaberite alternativnu turu:";
                     ShowAlternativeTours(peopleCount);
-                    return; // STVARNO prekini izvršavanje
+                    return;
                 }
 
-                // Ako je validacija OK, pokušaj kreiranje rezervacije
                 var createdReservation = _reservationService.CreateReservation(reservationDto);
 
                 if (createdReservation != null)
                 {
                     StatusMessage = "Rezervacija je uspešno kreirana!";
-
-                    // Refresh podataka o trenutnoj turi nakon uspešne rezervacije
                     RefreshTourData();
-
                     ReservationCompleted?.Invoke();
                 }
                 else
@@ -298,7 +299,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
             catch (ArgumentException ex)
             {
-                // Ovo se baca iz CreateReservation ako validacija ne prođe
                 var peopleCount = int.Parse(NumberOfPeople);
                 var availableSpots = _reservationService.GetAvailableSpotsForTour(_selectedTour.Id);
                 StatusMessage = $"Rezervacija nije moguća: {ex.Message}. Dostupno mesta: {availableSpots}";
@@ -311,10 +311,11 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             finally
             {
                 IsLoading = false;
+                _reservationInProgress = false;
+                OnPropertyChanged(nameof(CanAttemptReservation));
             }
         }
 
-        
         private void RefreshTourData()
         {
             try
@@ -325,27 +326,23 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 _selectedTour.AvailableSpotsText = $"Slobodnih mesta: {availableSpots}";
                 _selectedTour.AvailableSpotsColor = availableSpots > 0 ? Brushes.Green : Brushes.Red;
 
-                // Ažuriraj UI
-                InitializeProperties();
+                AvailableSpotsText = _selectedTour.AvailableSpotsText;
+                AvailableSpotsColor = _selectedTour.AvailableSpotsColor;
 
-                System.Diagnostics.Debug.WriteLine($"Refreshed tour data: {_selectedTour.Name} has {availableSpots} available spots");
+                OnPropertyChanged(nameof(AvailableSpotsText));
+                OnPropertyChanged(nameof(AvailableSpotsColor));
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error refreshing tour data: {ex.Message}");
+                // Silent fail for refresh errors
             }
         }
+
         private bool ValidateReservation()
         {
             if (!int.TryParse(NumberOfPeople, out int peopleCount) || peopleCount <= 0)
             {
                 StatusMessage = "Broj ljudi mora biti veći od 0.";
-                return false;
-            }
-
-            if (peopleCount > _selectedTour.AvailableSpots)
-            {
-                StatusMessage = $"Nema dovoljno slobodnih mesta. Dostupno je {_selectedTour.AvailableSpots}.";
                 return false;
             }
 
@@ -374,14 +371,13 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
                 if (i == 0 && string.IsNullOrWhiteSpace(guest.Email))
                 {
-                    StatusMessage = "Email je obavezan za glavnog kontakta.";
+                    StatusMessage = $"Email je obavezan za {guestTitle}.";
                     return false;
                 }
             }
 
             return true;
         }
-
 
         protected override void Dispose(bool disposing)
         {

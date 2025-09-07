@@ -57,25 +57,25 @@ public class Tour : ISerializable
 
     public string[] ToCSV()
     {
-        string keyPointIds = string.Join(",", KeyPoints.Select(kp => kp.Id));
-        string startTimeIds = string.Join(",", StartTimes.Select(st => st.Id));
-        string imageIds = string.Join(",", Images.Select(img => img.Id));
+        string keyPointIds = string.Join(",", KeyPoints?.Select(kp => kp.Id) ?? new List<int>());
+        string startTimeIds = string.Join(",", StartTimes?.Select(st => st.Id) ?? new List<int>());
+        string imageIds = string.Join(",", Images?.Select(img => img.Id) ?? new List<int>());
 
         return new string[]
         {
-            Id.ToString(),
-            Name,
-            Location.Id.ToString(),
-            Language,
-            MaxTourists.ToString(),
-            ReservedSpots.ToString(),
-            DurationHours.ToString(),
-            Status.ToString(),
-            GuideId.ToString(),
-            keyPointIds,
-            startTimeIds,
-            imageIds,
-            Guide?.Id.ToString() ?? "0"
+        Id.ToString(),
+        Name ?? string.Empty,
+        Location?.Id.ToString() ?? "0", 
+        Language ?? string.Empty,
+        MaxTourists.ToString(),
+        ReservedSpots.ToString(),
+        DurationHours.ToString(),
+        Status.ToString(),
+        GuideId.ToString(),
+        keyPointIds,
+        startTimeIds,
+        imageIds,
+        Guide?.Id.ToString() ?? "0"
         };
     }
 

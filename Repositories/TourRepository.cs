@@ -51,6 +51,7 @@ namespace BookingApp.Repositories
 
         public Tour Update(Tour tour)
         {
+
             var index = _tours.FindIndex(t => t.Id == tour.Id);
             if (index >= 0)
             {
@@ -59,7 +60,6 @@ namespace BookingApp.Repositories
             }
             return tour;
         }
-
         public void Delete(int id)
         {
             var tour = _tours.FirstOrDefault(t => t.Id == id);
@@ -141,6 +141,16 @@ namespace BookingApp.Repositories
                 t.Location?.Id == originalTour.Location.Id &&
                 (t.MaxTourists - t.ReservedSpots) >= requiredSpots
             ).ToList();
+        }
+
+        public List<KeyPoint> GetKeyPointsForTour(int tourId)
+        {
+            var tour = GetById(tourId);
+            if (tour != null && tour.KeyPoints != null)
+            {
+                return tour.KeyPoints;
+            }
+            return new List<KeyPoint>();
         }
     }
 }

@@ -115,5 +115,10 @@ namespace BookingApp.Repositories
             var tourReviews = GetByTourId(tourId);
             return tourReviews.Count > 0 ? tourReviews.Average(r => (r.GuideKnowledge + r.GuideLanguage + r.TourInterest) / 3.0) : 0.0;
         }
+
+        public bool HasReviewForReservation(int reservationId)
+        {
+            return _reviews.Any(r => r.ReservationId == reservationId && r.IsValid);
+        }
     }
 }

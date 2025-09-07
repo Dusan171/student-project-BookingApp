@@ -16,30 +16,33 @@ namespace BookingApp.Services.DTO
 
         public AlternativeTourDTO() { }
 
-        // Dodajte availableSpots kao parametar
+       
         public AlternativeTourDTO(Tour tour, int availableSpots)
         {
             Id = tour.Id;
             Name = tour.Name;
-            LocationText = tour.Location?.City ?? "Nepoznata lokacija";
-            DurationText = $"{tour.DurationHours} h";
+            LocationText = $"{tour.Location?.City ?? "Nepoznat grad"}, {tour.Location?.Country ?? "Nepoznata zemlja"}";
+            DurationText = $"{tour.DurationHours:F1}h";
             Language = tour.Language;
-            AvailableSpots = availableSpots; // Koristite prosleđenu vrednost
-            AvailableSpotsText = $"{AvailableSpots} mesta";
+            AvailableSpots = availableSpots; 
+            AvailableSpotsText = $"Slobodnih mesta: {AvailableSpots}";
             AvailableSpotsColor = AvailableSpots > 0 ? Brushes.Green : Brushes.Red;
+
+            System.Diagnostics.Debug.WriteLine($"Kreiran AlternativeTourDTO: {Name}, ID: {Id}, Dostupno: {AvailableSpots}");
         }
 
-        // Za kompatibilnost - koristi Tour.AvailableSpots property
         public AlternativeTourDTO(Tour tour)
         {
             Id = tour.Id;
             Name = tour.Name;
-            LocationText = tour.Location?.City ?? "Nepoznata lokacija";
-            DurationText = $"{tour.DurationHours} h";
+            LocationText = $"{tour.Location?.City ?? "Nepoznat grad"}, {tour.Location?.Country ?? "Nepoznata zemlja"}";
+            DurationText = $"{tour.DurationHours:F1}h";
             Language = tour.Language;
-            AvailableSpots = tour.AvailableSpots; // Koristi calculated property iz Tour modela
-            AvailableSpotsText = $"{AvailableSpots} mesta";
+            AvailableSpots = tour.AvailableSpots;
+            AvailableSpotsText = $"Slobodnih mesta: {AvailableSpots}";
             AvailableSpotsColor = AvailableSpots > 0 ? Brushes.Green : Brushes.Red;
+
+            System.Diagnostics.Debug.WriteLine($"Kreiran AlternativeTourDTO (legacy): {Name}, ID: {Id}, Dostupno: {AvailableSpots}");
         }
     }
 }

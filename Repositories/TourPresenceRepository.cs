@@ -19,7 +19,7 @@ namespace BookingApp.Repositories
             _tourPresences = _serializer.FromCSV(FilePath);
         }
 
-        public TourPresence GetById(int id)
+        public TourPresence? GetById(int id)
         {
             return _tourPresences.FirstOrDefault(tp => tp.Id == id);
         }
@@ -37,7 +37,7 @@ namespace BookingApp.Repositories
             return tourPresence;
         }
 
-        public TourPresence Update(TourPresence tourPresence)
+        public TourPresence? Update(TourPresence tourPresence)
         {
             var existingPresence = GetById(tourPresence.Id);
             if (existingPresence != null)
@@ -48,7 +48,7 @@ namespace BookingApp.Repositories
                 existingPresence.IsPresent = tourPresence.IsPresent;
                 existingPresence.CurrentKeyPointIndex = tourPresence.CurrentKeyPointIndex;
                 existingPresence.LastUpdated = DateTime.Now;
-
+                existingPresence.KeyPointId = tourPresence.KeyPointId;
                 _serializer.ToCSV(FilePath, _tourPresences);
                 return existingPresence;
             }
@@ -71,7 +71,7 @@ namespace BookingApp.Repositories
             return _tourPresences.Where(tp => tp.UserId == userId).ToList();
         }
 
-        public TourPresence GetByTourAndUser(int tourId, int userId)
+        public TourPresence? GetByTourAndUser(int tourId, int userId)
         {
             return _tourPresences.FirstOrDefault(tp => tp.TourId == tourId && tp.UserId == userId);
         }

@@ -17,6 +17,7 @@ namespace BookingApp.Services.DTO
         private int _keyPointJoinedAt;
         private string _fullName = string.Empty;
         private string _appearanceStatus = string.Empty;
+        private bool _isMainContact; 
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -104,12 +105,24 @@ namespace BookingApp.Services.DTO
             private set { _appearanceStatus = value; OnPropertyChanged(); }
         }
 
+        
+        public bool IsMainContact
+        {
+            get => _isMainContact;
+            set
+            {
+                _isMainContact = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ReservationGuest OriginalGuest { get; set; } = new ReservationGuest();
 
         public ReservationGuestDTO()
         {
             HasAppeared = false;
             KeyPointJoinedAt = -1;
+            IsMainContact = false;
         }
 
         public ReservationGuestDTO(ReservationGuest guest)
@@ -125,6 +138,9 @@ namespace BookingApp.Services.DTO
             Email = guest.Email;
             HasAppeared = guest.HasAppeared;
             KeyPointJoinedAt = guest.KeyPointJoinedAt;
+
+            
+            IsMainContact = !string.IsNullOrEmpty(guest.Email);
 
             OriginalGuest = guest;
         }
