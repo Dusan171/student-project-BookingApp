@@ -64,14 +64,25 @@ namespace BookingApp.Presentation.View.Guide
         public void LoadTours()
         {
             tours = toursRepository.GetAll();
+            if (tours.Count() == 0)
+            {
+                MessageBox.Show("nema tura");
+            }
         }
         private void CreateReviewForShow()
         {
             //ime turiste, ime ture, keypoint, sve ove ocene podaci
             foreach(var review in reviews)
             {
+                
                 var tour = tours.FirstOrDefault(t => t.Id == review.TourId);
                 var tourist = tourists.FirstOrDefault(t => t.Id == review.TouristId);
+
+                if (tour == null || tourist == null)
+                {
+                    continue;
+                }
+
                 String joinedAt = GetKeyPointJoinedAt(tourist.Id, guests);
                 TourReviewDisplayDTO reviewDisplay = new TourReviewDisplayDTO(1, tour.Name, review.IsValid, tourist.FirstName + " " + tourist.LastName, joinedAt, review.GuideKnowledge, review.GuideLanguage, review.TourInterest, review.Comment, review);
                 reviewDisplays.Add(reviewDisplay);

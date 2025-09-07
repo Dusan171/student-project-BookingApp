@@ -37,7 +37,7 @@ public class TourReviewDisplayDTO
         GuideLanguageRating = guideLanguageRating;
         TourInterestRating = tourInterestRating;
         Comment = comment;
-        IsValid = isvalid;   
+        IsValid = isvalid;
         OriginalReview = originalReview;
     }
 }

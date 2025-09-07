@@ -24,6 +24,8 @@ namespace BookingApp.Presentation.View.Guide
             InitializeComponent();
             mainPage = main;
             currentTour = tour ?? throw new ArgumentNullException(nameof(tour));
+            currentTour.Status = TourStatus.ACTIVE;
+            tourRepository.Update(currentTour);
             LoadReservations();
             startTime = start;
             LoadTourDetails(startTime);

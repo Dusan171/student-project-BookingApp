@@ -9,10 +9,10 @@ namespace BookingApp.Domain.Model
         public int Id { get; set; }
         public int TourId { get; set; }
         public int TouristId { get; set; }
-        public int ReservationId { get; set; }   // novo polje
-        public int GuideKnowledge { get; set; }  // 1-5
-        public int GuideLanguage { get; set; }   // 1-5
-        public int TourInterest { get; set; }    // 1-5
+        public int ReservationId { get; set; }  
+        public int GuideKnowledge { get; set; }  
+        public int GuideLanguage { get; set; }  
+        public int TourInterest { get; set; }   
         public string Comment { get; set; } = string.Empty;
         public DateTime ReviewDate { get; set; } = DateTime.Now;
 
