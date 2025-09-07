@@ -20,12 +20,12 @@ namespace BookingApp.Services.DTO
         public string AvailableSpotsText { get; set; } = string.Empty;
         public string GuideName { get; set; } = string.Empty;
 
-        // COLOR PROPERTIES FOR UI
+        
         public Brush AvailableSpotsColor { get; set; } = Brushes.Black;
         public Brush ReserveButtonColor { get; set; } = Brushes.Gray;
         public bool CanReserve { get; set; }
 
-        // ORIGINAL OBJECT FOR BUSINESS OPERATIONS
+        
         public Tour OriginalTour { get; set; } = new Tour();
 
         public static TourDTO FromDomain(Tour tour)
@@ -48,7 +48,7 @@ namespace BookingApp.Services.DTO
                 AvailableSpotsText = $"Slobodnih mesta: {availableSpots}/{tour.MaxTourists}",
                 GuideName = GetGuideName(tour.Guide),
 
-                // UI PROPERTIES
+               
                 AvailableSpotsColor = availableSpots > 0 ? Brushes.Green : Brushes.Red,
                 ReserveButtonColor = availableSpots > 0 ?
                     new SolidColorBrush(Color.FromRgb(46, 134, 193)) :
@@ -77,8 +77,16 @@ namespace BookingApp.Services.DTO
         {
             var availableSpots = reservationService.GetAvailableSpotsForTour(this.Id);
             this.AvailableSpots = availableSpots;
-            this.AvailableSpotsText = $"Slobodnih mesta: {availableSpots}";
+            this.AvailableSpotsText = $"Slobodnih mesta: {availableSpots}"; 
             this.AvailableSpotsColor = availableSpots > 0 ? Brushes.Green : Brushes.Red;
+
+           
+            this.CanReserve = availableSpots > 0;
+            this.ReserveButtonColor = availableSpots > 0 ?
+                new SolidColorBrush(Color.FromRgb(46, 134, 193)) :
+                new SolidColorBrush(Color.FromRgb(231, 76, 60));
+
+            System.Diagnostics.Debug.WriteLine($"RefreshAvailability za turu {Id}: {availableSpots} dostupnih mesta");
         }
     }
 }

@@ -130,15 +130,15 @@ namespace BookingApp.Presentation.View.Guide
         }
 
 
-        private bool HasOngoingTour()
+        private bool HasOngoingTour(Tour tour)
         {
-            return allTours.Any(t => t.Status == TourStatus.ACTIVE);
+            return allTours.Any(t => t.Status == TourStatus.ACTIVE && t.Id != tour.Id);
         }
 
         private bool IsNotFinished(Tour tour)
         {
             var foundTour = allTours.FirstOrDefault(t => t.Id == tour.Id);
-            return foundTour != null && foundTour.Status == TourStatus.NONE;
+            return foundTour != null && foundTour.Status != TourStatus.FINISHED;
         }
 
         private void CreateTourCard(Tour tour, DateTime time, bool isToursToday, bool hasActiveReservation)
@@ -190,7 +190,7 @@ namespace BookingApp.Presentation.View.Guide
                 Margin = new Thickness(20, 0, 0, 0),
                 VerticalAlignment = VerticalAlignment.Center,
                 Visibility = isToursToday ? Visibility.Visible : Visibility.Collapsed,
-                IsEnabled = hasActiveReservation && !HasOngoingTour() && IsNotFinished(tour)
+                IsEnabled = hasActiveReservation && !HasOngoingTour(tour) && IsNotFinished(tour)
             };
 
             startBtn.Click += (s, e) =>
@@ -269,3 +269,5 @@ namespace BookingApp.Presentation.View.Guide
         }
     }
 }
+
+

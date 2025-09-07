@@ -14,5 +14,7 @@ namespace BookingApp.Domain.Interfaces
         void UpdateReview(TourReview review);     
         void DeleteReview(int id);                
         double GetAverageRatingForTour(int tourId);
+
+        bool HasReviewForReservation(int reservationId);
     }
 }

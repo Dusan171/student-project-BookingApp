@@ -1,89 +1,84 @@
-﻿using BookingApp.Domain;
+﻿using BookingApp.Domain.Interfaces;
+using BookingApp.Domain.Model;
 using BookingApp.Serializer;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using BookingApp.Serializer;
-using System.IO;
-using BookingApp.Domain.Model;
 
 namespace BookingApp.Repositories
 {
-    public class TouristAttendanceRepository
+    public class TouristAttendanceRepository : ITouristAttendanceRepository
     {
         private const string FilePath = "../../../Resources/Data/touristAttendances.csv";
-
         private readonly Serializer<TouristAttendance> _serializer;
-        private List<TouristAttendance> _attendances;
+        private List<TouristAttendance> _touristAttendances;
 
         public TouristAttendanceRepository()
         {
             _serializer = new Serializer<TouristAttendance>();
-            _attendances = _serializer.FromCSV(FilePath) ?? new List<TouristAttendance>();
+            _touristAttendances = _serializer.FromCSV(FilePath);
         }
 
         public List<TouristAttendance> GetAll()
         {
-            _attendances = _serializer.FromCSV(FilePath) ?? new List<TouristAttendance>();
-            return _attendances;
+            return _touristAttendances;
         }
 
-        public TouristAttendance GetById(int id)
+        public TouristAttendance? GetById(int id)
         {
-            _attendances = _serializer.FromCSV(FilePath) ?? new List<TouristAttendance>();
-            return _attendances.FirstOrDefault(a => a.Id == id);
+            return _touristAttendances.FirstOrDefault(ta => ta.Id == id);
+        }
+
+        public List<TouristAttendance> GetByTourId(int tourId)
+        {
+            return _touristAttendances.Where(ta => ta.TourId == tourId).ToList();
+        }
+
+        public List<TouristAttendance> GetByGuestId(int guestId)
+        {
+            return _touristAttendances.Where(ta => ta.GuestId == guestId).ToList();
+        }
+
+        public TouristAttendance Add(TouristAttendance attendance)
+        {
+            attendance.Id = NextId();
+            _touristAttendances.Add(attendance);
+            _serializer.ToCSV(FilePath, _touristAttendances);
+            return attendance;
+        }
+
+        public TouristAttendance Update(TouristAttendance attendance)
+        {
+            var existingAttendance = GetById(attendance.Id);
+            if (existingAttendance != null)
+            {
+                var index = _touristAttendances.IndexOf(existingAttendance);
+                _touristAttendances[index] = attendance;
+                _serializer.ToCSV(FilePath, _touristAttendances);
+            }
+            return attendance;
+        }
+
+        public void Delete(TouristAttendance attendance)
+        {
+            _touristAttendances.Remove(attendance);
+            _serializer.ToCSV(FilePath, _touristAttendances);
         }
 
         public TouristAttendance Save(TouristAttendance attendance)
         {
             if (attendance.Id == 0)
             {
-                attendance.Id = NextId();
+                return Add(attendance);
             }
-
-            _attendances = _serializer.FromCSV(FilePath) ?? new List<TouristAttendance>();
-            _attendances.Add(attendance);
-            _serializer.ToCSV(FilePath, _attendances);
-
-            return attendance;
-        }
-
-        public int NextId()
-        {
-            _attendances = _serializer.FromCSV(FilePath) ?? new List<TouristAttendance>();
-            if (_attendances.Count < 1)
-                return 1;
-
-            return _attendances.Max(a => a.Id) + 1;
-        }
-
-        public void Delete(TouristAttendance attendance)
-        {
-            _attendances = _serializer.FromCSV(FilePath) ?? new List<TouristAttendance>();
-            var found = _attendances.FirstOrDefault(a => a.Id == attendance.Id);
-            if (found != null)
+            else
             {
-                _attendances.Remove(found);
-                _serializer.ToCSV(FilePath, _attendances);
+                return Update(attendance);
             }
         }
 
-        public TouristAttendance Update(TouristAttendance attendance)
+        private int NextId()
         {
-            _attendances = _serializer.FromCSV(FilePath) ?? new List<TouristAttendance>();
-            var current = _attendances.FirstOrDefault(a => a.Id == attendance.Id);
-            if (current != null)
-            {
-                int index = _attendances.IndexOf(current);
-                _attendances[index] = attendance;
-                _serializer.ToCSV(FilePath, _attendances);
-            }
-            return attendance;
+            return _touristAttendances.Count > 0 ? _touristAttendances.Max(ta => ta.Id) + 1 : 1;
         }
-       
-
-
-
-
     }
 }

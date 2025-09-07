@@ -51,7 +51,7 @@ namespace BookingApp.Repositories
         {
             if (reservation == null) throw new ArgumentNullException(nameof(reservation));
 
-            Reload();
+            
             var existing = _tourReservations.FirstOrDefault(tr => tr.Id == reservation.Id);
             if (existing != null)
             {
@@ -64,7 +64,7 @@ namespace BookingApp.Repositories
 
         public void Delete(int id)
         {
-            Reload();
+           
             var existing = _tourReservations.FirstOrDefault(tr => tr.Id == id);
             if (existing != null)
             {
@@ -80,7 +80,7 @@ namespace BookingApp.Repositories
 
         public int GetNextId()
         {
-            Reload();
+            
             return _tourReservations.Count == 0 ? 1 : _tourReservations.Max(r => r.Id) + 1;
         }
 
@@ -98,6 +98,8 @@ namespace BookingApp.Repositories
         public List<TourReservation> GetByTourId(int tourId)
         {
             Reload();
+            var reservations = _tourReservations.Where(r => r.TourId == tourId).ToList();
+            System.Diagnostics.Debug.WriteLine($"TourReservationRepository.GetByTourId({tourId}): našao {reservations.Count} rezervacija");
             return _tourReservations.Where(r => r.TourId == tourId).ToList();
         }
 
@@ -136,7 +138,7 @@ namespace BookingApp.Repositories
 
         public List<TourReservation> GetCompletedUnreviewedReservationsByTourist(int touristId)
         {
-            // Ovde kasnije možeš dodati logiku provere review-a
+            // Ovde kasnije mogu dodati logiku provere review-a
             return GetCompletedReservationsByTourist(touristId);
         }
 

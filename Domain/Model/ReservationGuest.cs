@@ -63,20 +63,20 @@ namespace BookingApp.Domain.Model
         }
 
         public void FromCSV(string[] values)
-{
-    if (values == null || values.Length < 6)
-        throw new ArgumentException("Invalid CSV data for ReservationGuest");
+        {
+            if (values == null || values.Length < 6)
+            throw new ArgumentException("Invalid CSV data for ReservationGuest");
 
-    Id = int.Parse(values[0]);
-    ReservationId = int.Parse(values[1]);
-    FirstName = values[2] ?? string.Empty;
-    LastName = values[3] ?? string.Empty;
-    Age = int.Parse(values[4]);
-    Email = values.Length > 5 ? values[5] ?? string.Empty : string.Empty;
-    HasAppeared = values.Length > 6 ? bool.Parse(values[6]) : false;
-    KeyPointJoinedAt = values.Length > 7 ? int.Parse(values[7]) : -1;
-    TouristId = values.Length > 8 ? int.Parse(values[8]) : 0;
-}
+            Id = int.Parse(values[0]);
+            ReservationId = int.Parse(values[1]);
+            FirstName = values[2] ?? string.Empty;
+            LastName = values[3] ?? string.Empty;
+            Age = int.Parse(values[4]);
+            Email = values.Length > 5 ? values[5] ?? string.Empty : string.Empty;
+            HasAppeared = values.Length > 6 ? bool.Parse(values[6]) : false;
+            KeyPointJoinedAt = values.Length > 7 ? int.Parse(values[7]) : -1;
+            TouristId = values.Length > 8 ? int.Parse(values[8]) : 0;
+        }
 
     }
 }

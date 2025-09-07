@@ -13,6 +13,5 @@ namespace BookingApp.Domain.Interfaces
         TouristAttendance Add(TouristAttendance attendance);
         TouristAttendance Update(TouristAttendance attendance);
         void Delete(TouristAttendance attendance);
-        int NextId();
     }
 }

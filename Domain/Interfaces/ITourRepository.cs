@@ -24,5 +24,7 @@ namespace BookingApp.Domain.Interfaces
         List<Tour> SearchTours(string location, string country, string language, int? maxPeople, double? duration);
         bool ReserveSpots(int tourId, int numberOfSpots);
         List<Tour> GetAlternativeTours(int originalTourId, int requiredSpots);
+
+        List<KeyPoint> GetKeyPointsForTour(int tourId);
     }
 }

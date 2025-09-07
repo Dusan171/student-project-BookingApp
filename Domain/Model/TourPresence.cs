@@ -14,6 +14,7 @@ namespace BookingApp.Domain.Model
         public int Id { get; set; }
         public int TourId { get; set; }
         public int UserId { get; set; }
+        public int KeyPointId { get; set; }
         public DateTime JoinedAt { get; set; }
         public bool IsPresent { get; set; }
         public int CurrentKeyPointIndex { get; set; }
@@ -27,7 +28,7 @@ namespace BookingApp.Domain.Model
             IsPresent = false;
         }
 
-        public TourPresence(int id, int tourId, int userId, DateTime joinedAt, bool isPresent, int currentKeyPointIndex)
+        public TourPresence(int id, int tourId, int userId, DateTime joinedAt, bool isPresent, int currentKeyPointIndex, int keyPointId)
         {
             Id = id;
             TourId = tourId;
@@ -36,6 +37,7 @@ namespace BookingApp.Domain.Model
             IsPresent = isPresent;
             CurrentKeyPointIndex = currentKeyPointIndex;
             LastUpdated = DateTime.Now;
+            KeyPointId = keyPointId;
         }
 
         public string[] ToCSV()
@@ -48,13 +50,14 @@ namespace BookingApp.Domain.Model
                 JoinedAt.ToString("dd-MM-yyyy HH:mm:ss"),
                 IsPresent.ToString(),
                 CurrentKeyPointIndex.ToString(),
-                LastUpdated.ToString("dd-MM-yyyy HH:mm:ss")
+                LastUpdated.ToString("dd-MM-yyyy HH:mm:ss"),
+                KeyPointId.ToString(),
             };
         }
 
         public void FromCSV(string[] values)
         {
-            if (values == null || values.Length < 7)
+            if (values == null || values.Length < 8)
                 throw new ArgumentException("Invalid CSV data for TourPresence");
 
             Id = int.Parse(values[0]);
@@ -64,6 +67,8 @@ namespace BookingApp.Domain.Model
             IsPresent = bool.Parse(values[4]);
             CurrentKeyPointIndex = int.Parse(values[5]);
             LastUpdated = DateTime.ParseExact(values[6], "dd-MM-yyyy HH:mm:ss", null);
+            KeyPointId = int.Parse(values[7]);
+
         }
     }
 }
