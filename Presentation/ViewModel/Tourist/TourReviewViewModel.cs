@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
+using Microsoft.Win32;
 
 namespace BookingApp.Presentation.ViewModel.Tourist
 {
@@ -17,6 +20,15 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         private readonly TourReviewRepository _reviewRepository = new();
         private readonly TourRepository _tourRepository = new();
         private readonly UserRepository _userRepository = new();
+        private ObservableCollection<string> _selectedImages = new();
+        public ObservableCollection<string> SelectedImages
+        {
+            get => _selectedImages;
+            set { _selectedImages = value; 
+            OnPropertyChanged(nameof(SelectedImages)); }
+        }
+
+        public string ImageCount => $"({SelectedImages.Count} slika)";
 
         public ObservableCollection<TourReservation> CompletedReservations { get; set; } = new();
 
@@ -92,13 +104,32 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
         }
 
-        // Commands
+        
+
+        public ICommand AddImageCommand => new RelayCommand(AddImage);
+        public ICommand RemoveImageCommand => new RelayCommand<string>(RemoveImage);
         public ICommand ReviewCommand => new RelayCommand<TourReservation>(r => SelectedReservation = r);
         public ICommand CancelReviewCommand => new RelayCommand(() =>
         {
+            
+            foreach (var imagePath in SelectedImages.ToList())
+            {
+                try
+                {
+                    string fullPath = Path.GetFullPath(imagePath);
+                    if (File.Exists(fullPath))
+                    {
+                        File.Delete(fullPath);
+                    }
+                }
+                catch { /* Ignoriši greške brisanja */ }
+            }
+
             SelectedReservation = null;
             ResetRatings();
             ReviewComment = "";
+            SelectedImages.Clear();
+            OnPropertyChanged(nameof(ImageCount));
         });
         public ICommand SubmitReviewCommand => new RelayCommand(SubmitReview);
 
@@ -136,7 +167,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             var all = _tourReservationRepository.GetReservationsForTourist(Session.CurrentUser.Id);
             foreach (var r in all)
             {
-                if (r.Status == TourReservationStatus.COMPLETED && !_reviewRepository.HasReview(r.TouristId, r.TourId))
+                if (r.Status == TourReservationStatus.COMPLETED && !_reviewRepository.HasReviewForReservation(r.Id))
                 {
                     r.Tour = _tourRepository.GetById(r.TourId);
 
@@ -157,13 +188,15 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             var review = new TourReview
             {
                 ReservationId = SelectedReservation.Id,
+                TourId = SelectedReservation.TourId,
                 GuideKnowledge = GuideKnowledgeRating,
                 GuideLanguage = GuideLanguageRating,
                 TourInterest = TourInterestRating,
                 Comment = ReviewComment,
                 TouristId = Session.CurrentUser?.Id ?? 0,
                 
-                ReviewDate = DateTime.Now
+                ReviewDate = DateTime.Now,
+                ImagePaths = SelectedImages.ToList()
             };
 
             _reviewRepository.AddReview(review);
@@ -176,6 +209,8 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             SelectedReservation = null;
             ResetRatings();
             ReviewComment = "";
+            SelectedImages.Clear(); 
+            OnPropertyChanged(nameof(ImageCount)); 
             LoadCompletedTours();
         }
 
@@ -206,6 +241,81 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             {
                 MessageBox.Show("Rezervacija nije pronađena ili je već ocenjena.",
                               "Greška", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+
+        private void AddImage()
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Title = "Odaberite sliku",
+                Filter = "Slike|*.jpg;*.jpeg;*.png;*.bmp;*.gif|Sve datoteke|*.*",
+                Multiselect = true
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+               
+                string imagesFolder = "../../../Resources/Images";
+                string fullImagesPath = Path.GetFullPath(imagesFolder);
+
+                
+                if (!Directory.Exists(fullImagesPath))
+                {
+                    Directory.CreateDirectory(fullImagesPath);
+                }
+
+                foreach (var originalPath in openFileDialog.FileNames)
+                {
+                    try
+                    {
+                        
+                        string fileName = $"{Guid.NewGuid()}{Path.GetExtension(originalPath)}";
+                        string destinationPath = Path.Combine(fullImagesPath, fileName);
+
+                        // Kopiraj sliku u Resources/Images folder
+                        File.Copy(originalPath, destinationPath, true);
+
+                        // Relativna putanja za čuvanje u CSV
+                        string relativePath = $"../../../Resources/Images/{fileName}";
+
+                        if (!SelectedImages.Contains(relativePath))
+                        {
+                            SelectedImages.Add(relativePath);
+                            OnPropertyChanged(nameof(ImageCount));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Greška pri dodavanju slike: {ex.Message}",
+                                      "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void RemoveImage(string? imagePath)
+        {
+            if (!string.IsNullOrEmpty(imagePath) && SelectedImages.Contains(imagePath))
+            {
+                try
+                {
+                    // Ukloni iz liste
+                    SelectedImages.Remove(imagePath);
+                    OnPropertyChanged(nameof(ImageCount));
+
+                    
+                    string fullPath = Path.GetFullPath(imagePath);
+                    if (File.Exists(fullPath))
+                    {
+                        File.Delete(fullPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Greška pri brisanju slike: {ex.Message}",
+                                  "Greška", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
         }
 

@@ -7,7 +7,7 @@ using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 
 namespace BookingApp.Presentation.View.Guide
-{ 
+{
     public partial class ReservedTouristsWindow : Window
     {
         private List<ReservationGuest> guests;
@@ -26,6 +26,8 @@ namespace BookingApp.Presentation.View.Guide
             Title = $"Turisti za turu: {tour.Name}";
             PopulateGuests();
         }
+
+
 
         private void PopulateGuests()
         {
@@ -91,6 +93,27 @@ namespace BookingApp.Presentation.View.Guide
 
                 GuestsPanel.Children.Add(stack);
             }
+        }
+
+        public List<int> GetPresentGuestIds()
+        {
+            var presentIds = new List<int>();
+
+            foreach (StackPanel row in GuestsPanel.Children)
+            {
+                var cb = row.Children.OfType<CheckBox>().FirstOrDefault();
+                if (cb?.IsChecked == true && cb.Tag is int guestId)
+                {
+                    presentIds.Add(guestId);
+                }
+            }
+
+            return presentIds;
+        }
+
+        public Dictionary<string, List<string>> GetNotificationSummary()
+        {
+            return new Dictionary<string, List<string>>();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)

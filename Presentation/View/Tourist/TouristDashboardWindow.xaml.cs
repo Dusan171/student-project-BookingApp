@@ -9,28 +9,56 @@ using System.Windows.Controls;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
 
-
 namespace BookingApp.Presentation.View.Tourist
 {
     public partial class TouristDashboardWindow : Window
     {
+        private bool _tourPresenceInitialized = false;
+        private bool _tourRequestsInitialized = false;
+
         public string CurrentUserName => Session.CurrentUser?.FirstName + " " + Session.CurrentUser?.LastName ?? "Tourist";
 
         public TouristDashboardWindow()
         {
             InitializeComponent();
-            DataContext = this;
-            InitializeViews();
             SetupEventHandlers();
             ShowSearchToursView();
         }
 
-        private void InitializeViews()
+        private void EnsureTourPresenceInitialized()
         {
-            var currentUserId = Session.CurrentUser?.Id ?? 0;
+            if (!_tourPresenceInitialized && TourPresenceContent != null)
+            {
+                var currentUserId = Session.CurrentUser?.Id ?? 0;
+                try
+                {
+                    TourPresenceContent.InitializeViewModel(currentUserId);
+                    _tourPresenceInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Greška pri inicijalizaciji praćenja tura: {ex.Message}",
+                                   "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
 
-            TourPresenceContent?.InitializeViewModel(currentUserId);
-            TourRequestsContent?.InitializeViewModel(currentUserId);
+        private void EnsureTourRequestsInitialized()
+        {
+            if (!_tourRequestsInitialized && TourRequestsContent != null)
+            {
+                var currentUserId = Session.CurrentUser?.Id ?? 0;
+                try
+                {
+                    TourRequestsContent.InitializeViewModel(currentUserId);
+                    _tourRequestsInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Greška pri inicijalizaciji zahteva za ture: {ex.Message}",
+                                   "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void SetupEventHandlers()
@@ -117,18 +145,43 @@ namespace BookingApp.Presentation.View.Tourist
 
         private void TourPresence_Click(object sender, RoutedEventArgs e)
         {
-            HideAllViews();
-            TourPresenceContent.Visibility = Visibility.Visible;
-            SetActiveTab(TourPresenceTab);
+            try
+            {
+                if (TourPresenceContent == null)
+                {
+                    MessageBox.Show("TourPresenceContent nije inicijalizovan!", "Greška",
+                                   MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                EnsureTourPresenceInitialized();
+                HideAllViews();
+                TourPresenceContent.Visibility = Visibility.Visible;
+                SetActiveTab(TourPresenceTab);
+                TourPresenceContent.RefreshData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška pri učitavanju praćenja tura: {ex.Message}",
+                               "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void TourRequests_Click(object sender, RoutedEventArgs e)
         {
-            HideAllViews();
-            TourRequestsContent.Visibility = Visibility.Visible;
-            SetActiveTab(TourRequestsTab);
+            try
+            {
+                EnsureTourRequestsInitialized();
+                HideAllViews();
+                TourRequestsContent.Visibility = Visibility.Visible;
+                SetActiveTab(TourRequestsTab);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška pri učitavanju zahteva za ture: {ex.Message}",
+                               "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
-
 
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
@@ -141,10 +194,8 @@ namespace BookingApp.Presentation.View.Tourist
             if (result == MessageBoxResult.Yes)
             {
                 Session.ClearSession();
-
                 var signInWindow = new SignInForm();
                 signInWindow.Show();
-
                 this.Close();
             }
         }
@@ -180,33 +231,24 @@ namespace BookingApp.Presentation.View.Tourist
 
                 if (TourReviewViewContent.ViewModel != null)
                 {
-
-                    TourReviewViewContent.ViewModel.ReviewSubmitted -= OnReviewSubmitted; // ukloni stari
-                    TourReviewViewContent.ViewModel.ReviewSubmitted += OnReviewSubmitted; // dodaj novi
-
+                    TourReviewViewContent.ViewModel.ReviewSubmitted -= OnReviewSubmitted;
+                    TourReviewViewContent.ViewModel.ReviewSubmitted += OnReviewSubmitted;
                     TourReviewViewContent.ViewModel.LoadCompletedTours();
                 }
             }
         }
 
-
-
         private void HideAllViews()
         {
-            TourSearchView.Visibility = Visibility.Collapsed;
-            TourReservationView.Visibility = Visibility.Collapsed;
-            MyReservationsContent.Visibility = Visibility.Collapsed;
-            TourReviewViewContent.Visibility = Visibility.Collapsed;
-            ReviewsContent.Visibility = Visibility.Collapsed;
-            TourPresenceContent.Visibility = Visibility.Collapsed;
-            TourRequestsContent.Visibility = Visibility.Collapsed;
+            if (TourSearchView != null) TourSearchView.Visibility = Visibility.Collapsed;
+            if (TourReservationView != null) TourReservationView.Visibility = Visibility.Collapsed;
+            if (MyReservationsContent != null) MyReservationsContent.Visibility = Visibility.Collapsed;
+            if (TourReviewViewContent != null) TourReviewViewContent.Visibility = Visibility.Collapsed;
+            if (ReviewsContent != null) ReviewsContent.Visibility = Visibility.Collapsed;
+            if (TourPresenceContent != null) TourPresenceContent.Visibility = Visibility.Collapsed;
+            if (TourRequestsContent != null) TourRequestsContent.Visibility = Visibility.Collapsed;
 
             TourReservationView?.ClearForm();
-        }
-
-        private void HideAllContent()
-        {
-            HideAllViews();
         }
 
         private void SetActiveTab(Button activeTab)
