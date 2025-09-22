@@ -63,9 +63,16 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 var tours = _tourService.GetAllTours();
                 Tours.Clear();
 
+                var reservationService = Services.Injector.CreateInstance<ITourReservationService>();
+
                 foreach (var tour in tours)
                 {
-                    Tours.Add(TourDTO.FromDomain(tour));
+                    var tourDto = TourDTO.FromDomain(tour);
+
+                    
+                    tourDto.RefreshAvailability(reservationService);
+
+                    Tours.Add(tourDto);
                 }
 
                 StatusMessage = $"Pronađeno {Tours.Count} dostupnih tura";
@@ -99,9 +106,18 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 var searchResults = _tourService.SearchTours(criteria);
 
                 Tours.Clear();
+
+               
+                var reservationService = Services.Injector.CreateInstance<ITourReservationService>();
+
                 foreach (var tour in searchResults)
                 {
-                    Tours.Add(TourDTO.FromDomain(tour));
+                    var tourDto = TourDTO.FromDomain(tour);
+
+                    
+                    tourDto.RefreshAvailability(reservationService);
+
+                    Tours.Add(tourDto);
                 }
 
                 if (Tours.Count == 0)
@@ -132,11 +148,11 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             {
                 var reservationVM = new TourReservationViewModel(tour);
 
-                // Dodaj event listener za refresh
+                
                 reservationVM.ReservationCompleted += () => {
-                    RefreshTours(); // Već postojeća metoda!
+                    RefreshTours(); 
                 };
-                // Увек иди на резервацијски екран, без обзира на попуњеност
+                
                 TourReserveRequested?.Invoke(tour);
             }
             catch (Exception ex)
@@ -149,17 +165,17 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         {
             try
             {
-                // Узми број људи из претраге (default 1)
+               
                 int requiredSpots = ParseIntValue(SearchPeopleCount) ?? 1;
 
-                // Пронађи алтернативне туре на истој локацији
+                
                 var alternatives = _tourService.GetAlternativeTours(originalTour.Id, requiredSpots);
 
                 if (alternatives.Any())
                 {
                     StatusMessage = $"Tura '{originalTour.Name}' je popunjena. Pronađene su {alternatives.Count} alternative na istoj lokaciji:";
 
-                    // Замени тренутну листу са алтернативама
+                   
                     Tours.Clear();
                     foreach (var alternative in alternatives)
                     {

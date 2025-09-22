@@ -5,19 +5,60 @@ using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.View;
 using BookingApp.Presentation.ViewModel.Tourist;
+using System.Windows.Controls;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Services;
 
 namespace BookingApp.Presentation.View.Tourist
 {
     public partial class TouristDashboardWindow : Window
     {
+        private bool _tourPresenceInitialized = false;
+        private bool _tourRequestsInitialized = false;
+
         public string CurrentUserName => Session.CurrentUser?.FirstName + " " + Session.CurrentUser?.LastName ?? "Tourist";
 
         public TouristDashboardWindow()
         {
             InitializeComponent();
-            DataContext = this;
             SetupEventHandlers();
             ShowSearchToursView();
+        }
+
+        private void EnsureTourPresenceInitialized()
+        {
+            if (!_tourPresenceInitialized && TourPresenceContent != null)
+            {
+                var currentUserId = Session.CurrentUser?.Id ?? 0;
+                try
+                {
+                    TourPresenceContent.InitializeViewModel(currentUserId);
+                    _tourPresenceInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Greška pri inicijalizaciji praćenja tura: {ex.Message}",
+                                   "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void EnsureTourRequestsInitialized()
+        {
+            if (!_tourRequestsInitialized && TourRequestsContent != null)
+            {
+                var currentUserId = Session.CurrentUser?.Id ?? 0;
+                try
+                {
+                    TourRequestsContent.InitializeViewModel(currentUserId);
+                    _tourRequestsInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Greška pri inicijalizaciji zahteva za ture: {ex.Message}",
+                                   "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
         }
 
         private void SetupEventHandlers()
@@ -102,6 +143,46 @@ namespace BookingApp.Presentation.View.Tourist
             SetActiveTab(ReviewsTab);
         }
 
+        private void TourPresence_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (TourPresenceContent == null)
+                {
+                    MessageBox.Show("TourPresenceContent nije inicijalizovan!", "Greška",
+                                   MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                EnsureTourPresenceInitialized();
+                HideAllViews();
+                TourPresenceContent.Visibility = Visibility.Visible;
+                SetActiveTab(TourPresenceTab);
+                TourPresenceContent.RefreshData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška pri učitavanju praćenja tura: {ex.Message}",
+                               "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void TourRequests_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                EnsureTourRequestsInitialized();
+                HideAllViews();
+                TourRequestsContent.Visibility = Visibility.Visible;
+                SetActiveTab(TourRequestsTab);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška pri učitavanju zahteva za ture: {ex.Message}",
+                               "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
             var result = MessageBox.Show(
@@ -113,10 +194,8 @@ namespace BookingApp.Presentation.View.Tourist
             if (result == MessageBoxResult.Yes)
             {
                 Session.ClearSession();
-
                 var signInWindow = new SignInForm();
                 signInWindow.Show();
-
                 this.Close();
             }
         }
@@ -152,10 +231,8 @@ namespace BookingApp.Presentation.View.Tourist
 
                 if (TourReviewViewContent.ViewModel != null)
                 {
-         
-                    TourReviewViewContent.ViewModel.ReviewSubmitted -= OnReviewSubmitted; // ukloni stari
-                    TourReviewViewContent.ViewModel.ReviewSubmitted += OnReviewSubmitted; // dodaj novi
-
+                    TourReviewViewContent.ViewModel.ReviewSubmitted -= OnReviewSubmitted;
+                    TourReviewViewContent.ViewModel.ReviewSubmitted += OnReviewSubmitted;
                     TourReviewViewContent.ViewModel.LoadCompletedTours();
                 }
             }
@@ -163,27 +240,26 @@ namespace BookingApp.Presentation.View.Tourist
 
         private void HideAllViews()
         {
-            if (TourSearchView != null)
-                TourSearchView.Visibility = Visibility.Collapsed;
-            if (TourReservationView != null)
-                TourReservationView.Visibility = Visibility.Collapsed;
-            if (MyReservationsContent != null)
-                MyReservationsContent.Visibility = Visibility.Collapsed;
-            if (ReviewsContent != null)
-                ReviewsContent.Visibility = Visibility.Collapsed;
-            if (TourReviewViewContent != null)
-                TourReviewViewContent.Visibility = Visibility.Collapsed;
+            if (TourSearchView != null) TourSearchView.Visibility = Visibility.Collapsed;
+            if (TourReservationView != null) TourReservationView.Visibility = Visibility.Collapsed;
+            if (MyReservationsContent != null) MyReservationsContent.Visibility = Visibility.Collapsed;
+            if (TourReviewViewContent != null) TourReviewViewContent.Visibility = Visibility.Collapsed;
+            if (ReviewsContent != null) ReviewsContent.Visibility = Visibility.Collapsed;
+            if (TourPresenceContent != null) TourPresenceContent.Visibility = Visibility.Collapsed;
+            if (TourRequestsContent != null) TourRequestsContent.Visibility = Visibility.Collapsed;
 
             TourReservationView?.ClearForm();
         }
 
-        private void SetActiveTab(System.Windows.Controls.Button activeTab)
+        private void SetActiveTab(Button activeTab)
         {
-            if (SearchToursTab != null) SearchToursTab.IsDefault = false;
-            if (MyReservationsTab != null) MyReservationsTab.IsDefault = false;
-            if (ReviewsTab != null) ReviewsTab.IsDefault = false;
+            SearchToursTab.IsDefault = false;
+            MyReservationsTab.IsDefault = false;
+            ReviewsTab.IsDefault = false;
+            TourPresenceTab.IsDefault = false;
+            TourRequestsTab.IsDefault = false;
 
-            if (activeTab != null) activeTab.IsDefault = true;
+            activeTab.IsDefault = true;
         }
 
         private void TouristDashboardWindow_Closing(object? sender, CancelEventArgs e)

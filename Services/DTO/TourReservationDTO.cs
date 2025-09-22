@@ -100,6 +100,14 @@ namespace BookingApp.Services.DTO
             private set { _statusText = value; OnPropertyChanged(); }
         }
 
+        private int _currentKeyPointIndex;
+
+        public int CurrentKeyPointIndex
+        {
+            get => _currentKeyPointIndex;
+            set { _currentKeyPointIndex = value; OnPropertyChanged(); }
+        }
+
         public List<ReservationGuestDTO> Guests
         {
             get => _guests;
@@ -130,14 +138,15 @@ namespace BookingApp.Services.DTO
             TourName = reservation.Tour?.Name ?? "Nepoznata tura";
             GuideName = GetGuideNameFromTour(reservation.Tour);
             TourDateFormatted = reservation.StartTourTime?.Time.ToString("dd.MM.yyyy") ??
-                               reservation.ReservationDate.ToString("dd.MM.yyyy");
+                                reservation.ReservationDate.ToString("dd.MM.yyyy");
 
             Guests = reservation.Guests?.Select(g => new ReservationGuestDTO(g)).ToList() ??
                      new List<ReservationGuestDTO>();
 
+            CurrentKeyPointIndex = reservation.CurrentKeyPointIndex; // dodato
+
             OriginalReservation = reservation;
         }
-
         private string GetGuideNameFromTour(Tour? tour)
         {
             if (tour?.Guide != null)

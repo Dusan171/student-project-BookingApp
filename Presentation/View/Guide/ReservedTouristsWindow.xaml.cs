@@ -4,12 +4,14 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using BookingApp.Domain.Model;
+using BookingApp.Repositories;
 
 namespace BookingApp.Presentation.View.Guide
-{ 
+{
     public partial class ReservedTouristsWindow : Window
     {
         private List<ReservationGuest> guests;
+        private ReservationGuestRepository guestRepository = new ReservationGuestRepository();
         private List<KeyPoint> passedKeyPoints;
         private List<TouristAttendance> attendance;
 
@@ -24,6 +26,8 @@ namespace BookingApp.Presentation.View.Guide
             Title = $"Turisti za turu: {tour.Name}";
             PopulateGuests();
         }
+
+
 
         private void PopulateGuests()
         {
@@ -44,15 +48,14 @@ namespace BookingApp.Presentation.View.Guide
                 }
 
                 var stack = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 5) };
-
+                var fullGuest = guestRepository.GetById(guest.Id);
                 var cb = new CheckBox
                 {
-                    Content = guest.FirstName + " " + guest.LastName,
+                    Content = fullGuest.FirstName + " " + fullGuest.LastName,
                     IsChecked = att.HasAppeared,
                     Tag = guest.Id,
-                    Width = 150
+                    VerticalAlignment = VerticalAlignment.Center
                 };
-
                 var combo = new ComboBox
                 {
                     ItemsSource = passedKeyPoints,
@@ -67,7 +70,6 @@ namespace BookingApp.Presentation.View.Guide
                 {
                     combo.SelectedValue = att.KeyPointJoinedAt;
                 }
-
                 cb.Checked += (s, e) =>
                 {
                     combo.IsEnabled = true;
@@ -83,19 +85,35 @@ namespace BookingApp.Presentation.View.Guide
                     att.KeyPointJoinedAt = -1;
                 };
 
-                combo.SelectionChanged += (s, e) =>
-                {
-                    if (combo.SelectedValue is int kpId && cb.IsChecked == true)
-                    {
-                        att.HasAppeared = true;
-                        att.KeyPointJoinedAt = kpId;
-                    }
-                };
+                Grid.SetColumn(cb, 0);
+                Grid.SetColumn(combo, 1);
 
                 stack.Children.Add(cb);
                 stack.Children.Add(combo);
+
                 GuestsPanel.Children.Add(stack);
             }
+        }
+
+        public List<int> GetPresentGuestIds()
+        {
+            var presentIds = new List<int>();
+
+            foreach (StackPanel row in GuestsPanel.Children)
+            {
+                var cb = row.Children.OfType<CheckBox>().FirstOrDefault();
+                if (cb?.IsChecked == true && cb.Tag is int guestId)
+                {
+                    presentIds.Add(guestId);
+                }
+            }
+
+            return presentIds;
+        }
+
+        public Dictionary<string, List<string>> GetNotificationSummary()
+        {
+            return new Dictionary<string, List<string>>();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)

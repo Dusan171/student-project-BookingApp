@@ -23,7 +23,7 @@ namespace BookingApp.Domain.Model
         public DateTime ReservationDate { get; set; }
         public TourReservationStatus Status { get; set; }
 
-
+        public int CurrentKeyPointIndex { get; set; } = 0;
         public List<ReservationGuest> Guests { get; set; }
         public Tour? Tour { get; set; }
         public StartTourTime? StartTourTime { get; set; }
@@ -72,35 +72,44 @@ namespace BookingApp.Domain.Model
         {
             return new string[]
             {
-                Id.ToString(),
-                TourId.ToString(),
-                StartTourTimeId.ToString(),
-                TouristId.ToString(),
-                NumberOfGuests.ToString(),
-                ReservationDate.ToString("dd-MM-yyyy HH:mm:ss"),
-                Status.ToString()
+        Id.ToString(),
+        TourId.ToString(),
+        StartTourTimeId.ToString(),
+        TouristId.ToString(),
+        NumberOfGuests.ToString(),
+        ReservationDate.ToString("dd-MM-yyyy HH:mm:ss"),
+        Status.ToString(),
+        string.Join(",", Guests.Select(g => g.Id)), // gosti
+        CurrentKeyPointIndex.ToString()              // indeks ključne tačke
             };
         }
 
         public void FromCSV(string[] values)
         {
             if (values == null || values.Length < 7)
-            {
                 throw new ArgumentException("Invalid CSV data for TourReservation");
-            }
 
             Id = int.Parse(values[0]);
             TourId = int.Parse(values[1]);
             StartTourTimeId = int.Parse(values[2]);
             TouristId = int.Parse(values[3]);
             NumberOfGuests = int.Parse(values[4]);
-            ReservationDate = DateTime.ParseExact(values[5], "dd-MM-yyyy HH:mm:ss",
-                                      CultureInfo.InvariantCulture);
+            ReservationDate = DateTime.ParseExact(values[5], "dd-MM-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
             Status = (TourReservationStatus)Enum.Parse(typeof(TourReservationStatus), values[6]);
 
+            // Gosti
             Guests = new List<ReservationGuest>();
+            if (values.Length > 7 && !string.IsNullOrEmpty(values[7]))
+            {
+                Guests = values[7].Split(',')
+                                  .Select(s => new ReservationGuest { Id = int.Parse(s) })
+                                  .ToList();
+            }
+
+            // Trenutni ključni indeks
+            CurrentKeyPointIndex = values.Length > 8 ? int.Parse(values[8]) : 0;
         }
 
- 
+
     }
 }

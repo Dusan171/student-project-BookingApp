@@ -14,21 +14,23 @@ namespace BookingApp.Services
         private readonly IStartTourTimeRepository _startTourTimeRepository;
         private readonly IUserRepository _userRepository;
         private readonly ITourReviewService _tourReviewService;
+        private readonly IReservationGuestRepository _guestRepository;
 
         public TourReservationService(ITourReservationRepository reservationRepository,
                                     ITourRepository tourRepository,
                                     IStartTourTimeRepository startTourTimeRepository,
                                     IUserRepository userRepository,
-                                    ITourReviewService tourReviewService)
+                                    ITourReviewService tourReviewService,
+                                    IReservationGuestRepository guestRepository)
         {
             _reservationRepository = reservationRepository ?? throw new ArgumentNullException(nameof(reservationRepository));
             _tourRepository = tourRepository ?? throw new ArgumentNullException(nameof(tourRepository));
             _startTourTimeRepository = startTourTimeRepository ?? throw new ArgumentNullException(nameof(startTourTimeRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _tourReviewService = tourReviewService ?? throw new ArgumentNullException(nameof(tourReviewService));
+            _guestRepository = guestRepository ?? throw new ArgumentNullException(nameof(guestRepository));
         }
 
-        // POSTOJEĆE METODE
         public List<TourReservationDTO> GetAllReservations()
         {
             var reservations = _reservationRepository.GetAll();
@@ -50,13 +52,33 @@ namespace BookingApp.Services
                 throw new ArgumentNullException(nameof(reservationDTO));
 
             if (!ValidateReservation(reservationDTO))
-                throw new ArgumentException("Reservation validation failed");
+                throw new ArgumentException("Rezervacija nije moguća - nema dovoljno slobodnih mesta");
 
             var reservation = reservationDTO.ToTourReservation();
             var savedReservation = _reservationRepository.Add(reservation);
 
-            // VAŽNO: Ažuriraj ReservedSpots nakon dodavanja rezervacije
-            UpdateTourReservedSpots(savedReservation.TourId);
+            if (reservationDTO.Guests != null && reservationDTO.Guests.Any())
+            {
+                var createdGuests = new List<ReservationGuest>();
+
+                foreach (var guestDto in reservationDTO.Guests)
+                {
+                    var guest = new ReservationGuest
+                    {
+                        ReservationId = savedReservation.Id,
+                        FirstName = guestDto.FirstName,
+                        LastName = guestDto.LastName,
+                        Age = guestDto.Age,
+                        Email = guestDto.Email,
+                        TouristId = savedReservation.TouristId
+                    };
+                    var savedGuest = _guestRepository.Add(guest);
+                    createdGuests.Add(savedGuest);
+                }
+
+                savedReservation.Guests = createdGuests;
+                _reservationRepository.Update(savedReservation);
+            }
 
             EnrichReservationWithDetails(savedReservation);
             return TourReservationDTO.FromDomain(savedReservation);
@@ -70,9 +92,6 @@ namespace BookingApp.Services
             var reservation = reservationDTO.ToTourReservation();
             var updatedReservation = _reservationRepository.Update(reservation);
 
-            // VAŽNO: Ažuriraj ReservedSpots nakon ažuriranja
-            UpdateTourReservedSpots(updatedReservation.TourId);
-
             EnrichReservationWithDetails(updatedReservation);
             return TourReservationDTO.FromDomain(updatedReservation);
         }
@@ -84,9 +103,6 @@ namespace BookingApp.Services
             {
                 reservation.Status = TourReservationStatus.CANCELLED;
                 _reservationRepository.Update(reservation);
-
-                // VAŽNO: Ažuriraj ReservedSpots nakon otkazivanja
-                UpdateTourReservedSpots(reservation.TourId);
             }
         }
 
@@ -148,11 +164,18 @@ namespace BookingApp.Services
 
         public int GetAvailableSpotsForTour(int tourId)
         {
-
             var tour = _tourRepository.GetById(tourId);
             if (tour == null) return 0;
 
-            int availableSpots = tour.MaxTourists - tour.ReservedSpots;
+            var allReservationsForTour = _reservationRepository.GetByTourId(tourId);
+
+            var activeReservations = allReservationsForTour
+                .Where(r => r.Status == TourReservationStatus.ACTIVE)
+                .ToList();
+
+            var activeReservationsCount = activeReservations.Sum(r => r.NumberOfGuests);
+            int availableSpots = tour.MaxTourists - activeReservationsCount;
+
             return Math.Max(0, availableSpots);
         }
 
@@ -160,7 +183,9 @@ namespace BookingApp.Services
         {
             var originalTour = _tourRepository.GetById(tourId);
             if (originalTour?.Location == null)
+            {
                 return new List<AlternativeTourDTO>();
+            }
 
             var alternativeTours = _tourRepository.GetAll()
                 .Where(t => t.Id != tourId &&
@@ -172,20 +197,20 @@ namespace BookingApp.Services
 
             foreach (var tour in alternativeTours)
             {
-                // NE POZIVAJTE UpdateTourReservedSpots() ovde!
-                // Samo izračunajte dostupnost bez menjanja CSV-a
                 int availableSpots = GetAvailableSpotsForTour(tour.Id);
-                alternativeDTOs.Add(new AlternativeTourDTO(tour));
+                var alternativeDto = new AlternativeTourDTO(tour, availableSpots);
+                alternativeDTOs.Add(alternativeDto);
             }
 
             return alternativeDTOs
+                .Where(a => a.AvailableSpots > 0)
                 .OrderByDescending(a => a.AvailableSpots)
                 .ThenBy(a => a.Name)
                 .ToList();
         }
+
         public bool IsTourFullyBooked(int tourId)
         {
-           
             return GetAvailableSpotsForTour(tourId) <= 0;
         }
 
@@ -194,26 +219,8 @@ namespace BookingApp.Services
             if (reservationDTO == null) return false;
             if (reservationDTO.NumberOfGuests <= 0) return false;
 
-           
             var availableSpots = GetAvailableSpotsForTour(reservationDTO.TourId);
             return availableSpots >= reservationDTO.NumberOfGuests;
-        }
-        private void UpdateTourReservedSpots(int tourId)
-        {
-            var tour = _tourRepository.GetById(tourId);
-            if (tour == null) return;
-
-            // Izračunaj trenutno rezervisana mesta
-            var activeReservations = _reservationRepository.GetByTourId(tourId)
-                .Where(r => r.Status == TourReservationStatus.ACTIVE);
-
-            int totalReservedSpots = activeReservations.Sum(r => r.NumberOfGuests);
-
-            // Ažuriraj ReservedSpots u Tour objektu
-            tour.ReservedSpots = totalReservedSpots;
-
-            // Sačuvaj promene
-            _tourRepository.Update(tour);
         }
 
         private List<TourReservationDTO> EnrichReservationsAndConvertToDTO(List<TourReservation> reservations)
@@ -244,6 +251,11 @@ namespace BookingApp.Services
                 {
                     reservation.Tour.Guide = guide;
                 }
+            }
+
+            if (reservation.Id > 0)
+            {
+                reservation.Guests = _guestRepository.GetByReservationId(reservation.Id);
             }
         }
 

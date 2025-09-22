@@ -19,6 +19,7 @@
             <Setter Property="FontSize" Value="16"/>
         </Style>
         <utils:StarHighlightConverter x:Key="StarHighlightConverter"/>
+        <utils:ImagePathConverter x:Key="ImagePathConverter"/>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -136,6 +137,48 @@
                     <TextBlock Text="Komentar:" FontWeight="Bold" Margin="0,0,0,5"/>
                     <TextBox Text="{Binding ReviewComment, UpdateSourceTrigger=PropertyChanged}" Height="60" TextWrapping="Wrap" AcceptsReturn="True" 
                              VerticalScrollBarVisibility="Auto" Margin="0,0,0,15"/>
+
+                    <!-- Sekcija za slike -->
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,10">
+                        <TextBlock Text="Slike sa ture (opciono):" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Button Content="Dodaj sliku" Background="#17A2B8" Foreground="White" Padding="10,5" 
+                Command="{Binding AddImageCommand}"/>
+                            <TextBlock Text="{Binding ImageCount}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Lista odabranih slika -->
+                        <ItemsControl ItemsSource="{Binding SelectedImages}" Margin="0,5,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#E0E0E0" BorderThickness="1" Padding="5" Margin="0,2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Image Preview sa converter-om -->
+                                            <Image Grid.Column="0" Width="50" Height="50" 
+                                                   Stretch="UniformToFill" Margin="0,0,10,0"
+                                                   Source="{Binding Converter={StaticResource ImagePathConverter}}"/>
+
+                                            <!-- Relativna putanja kako će biti u CSV-u -->
+                                            <TextBlock Grid.Column="1" Text="{Binding}" VerticalAlignment="Center" 
+                                                       TextWrapping="Wrap"/>
+
+                                            <!-- Remove Button -->
+                                            <Button Grid.Column="2" Content="Ukloni" 
+                                                    Command="{Binding DataContext.RemoveImageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="#DC3545" Foreground="White" Padding="5,2"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
 
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Content="Odustani" Background="#6C757D" Foreground="White" Padding="15,8" Margin="10,0" 
