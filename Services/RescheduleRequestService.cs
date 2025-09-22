@@ -106,8 +106,22 @@ namespace BookingApp.Services
             if (existingRequestIndex != -1)
             {
                 allRequests[existingRequestIndex] = request;
+                UpdateReservation(request);
                 _rescheduleRequestRepository.SaveAll(allRequests);
             }
+        }
+        private void UpdateReservation(RescheduleRequest request)
+        {
+            var originalReservation = _reservationRepository.GetById(request.ReservationId);
+            if (originalReservation == null)
+            {
+                throw new InvalidOperationException("Reservation not found.");
+            }
+
+            originalReservation.StartDate = request.NewStartDate;
+            originalReservation.EndDate = request.NewEndDate;
+
+            _reservationRepository.Update(originalReservation);
         }
         public void Create(CreateRescheduleRequestDTO requestDto)
         {
