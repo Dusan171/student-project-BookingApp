@@ -11,6 +11,11 @@ namespace BookingApp.Services.DTO
         private DateTime _creationTime;
         private string _text;
         private int _userId;
+
+        private string _authorName;
+        private bool _isFromVisitor;
+        private bool _isFromOwner;
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -57,6 +62,21 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
+        public string AuthorName 
+        {
+            get => _authorName;
+            set { if (_authorName != value) { _authorName = value;OnPropertyChanged(); } }
+        }
+        public bool IsFromOwner
+        {
+            get => _isFromOwner;
+            set { if (_isFromOwner != value) { _isFromOwner = value; OnPropertyChanged(); } }
+        }
+        public bool IsFromVisitor
+        {
+            get => _isFromVisitor;
+            set { if (_isFromVisitor != value) { _isFromVisitor = value;OnPropertyChanged(); } }
+        }
         public CommentDTO() { }
         public CommentDTO(Comment c)
         {
@@ -64,6 +84,7 @@ namespace BookingApp.Services.DTO
             _creationTime = c.CreationTime;
             _text = c.Text;
             _userId = c.User.Id;
+            _authorName = c.User.Username;
         }
         public Comment ToComment()
         {

@@ -21,7 +21,7 @@ namespace BookingApp.Services
             _accommodationRepository = accommodationRepository;
             _guestReviewRepository = guestReviewRepository;
         }
-        
+
         public ReservationDTO Create(ReservationDTO reservationDto)
         {
             var accommodation = GetAndValidateAccommodation(reservationDto.AccommodationId);
@@ -82,12 +82,12 @@ namespace BookingApp.Services
         }
         public List<ReservationDTO> GetAll()
         {
-            return _reservationRepository.GetAll()  
-                                         .Select(reservation => new ReservationDTO(reservation))  
+            return _reservationRepository.GetAll()
+                                         .Select(reservation => new ReservationDTO(reservation))
                                          .ToList();
         }
         public List<DateTime> GetOccupiedDatesForAccommodation(int accommodationId)
-        { 
+        {
             var occupiedDateObjects = _occupiedDateRepository.GetByAccommodationId(accommodationId);
             return occupiedDateObjects.Select(occupiedDate => occupiedDate.Date).ToList();
         }
@@ -118,7 +118,7 @@ namespace BookingApp.Services
                     return false;
                 }
             }
-            return true; 
+            return true;
         }
         public List<ReservationDTO> GetUnratedReservations()
         {
@@ -130,7 +130,7 @@ namespace BookingApp.Services
                             (DateTime.Now - r.EndDate).TotalDays <= 5 &&
                             !allGuestReviews.Any(gr => gr.ReservationId == r.Id))
                 .ToList();
-            
+
             return unratedReservations.Select(r => new ReservationDTO(r)).ToList();
         }
     }

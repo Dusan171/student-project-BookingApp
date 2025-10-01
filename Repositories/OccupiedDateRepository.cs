@@ -42,5 +42,13 @@ namespace BookingApp.Repositories
             var allDates = GetAll();
             return allDates.Any() ? allDates.Max(o => o.Id) + 1 : 1;
         }
+        public void DeleteByReservationId(int reservationId)
+        {
+            var allDates = GetAll();
+
+            var remainingDates = allDates.Where(d => d.ReservationId != reservationId).ToList();
+
+            _serializer.ToCSV(FilePath, remainingDates);
+        }
     }
 }

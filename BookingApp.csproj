@@ -8,103 +8,98 @@
 		 
 	</PropertyGroup>
 
-	  <ItemGroup>
-		    <None Remove="Resources\Images\add.png" />
-		    <None Remove="Resources\Images\cats.jpg" /><None Remove="Resources\Images\centar.jpg" />
-		    <None Remove="Resources\Images\delete.png" /><None Remove="Resources\Images\dvoriste.jpg" /><None Remove="Resources\Images\dvoriste2.jpg" />
-		    <None Remove="Resources\Images\edit.png" /><None Remove="Resources\Images\hodnik.jpg" />
-		    <None Remove="Resources\Images\kej.jpg" /><None Remove="Resources\Images\kuhinja3.jpg" /><None Remove="Resources\Images\kupatilo.jpg" />
-		    <None Remove="Resources\Images\location.png" /><None Remove="Resources\Images\notredame.jpg" />
-		    <None Remove="Resources\Images\photos.png" /><None Remove="Resources\Images\ptvrdjava.jpg" />
-		    <None Remove="Resources\Images\search.png" />
-		    <None Remove="Resources\Images\sky.jpg" /><None Remove="Resources\Images\soba.jpg" /><None Remove="Resources\Images\soba2.jpg" /><None Remove="Resources\Images\soba3.jpg" />
-		    <None Remove="Resources\Images\star_empty.png" />
-		    <None Remove="Resources\Images\star_filled.png" /><None Remove="Resources\Images\terasa.jpg" /><None Remove="Resources\Images\trpezarija.jpg" />
-		    <None Remove="Resources\Images\view.png" />
-		 
-	</ItemGroup>
+  <ItemGroup>
+    <None Remove="Resources\Images\add.png" />
 
-	  <ItemGroup>
-		    <Content Include="Resources\Images\add.png">
-			      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			   
-		</Content>
-		    <Content Include="Resources\Images\cats.jpg">
-			      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			   
-		</Content><Content Include="Resources\Images\centar.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content>
-		    <Content Include="Resources\Images\delete.png">
-			      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			   
-		</Content><Content Include="Resources\Images\dvoriste.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\dvoriste2.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content>
-		    <Content Include="Resources\Images\edit.png">
-			      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			   
-		</Content><Content Include="Resources\Images\hodnik.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content>
-		    <Content Include="Resources\Images\kej.jpg">
-			      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			   
-		</Content><Content Include="Resources\Images\kuhinja3.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\kupatilo.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\notredame.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\ptvrdjava.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\soba.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\soba3.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\terasa.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\soba2.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content><Content Include="Resources\Images\trpezarija.jpg">
-  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-</Content>
-		    <Resource Include="Resources\Images\star_empty.png">
-			      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			   
-		</Resource>
-		    <Resource Include="Resources\Images\location.png">
-			      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			   
-		</Resource>
-		    <Resource Include="Resources\Images\search.png">
-			      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			   
-		</Resource>
-		    <Content Include="Resources\Images\sky.jpg">
-			      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			   
-		</Content>
-		    <Content Include="Resources\Images\view.png">
-			      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			   
-		</Content>
-		 
-	</ItemGroup><ItemGroup>
-  <PackageReference Include="iTextSharp" Version="5.5.13.4" />
-  <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
-  <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.9" />
-</ItemGroup>
+    <None Remove="Resources\Images\amsterdam.jpg" />
+    <None Remove="Resources\Images\apartman.jpg" />
+    <None Remove="Resources\Images\barcelona.jpg" />
+    <None Remove="Resources\Images\bec.jpg" />
+    <None Remove="Resources\Images\budimpesta.jpg" />
 
-	  <ItemGroup>
-		    <Resource Include="Resources\Images\photos.png" />
-		    <Resource Include="Resources\Images\star_filled.png">
-			      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			   
-		</Resource>
-		 
-	</ItemGroup>
+    <None Remove="Resources\Images\cats.jpg" />
+    <None Remove="Resources\Images\cottage.jpg" />
+    <None Remove="Resources\Images\delete.png" />
+    <None Remove="Resources\Images\edit.png" />
+    <None Remove="Resources\Images\kej.jpg" />
+    <None Remove="Resources\Images\location.png" />
+    <None Remove="Resources\Images\photos.png" />
+    <None Remove="Resources\Images\search.png" />
+    <None Remove="Resources\Images\sky.jpg" />
+    <None Remove="Resources\Images\soba.jpg" />
+    <None Remove="Resources\Images\star_empty.png" />
+    <None Remove="Resources\Images\star_filled.png" />
+    <None Remove="Resources\Images\view.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Images\add.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\cats.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\delete.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\edit.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\kej.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="Resources\Images\apartman.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\cottage.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\soba.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+
+    <Resource Include="Resources\Images\star_empty.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\location.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\search.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Content Include="Resources\Images\sky.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\view.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="itext7" Version="9.3.0" />
+    <PackageReference Include="itext7.bouncy-castle-adapter" Version="9.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Images\photos.png" />
+    <Resource Include="Resources\Images\star_filled.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>

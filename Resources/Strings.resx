@@ -1,0 +1,444 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AccomCard_ImagePlaceholder" xml:space="preserve">
+    <value>Image Placeholder</value>
+  </data>
+  <data name="AccomCard_MaxGuests" xml:space="preserve">
+    <value>Max Guests:</value>
+  </data>
+  <data name="AccomCard_MinDays" xml:space="preserve">
+    <value>Min. Days:</value>
+  </data>
+  <data name="AccomCard_Reserve" xml:space="preserve">
+    <value>Reserve</value>
+  </data>
+  <data name="AccomCard_ViewDetails" xml:space="preserve">
+    <value>View Details</value>
+  </data>
+  <data name="AccomLookup_FilterCity" xml:space="preserve">
+    <value>City:</value>
+  </data>
+  <data name="AccomLookup_FilterCountry" xml:space="preserve">
+    <value>Country:</value>
+  </data>
+  <data name="AccomLookup_FilterDays" xml:space="preserve">
+    <value>Days:</value>
+  </data>
+  <data name="AccomLookup_FilterGuests" xml:space="preserve">
+    <value>Guests:</value>
+  </data>
+  <data name="AccomLookup_FilterName" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="AccomLookup_FiltersHeader" xml:space="preserve">
+    <value>Search Filters</value>
+  </data>
+  <data name="AccomLookup_FilterType" xml:space="preserve">
+    <value>Type:</value>
+  </data>
+  <data name="AccomLookup_FilterTypeAll" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="AccomLookup_Title" xml:space="preserve">
+    <value>Browse Accommodations</value>
+  </data>
+  <data name="AccomReservation_DaysSuffix" xml:space="preserve">
+    <value>d.</value>
+  </data>
+  <data name="AccomReservation_Duration" xml:space="preserve">
+    <value>Duration:</value>
+  </data>
+  <data name="AccomReservation_EndDate" xml:space="preserve">
+    <value>End Date:</value>
+  </data>
+  <data name="AccomReservation_GuestInfo" xml:space="preserve">
+    <value>Guest Information</value>
+  </data>
+  <data name="AccomReservation_Header" xml:space="preserve">
+    <value>Reserve:</value>
+  </data>
+  <data name="AccomReservation_NumGuests" xml:space="preserve">
+    <value>Number of guests:</value>
+  </data>
+  <data name="AccomReservation_SelectPeriod" xml:space="preserve">
+    <value>Select Stay Period</value>
+  </data>
+  <data name="AccomReservation_StartDate" xml:space="preserve">
+    <value>Start Date:</value>
+  </data>
+  <data name="AccomReservation_Title" xml:space="preserve">
+    <value>Reserve Accommodation</value>
+  </data>
+  <data name="AccomReview_Cleanliness" xml:space="preserve">
+    <value>Cleanliness Rating:</value>
+  </data>
+  <data name="AccomReview_Comment" xml:space="preserve">
+    <value>Comment:</value>
+  </data>
+  <data name="AccomReview_Header" xml:space="preserve">
+    <value>Rate your stay at</value>
+  </data>
+  <data name="AccomReview_Images" xml:space="preserve">
+    <value>Images:</value>
+  </data>
+  <data name="AccomReview_OwnerCorrectness" xml:space="preserve">
+    <value>Owner Correctness Rating: </value>
+  </data>
+  <data name="AccomReview_Submit" xml:space="preserve">
+    <value>Submit Review</value>
+  </data>
+  <data name="AccomReview_UploadImages" xml:space="preserve">
+    <value>Upload Images</value>
+  </data>
+  <data name="AccomReview_WindowTitle" xml:space="preserve">
+    <value>Leave a Review</value>
+  </data>
+  <data name="AccomType_Apartment" xml:space="preserve">
+    <value>APARTMENT</value>
+  </data>
+  <data name="AccomType_Cottage" xml:space="preserve">
+    <value>COTTAGE</value>
+  </data>
+  <data name="AccomType_House" xml:space="preserve">
+    <value>HOUSE</value>
+  </data>
+  <data name="Anywhere_CardAvailable" xml:space="preserve">
+    <value>Available: </value>
+  </data>
+  <data name="Anywhere_CardDays" xml:space="preserve">
+    <value>Days:</value>
+  </data>
+  <data name="Anywhere_CardGuests" xml:space="preserve">
+    <value>Guests:</value>
+  </data>
+  <data name="Anywhere_CardReserveOffer" xml:space="preserve">
+    <value>Reserve This Offer</value>
+  </data>
+  <data name="Anywhere_FilterDuration" xml:space="preserve">
+    <value>Duration of stay (days):</value>
+  </data>
+  <data name="Anywhere_FilterEndDate" xml:space="preserve">
+    <value>End of period (optional): </value>
+  </data>
+  <data name="Anywhere_FilterNumGuests" xml:space="preserve">
+    <value>Number of guests:</value>
+  </data>
+  <data name="Anywhere_FilterStartDate" xml:space="preserve">
+    <value>Start of period (optional): </value>
+  </data>
+  <data name="Anywhere_Subtitle" xml:space="preserve">
+    <value>Find your perfect getaway</value>
+  </data>
+  <data name="Anywhere_Title" xml:space="preserve">
+    <value>Search Anywhere, Anytime</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Common_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Common_Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="CreateForum_CreateButton" xml:space="preserve">
+    <value>Create Forum</value>
+  </data>
+  <data name="CreateForum_FirstComment" xml:space="preserve">
+    <value>Your first comment or question: </value>
+  </data>
+  <data name="CreateForum_ForumTitle" xml:space="preserve">
+    <value>Forum Title:</value>
+  </data>
+  <data name="CreateForum_Header" xml:space="preserve">
+    <value>Create a New Forum</value>
+  </data>
+  <data name="CreateForum_Location" xml:space="preserve">
+    <value>Location (e.g., Belgrade, Serbia):</value>
+  </data>
+  <data name="CreateForum_WindowTitle" xml:space="preserve">
+    <value>Start a New Forum</value>
+  </data>
+  <data name="ForumList_CommentsSuffix" xml:space="preserve">
+    <value>comments</value>
+  </data>
+  <data name="ForumList_CreateNew" xml:space="preserve">
+    <value>Start a New Forum</value>
+  </data>
+  <data name="ForumList_TagClosed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="ForumList_TagUseful" xml:space="preserve">
+    <value>Very Useful</value>
+  </data>
+  <data name="ForumList_Title" xml:space="preserve">
+    <value>Forums</value>
+  </data>
+  <data name="ForumList_ViewForum" xml:space="preserve">
+    <value>View Forum</value>
+  </data>
+  <data name="ForumView_CloseForum" xml:space="preserve">
+    <value>Close Forum</value>
+  </data>
+  <data name="ForumView_PostComment" xml:space="preserve">
+    <value>Post Comment</value>
+  </data>
+  <data name="ForumView_TagOwner" xml:space="preserve">
+    <value>Owner</value>
+  </data>
+  <data name="ForumView_TagVisited" xml:space="preserve">
+    <value>Visited this location </value>
+  </data>
+  <data name="GuestReview_Cleanliness" xml:space="preserve">
+    <value>Cleanliness Rating:</value>
+  </data>
+  <data name="GuestReview_Header" xml:space="preserve">
+    <value>Owner's Review of Your Stay </value>
+  </data>
+  <data name="GuestReview_OwnerComment" xml:space="preserve">
+    <value>Owner's Comment:</value>
+  </data>
+  <data name="GuestReview_RuleRespect" xml:space="preserve">
+    <value>Rule Respecting Rating:</value>
+  </data>
+  <data name="GuestReview_WindowTitle" xml:space="preserve">
+    <value>Review from Owner</value>
+  </data>
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>BookingApp - Welcome Guest</value>
+  </data>
+  <data name="Menu_AnywhereAnytime" xml:space="preserve">
+    <value>Anywhere / Anytime</value>
+  </data>
+  <data name="Menu_Forums" xml:space="preserve">
+    <value>Forums</value>
+  </data>
+  <data name="Menu_MyReservations" xml:space="preserve">
+    <value>My Reservations</value>
+  </data>
+  <data name="Menu_SearchAccommodations" xml:space="preserve">
+    <value>Search Accommodations</value>
+  </data>
+  <data name="Menu_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="MyReservations_Cancel" xml:space="preserve">
+    <value>Cancel Reservation</value>
+  </data>
+  <data name="MyReservations_Guests" xml:space="preserve">
+    <value>Guests: </value>
+  </data>
+  <data name="MyReservations_Rate" xml:space="preserve">
+    <value>Rate</value>
+  </data>
+  <data name="MyReservations_ReportEnd" xml:space="preserve">
+    <value>End Date:</value>
+  </data>
+  <data name="MyReservations_ReportGenerate" xml:space="preserve">
+    <value>Generate PDF Report</value>
+  </data>
+  <data name="MyReservations_ReportSection" xml:space="preserve">
+    <value>Generate Reservation Report</value>
+  </data>
+  <data name="MyReservations_ReportStart" xml:space="preserve">
+    <value>Start Date:</value>
+  </data>
+  <data name="MyReservations_Reschedule" xml:space="preserve">
+    <value>Reschedule</value>
+  </data>
+  <data name="MyReservations_RescheduleRequest" xml:space="preserve">
+    <value>Reschedule Request:</value>
+  </data>
+  <data name="MyReservations_Title" xml:space="preserve">
+    <value>My Reservations</value>
+  </data>
+  <data name="MyReservations_ViewReview" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Reschedule_Accommodation" xml:space="preserve">
+    <value>Accommodation:</value>
+  </data>
+  <data name="Reschedule_Current" xml:space="preserve">
+    <value>Current Reservation</value>
+  </data>
+  <data name="Reschedule_Header" xml:space="preserve">
+    <value>Request to Reschedule Reservation</value>
+  </data>
+  <data name="Reschedule_NewEnd" xml:space="preserve">
+    <value>New End Date:</value>
+  </data>
+  <data name="Reschedule_NewStart" xml:space="preserve">
+    <value>New Start Date:</value>
+  </data>
+  <data name="Reschedule_Period" xml:space="preserve">
+    <value>Period:</value>
+  </data>
+  <data name="Reschedule_SelectNew" xml:space="preserve">
+    <value>Select New Dates</value>
+  </data>
+  <data name="Reschedule_Send" xml:space="preserve">
+    <value>Send Request</value>
+  </data>
+  <data name="Reschedule_WindowTitle" xml:space="preserve">
+    <value>Request Reservation Change</value>
+  </data>
+  <data name="Settings_DarkTheme" xml:space="preserve">
+    <value>Dark Theme</value>
+  </data>
+  <data name="Settings_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Settings_LanguageDescription" xml:space="preserve">
+    <value>Choose your language.</value>
+  </data>
+  <data name="Settings_LightTheme" xml:space="preserve">
+    <value>Light Theme</value>
+  </data>
+  <data name="Settings_Serbian" xml:space="preserve">
+    <value>Serbian (Latin)</value>
+  </data>
+  <data name="Settings_Theme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Settings_ThemeDescription" xml:space="preserve">
+    <value>Choose your preferred application theme.</value>
+  </data>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SuggestedDates_Description" xml:space="preserve">
+    <value>The dates you selected are already booked. Here are some available alternatives for the same duration:</value>
+  </data>
+  <data name="SuggestedDates_Header" xml:space="preserve">
+    <value>Period Unavailable</value>
+  </data>
+  <data name="SuggestedDates_ReserveButton" xml:space="preserve">
+    <value>Reserve Selected Date</value>
+  </data>
+  <data name="SuggestedDates_WindowTitle" xml:space="preserve">
+    <value>Alternative Dates</value>
+  </data>
+</root>

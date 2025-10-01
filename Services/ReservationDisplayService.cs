@@ -29,9 +29,11 @@ namespace BookingApp.Services
             var allAccommodations = _accommodationRepository.GetAll();
 
             return _reservationRepository.GetByGuestId(guestId)
-                .OrderByDescending(r => r.StartDate)
-                .Select(reservation => MapToDetailsDTO(reservation, allAccommodations))
-                .ToList();
+    
+        .Where(r => r.Status == ReservationStatus.Active || r.Status == ReservationStatus.Finished)
+        .OrderByDescending(r => r.StartDate)
+        .Select(reservation => MapToDetailsDTO(reservation, allAccommodations))
+        .ToList();
         }
 
         private ReservationDetailsDTO MapToDetailsDTO(Reservation reservation, List<Accommodation> allAccommodations)
@@ -40,6 +42,8 @@ namespace BookingApp.Services
             var request = _rescheduleRequestRepository.GetByReservationId(reservation.Id);
 
             bool hasGuestRated = _accommodationReviewService.HasGuestRated(reservation.Id);
+
+            bool isCancellationEnabled = reservation.StartDate > DateTime.Now;
 
             return new ReservationDetailsDTO
             {
@@ -54,7 +58,8 @@ namespace BookingApp.Services
 
                 IsRescheduleEnabled = CalculateIsRescheduleEnabled(reservation, request),
                 IsRatingEnabled = CalculateIsRatingEnabled(reservation, hasGuestRated),
-                IsGuestReviewVisible = CalculateIsGuestReviewVisible(reservation, hasGuestRated)
+                IsGuestReviewVisible = CalculateIsGuestReviewVisible(reservation, hasGuestRated),
+                IsCancellationEnabled = isCancellationEnabled
             };
         }
 

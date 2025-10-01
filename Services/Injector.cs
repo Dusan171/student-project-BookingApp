@@ -1,9 +1,12 @@
-﻿using BookingApp.Domain.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows.Navigation;
+using BookingApp.Domain.Interfaces;
 
 using BookingApp.Domain.Interfaces.ServiceInterfaces;
-
+using BookingApp.Presentation.View.Owner;
 using BookingApp.Presentation.ViewModel.Owner;
-
+using BookingApp.Presentation.ViewModel.Tourist;
 using BookingApp.Repositories;
 
 using BookingApp.Services;
@@ -11,14 +14,6 @@ using BookingApp.Services;
 using BookingApp.Services.DTO;
 
 using BookingApp.Utilities;
-
-using System;
-
-using System.Collections.Generic;
-
-using BookingApp.Presentation.View.Owner;
-
-using BookingApp.Presentation.ViewModel.Tourist;
 
 using BookingApp.Presentation.ViewModel;
 
@@ -101,12 +96,12 @@ namespace BookingApp.Services
 
             _implementations[typeof(ITourPresenceNotificationRepository)] = new TourPresenceNotificationRepository();
 
+            _implementations[typeof(IForumRepository)] = new ForumRepository();
+            _implementations[typeof(IForumCommentRepository)] = new ForumCommentRepository();
+            _implementations[typeof(ISystemNotificationRepository)] = new SystemNotificationRepository();
 
-
-            // ------------------- Services -------------------
-
-            _implementations[typeof(IUserService)] = new UserService(CreateInstance<IUserRepository>());
-
+            // ------------------- Services -------------------
+            _implementations[typeof(IUserService)] = new UserService(CreateInstance<IUserRepository>());
             _implementations[typeof(IAccommodationService)] = new AccommodationService(
    (IAccommodationRepository)_implementations[typeof(IAccommodationRepository)],
    (ILocationRepository)_implementations[typeof(ILocationRepository)],
@@ -182,9 +177,7 @@ namespace BookingApp.Services
               CreateInstance<IGuestReviewService>()
 
             );
-
-            _implementations[typeof(INavigationService)] = new NavigationService();
-
+    
             _implementations[typeof(INotificationService)] = new NotificationService((INotificationRepository)_implementations[typeof(INotificationRepository)], (IReservationService)_implementations[typeof(IReservationService)]);
 
             _implementations[typeof(RequestsDisplayService)] = new RequestsDisplayService(
@@ -302,17 +295,41 @@ namespace BookingApp.Services
               CreateInstance<INotificationService>()
 
             );
+            var displayServiceDependencies = new AssemblerDependencies(
+                CreateInstance<IUserRepository>(),
+                CreateInstance<ILocationRepository>(),
+                CreateInstance<ICommentRepository>(),
+                CreateInstance<IForumCommentRepository>(),
+                CreateInstance<IReservationRepository>(),
+                CreateInstance<IAccommodationRepository>()
+             );
+            _implementations[typeof(IForumDisplayService)] = new ForumDisplayService(displayServiceDependencies);
 
-            _implementations[typeof(IHomeStatisticsService)] = new HomeStatisticsService(
+            // 2. Forum "Read" Service
+            _implementations[typeof(IForumService)] = new ForumService(
+                CreateInstance<IForumRepository>(),
+                CreateInstance<IForumDisplayService>()
+            );
 
-               CreateInstance<IAccommodationService>(),
-
-               CreateInstance<IAccommodationReviewService>(),
-
-               CreateInstance<IReservationService>()
-
-               );
-
+            // 3. Forum "Write" Service
+            _implementations[typeof(IForumManagementService)] = new ForumManagementService(
+                CreateInstance<IForumRepository>(),
+                CreateInstance<ICommentRepository>(),
+                CreateInstance<IForumCommentRepository>(),
+                CreateInstance<ILocationRepository>()
+            );
+            _implementations[typeof(IReservationCreationService)] = new ReservationCreationService(
+                CreateInstance<IReservationRepository>(),
+                CreateInstance<IOccupiedDateRepository>(),
+                CreateInstance<IAccommodationRepository>()
+            );
+            _implementations[typeof(IReservationCancellationService)] = new ReservationCancellationService(
+                CreateInstance<IReservationRepository>(),
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<IOccupiedDateRepository>(),
+                CreateInstance<ISystemNotificationRepository>(),
+                CreateInstance<IUserRepository>()
+            );
         }
 
 

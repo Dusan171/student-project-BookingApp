@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain.Model;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BookingApp.Services.DTO
@@ -12,8 +13,12 @@ namespace BookingApp.Services.DTO
         public int? MaxGuests { get; set; }
         public int? MinReservationDays { get; set; }
         public int CancellationDeadlineDays { get; set; }
+        public List<string> ImagePaths { get; set; }
 
-        public AccommodationDetailsDTO() { }
+        public AccommodationDetailsDTO() 
+        {
+            ImagePaths = new List<string>();
+        }
 
         public AccommodationDetailsDTO(Accommodation accommodation)
         {
@@ -24,6 +29,12 @@ namespace BookingApp.Services.DTO
             MaxGuests = accommodation.MaxGuests;
             MinReservationDays = accommodation.MinReservationDays;
             CancellationDeadlineDays = accommodation.CancellationDeadlineDays;
+            ImagePaths = new List<string>
+            {
+                "/Resources/Images/apartman.jpg",
+                "/Resources/Images/cottage.jpg",
+                "/Resources/Images/soba.jpg"
+            };
         }
     }
 }
