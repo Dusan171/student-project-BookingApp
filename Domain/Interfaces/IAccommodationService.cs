@@ -1,4 +1,5 @@
-﻿using BookingApp.Services.DTO;
+﻿using BookingApp.Domain.Model;
+using BookingApp.Services.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,13 @@ namespace BookingApp.Domain.Interfaces
         void DeleteAccommodation(AccommodationDTO accommodation);
         AccommodationDTO UpdateAccommodation(AccommodationDTO accommodation);
         List<AccommodationDTO> GetAccommodationsByLocation(LocationDTO location);
-        bool RegisterAccommodation(AccommodationDTO accommodation);
+        bool RegisterAccommodation(AccommodationDTO accommodationDto);
+        List<AccommodationDTO> GetAccommodationsByOwnerId(int ownerId);
+        int GetActiveAccommodationsCount(int ownerId);
+        int GetTotalAccommodationsCount(int ownerId);
+
+        List<Accommodation> GetByOwnerId(int ownerId);
+        string GetLocationString(int locationId);
+
     }
 }

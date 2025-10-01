@@ -3,81 +3,408 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:BookingApp.Presentation.Owner"
+             xmlns:utilities="clr-namespace:BookingApp.Utilities"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Background="#f2f4f8">
+             d:DesignHeight="600" d:DesignWidth="1000">
 
-    <Grid>
-        <Grid Margin="20,200,20,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+    <UserControl.Resources>
+        <utilities:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <utilities:ImagePathConverter x:Key="ImagePathConverter"/>
+    </UserControl.Resources>
 
-            <Border Grid.Column="0" Margin="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="10">
-                <StackPanel>
-                    <TextBlock Text="Host → Guest"
-                           FontSize="20"
-                           FontWeight="Bold"
-                           Margin="0,20,0,10"
-                           HorizontalAlignment="Center"/>
-                    <DataGrid x:Name="HostToGuestGrid"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          HeadersVisibility="Column"
-                          RowBackground="White"
-                          AlternatingRowBackground="#f2f4f8"
-                          ItemsSource="{Binding HostReviews}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Guest Name" Binding="{Binding ReservationId}" Width="*" />
-                            <DataGridTextColumn Header="Cleanliness" Binding="{Binding CleanlinessRating}" Width="Auto" />
-                            <DataGridTextColumn Header="Rule Respecting" Binding="{Binding RuleRespectingRating}" Width="Auto" />
-                            <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="2*" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </StackPanel>
-            </Border>
+    <Grid Background="#fafbfc">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="40">
+            <StackPanel>
 
-            <Border Grid.Column="1" Margin="10" BorderBrush="Gray" BorderThickness="1" CornerRadius="10">
-                <StackPanel>
-                    <TextBlock Text="Guest → Host"
-                           FontSize="20"
-                           FontWeight="Bold"
-                           Margin="0,20,0,10"
-                           HorizontalAlignment="Center"/>
-                    <DataGrid x:Name="GuestToHostGrid"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          HeadersVisibility="Column"
-                          RowBackground="White"
-                          AlternatingRowBackground="#f2f4f8"
-                          ItemsSource="{Binding GuestReviews}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Guest Name" Binding="{Binding ReservationId}" Width="*" />
-                            <DataGridTextColumn Header="Cleanliness" Binding="{Binding CleanlinessRating}" Width="Auto" />
-                            <DataGridTextColumn Header="Owner's Reliability" Binding="{Binding OwnerRating}" Width="Auto" />
-                            <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="2*" />
-                            <DataGridTemplateColumn Header="Images" Width="Auto">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Button Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type DataGrid}}, Path=DataContext.OpenImageGalleryCommand}"
-                                                CommandParameter="{Binding}"
-                                                Padding="0" Background="Transparent" BorderThickness="0">
-                                                <StackPanel Orientation="Horizontal">
-                                                    <Image Source="/Resources/Images/photos.png" Width="16" Height="16" Margin="0,0,5,0"/>
-                                                    <TextBlock Text="{Binding ImageCount, StringFormat=+{0}}" VerticalAlignment="Center"/>
+                <TextBlock Text="Reviews"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           Foreground="#1e293b"
+                           HorizontalAlignment="Center"
+                           Margin="0,20,0,32"/>
+
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" 
+                            Background="White" 
+                            BorderBrush="#e2e8f0" 
+                            BorderThickness="1" 
+                            CornerRadius="6" 
+                            Padding="12,8"
+                            Margin="0,0,16,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="🔍" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     FontSize="14"
+                                     VerticalContentAlignment="Center">
+                                <TextBox.Style>
+                                    <Style TargetType="TextBox">
+                                        <Style.Triggers>
+                                            <Trigger Property="Text" Value="">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <VisualBrush Stretch="None" AlignmentX="Left">
+                                                            <VisualBrush.Visual>
+                                                                <TextBlock Text="Search reviews..." 
+                                                                          Foreground="#94a3b8" 
+                                                                          FontSize="14"/>
+                                                            </VisualBrush.Visual>
+                                                        </VisualBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBox.Style>
+                            </TextBox>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1"
+                            Background="White" 
+                            BorderBrush="#e2e8f0" 
+                            BorderThickness="1" 
+                            CornerRadius="6">
+                        <ComboBox ItemsSource="{Binding SortOptions}"
+                                  SelectedItem="{Binding SelectedSortOption}"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  Padding="12,8"
+                                  FontSize="14"
+                                  MinWidth="160"/>
+                    </Border>
+                </Grid>
+
+                <TabControl BorderThickness="0" Background="Transparent">
+
+                    <TabItem Header="Reviews You Gave" FontSize="15" FontWeight="Medium" Padding="16,10">
+                        <Border Background="White" 
+            BorderBrush="#e2e8f0" 
+            BorderThickness="1" 
+            CornerRadius="16" 
+            Padding="24"
+            Margin="0,16,0,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000" Direction="270" ShadowDepth="4" Opacity="0.06" BlurRadius="12"/>
+                            </Border.Effect>
+
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding HostToGuestDisplay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#f8fafc" 
+                                BorderBrush="#e2e8f0" 
+                                BorderThickness="1" 
+                                CornerRadius="10" 
+                                Padding="20" 
+                                Margin="0,0,0,12">
+
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding GuestName}" 
+                                          FontSize="16" 
+                                          FontWeight="Bold"
+                                          Foreground="#1e293b"
+                                          Margin="0,0,0,6"/>
+
+                                                    <TextBlock Text="{Binding AccommodationName}"
+                                          FontSize="14" 
+                                          FontWeight="SemiBold"
+                                          Foreground="#1e293b" 
+                                          Margin="0,0,0,8"/>
+
+
+
+                                                    <StackPanel Orientation="Horizontal"  Margin="0,0,0,0" >
+
+                                                        <Border Background="#dbeafe" 
+                                            Padding="10,5" 
+                                            CornerRadius="6" 
+                                            Margin="0,0,10,0">
+                                                            <TextBlock FontSize="13" Foreground="#1e40af">
+                                                <Run Text="✨ Cleanliness: " />
+                                                <Run Text="{Binding CleanlinessRating}"/>
+                                                <Run Text="/5"/>
+                                                            </TextBlock>
+                                                        </Border>
+                                                        <Border Background="#dbeafe" 
+                                            Padding="10,5" 
+                                            CornerRadius="6"
+                                            Margin="0,0,10,0">
+                                                            <TextBlock FontSize="13" Foreground="#1e40af">
+                                                <Run Text="📋 Rules: " />
+                                                <Run Text="{Binding RuleRespectingRating}"/>
+                                                <Run Text="/5"/>
+                                                            </TextBlock>
+                                                        </Border>
+                                                        <Border Padding="10,5" CornerRadius="6" Background="#dbeafe">
+                                                            <TextBlock Text="{Binding Comment}"
+                                                  FontSize="13"
+                                                  Foreground="#1e40af"
+                                                  
+                                                  TextWrapping="Wrap"
+                                                  
+                                                  Margin="0,0,10,0"/>
+                                                        </Border>
+                                                    </StackPanel>
                                                 </StackPanel>
-                                            </Button>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </StackPanel>
-            </Border>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                    </TabItem>
+
+
+                    <TabItem Header="Reviews You Received" FontSize="15" FontWeight="Medium" Padding="16,10">
+                        <Border Background="White" 
+            BorderBrush="#e2e8f0" 
+            BorderThickness="1" 
+            CornerRadius="16" 
+            Padding="24"
+            Margin="0,16,0,0">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000" Direction="270" ShadowDepth="4" Opacity="0.06" BlurRadius="12"/>
+                            </Border.Effect>
+
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{Binding GuestToHostDisplay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#f8fafc" 
+                                BorderBrush="#e2e8f0" 
+                                BorderThickness="1" 
+                                CornerRadius="10" 
+                                Padding="20" 
+                                Margin="0,0,0,12">
+
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                                                        <TextBlock Text="{Binding GuestName}" 
+                                              FontSize="16" 
+                                              FontWeight="Bold"
+                                              Foreground="#1e293b"
+                                              Margin="0,10,0,6"/>
+
+                                                        <TextBlock Text="{Binding AccommodationName}"
+                                              FontSize="14" 
+                                              FontWeight="SemiBold"
+                                              Foreground="#1e293b" 
+                                              Margin="0,0,0,8"/>
+
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Border Background="#dbeafe" 
+                                                Padding="10,5" 
+                                                CornerRadius="6" 
+                                                Margin="0,0,10,0">
+                                                                <TextBlock FontSize="13" Foreground="#1e40af">
+                                                <Run Text="✨ Cleanliness: " />
+                                                <Run Text="{Binding CleanlinessRating}"/>
+                                                <Run Text="/5"/>
+                                                                </TextBlock>
+                                                            </Border>
+                                                            <Border Background="#dbeafe" 
+                                                Padding="10,5" 
+                                                CornerRadius="6"
+                                                Margin="0,0,10,0">
+                                                                <TextBlock FontSize="13" Foreground="#1e40af">
+                                                <Run Text="⭐ Owner: " />
+                                                <Run Text="{Binding OwnerRating}"/>
+                                                <Run Text="/5"/>
+                                                                </TextBlock>
+                                                            </Border>
+                                                            <Border Padding="10,5" 
+                                                CornerRadius="6" 
+                                                Background="#dbeafe"
+                                                Margin="0,0,10,0">
+                                                                <TextBlock Text="{Binding Comment}"
+                                                      FontSize="13"
+                                                      Foreground="#1e40af"
+              
+                                                      TextWrapping="Wrap"
+              
+                                                      Margin="0,0,10,0"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </StackPanel>
+
+
+                                                    <Border Grid.Column="1"
+                                                            Background="#e2e8f0" 
+                                                            CornerRadius="6" 
+                                                            Width="110" 
+                                                            Height="110"
+                                                            Cursor="Hand"
+                                                            Tag="{Binding}"
+                                                            MouseLeftButtonDown="ImagePreview_Click">
+                                                        <Grid>
+                                                            <TextBlock Text="📷" 
+                                                                      FontSize="32" 
+                                                                      HorizontalAlignment="Center" 
+                                                                      VerticalAlignment="Center"
+                                                                      Foreground="#94a3b8"
+                                                                      IsHitTestVisible="False"
+                                                                      Visibility="{Binding HasImages, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}"/>
+
+                                                            <Image Stretch="UniformToFill" 
+                                                                   IsHitTestVisible="False"
+                                                                   Visibility="{Binding HasImages, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                                   Source="{Binding FirstImagePath, Converter={StaticResource ImagePathConverter}}"/>
+
+                                                            <Border Background="#1e40af" 
+                                                                    CornerRadius="4" 
+                                                                    Padding="6,3"
+                                                                    HorizontalAlignment="Right"
+                                                                    VerticalAlignment="Bottom"
+                                                                    Margin="0,0,6,6"
+                                                                    IsHitTestVisible="False"
+                                                                    Visibility="{Binding HasImages, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                                <TextBlock Foreground="White" FontSize="10" FontWeight="Bold">
+                                                                    <Run Text="{Binding ImageCount}"/>
+                                                                    <Run Text=" 📷"/>
+                                                                </TextBlock>
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Border>
+                    </TabItem>
+                </TabControl>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid x:Name="GalleryOverlay" 
+              Background="#DD000000" 
+              Visibility="Collapsed"
+              MouseLeftButtonDown="CloseGallery_Background">
+
+            <Grid MouseLeftButtonDown="PreventClose">
+
+                <Button Content="✕" 
+                        Click="CloseGalleryButton_Click"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
+                        Background="Transparent"
+                        Foreground="White"
+                        FontSize="32"
+                        FontWeight="Bold"
+                        Width="48"
+                        Height="48"
+                        Margin="20"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" 
+                                    CornerRadius="24"
+                                    x:Name="border">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#33FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Button Content="◀" 
+                        Click="PreviousImage_Click"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Background="#33FFFFFF"
+                        Foreground="White"
+                        FontSize="32"
+                        Width="56"
+                        Height="56"
+                        Margin="40,0,0,0"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" 
+                                    CornerRadius="28"
+                                    x:Name="border">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#55FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Image x:Name="MainGalleryImage" 
+                       Stretch="Uniform"
+                       Margin="120,80,120,80"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+
+                <Button Content="▶" 
+                        Click="NextImage_Click"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Background="#33FFFFFF"
+                        Foreground="White"
+                        FontSize="32"
+                        Width="56"
+                        Height="56"
+                        Margin="0,0,40,0"
+                        BorderThickness="0"
+                        Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" 
+                                    CornerRadius="28"
+                                    x:Name="border">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#55FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Border Background="#33000000" 
+                        CornerRadius="6" 
+                        Padding="12,6"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,40,40">
+                    <TextBlock x:Name="ImageCounter"
+                               Foreground="White" 
+                               FontSize="14" 
+                               FontWeight="SemiBold"
+                               Text="1 / 1"/>
+                </Border>
+            </Grid>
         </Grid>
-        <local:ImageGalleryView x:Name="ImageGallery" Visibility="Collapsed" />
-        </Grid>
+    </Grid>
 </UserControl>

@@ -1,5 +1,6 @@
 ﻿using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
+using BookingApp.Services.Demo;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.View;
@@ -19,8 +20,12 @@ namespace BookingApp.Presentation.ViewModel.Owner
     {
         private readonly INotificationService _notificationService;
         private readonly Action _closeWindowAction;
+        private readonly DemoManager _demoManager;
 
         private bool _isNotificationPopupVisible;
+        private object _currentViewModel;
+        private string _demoMessage;
+
         public bool IsNotificationPopupVisible
         {
             get => _isNotificationPopupVisible;
@@ -30,7 +35,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 OnPropertyChanged();
             }
         }
-        private object _currentViewModel;
+
         public object CurrentViewModel
         {
             get => _currentViewModel;
@@ -40,20 +45,97 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 OnPropertyChanged();
             }
         }
+
+        public string DemoMessage
+        {
+            get => _demoMessage;
+            set
+            {
+                _demoMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsDemoRunning => _demoManager?.IsRunning ?? false;
+
         public ICommand NavigateCommand { get; }
         public ICommand LogoutCommand { get; }
+        public ICommand StartDemoCommand { get; }
+        public ICommand StopDemoCommand { get; }
 
         public OwnerDashboardViewModel(Action closeWindowAction, INotificationService notificationService)
         {
-           
             _closeWindowAction = closeWindowAction;
             _notificationService = notificationService;
+            
+            // Initialize Demo Manager
+            _demoManager = new DemoManager(this);
+            _demoManager.OnDemoMessage += (message) => 
+            {
+                DemoMessage = message;
+                OnPropertyChanged(nameof(IsDemoRunning));
+            };
+            
             ShowPendingNotifications();
 
             NavigateCommand = new RelayCommand(ExecuteNavigate);
             LogoutCommand = new RelayCommand(ExecuteLogout);
-            CurrentViewModel = Injector.CreateHomeViewModel();
+            StartDemoCommand = new RelayCommand(ExecuteStartDemo);
+            StopDemoCommand = new RelayCommand(ExecuteStopDemo);
+            
+            var homeViewModel = Injector.CreateHomeViewModel();
+            homeViewModel.NavigateCommand = this.NavigateCommand;
+            CurrentViewModel = homeViewModel;
         }
+
+        private object _previousViewModel; 
+        private void ExecuteStartDemo(object parameter)
+        {
+            _previousViewModel = CurrentViewModel;
+
+            _demoManager.StartDemo();
+            OnPropertyChanged(nameof(IsDemoRunning));
+        }
+
+        private void ExecuteStopDemo(object parameter)
+        {
+            _demoManager.StopDemo();
+
+            
+            if (_previousViewModel != null)
+            {
+                CurrentViewModel = _previousViewModel;
+                _previousViewModel = null; 
+            }
+            else
+            {
+                ExecuteNavigate("Home");
+            }
+
+            OnPropertyChanged(nameof(IsDemoRunning));
+        }
+
+        public void HandleKeyDown(Key key)
+        {
+            if (key == Key.Escape && IsDemoRunning)
+            {
+                _demoManager.StopDemo();
+                OnPropertyChanged(nameof(IsDemoRunning));
+            }
+            else if (key == Key.F5)
+            {
+                if (IsDemoRunning)
+                {
+                    _demoManager.StopDemo();
+                }
+                else
+                {
+                    _demoManager.StartDemo();
+                }
+                OnPropertyChanged(nameof(IsDemoRunning));
+            }
+        }
+
         private async void ShowPendingNotifications()
         {
             _notificationService.CheckAndGenerateNotifications();
@@ -72,6 +154,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 }
             }
         }
+
         private void ExecuteNavigate(object parameter)
         {
             if (parameter is string viewName)
@@ -79,32 +162,73 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 switch (viewName)
                 {
                     case "Home":
-                        CurrentViewModel = Injector.CreateHomeViewModel();
+                        var homeViewModel = Injector.CreateHomeViewModel();
+                        homeViewModel.NavigateCommand = this.NavigateCommand; 
+                        CurrentViewModel = homeViewModel;
                         break;
-                    case "RegisterAccommodation":
-                        CurrentViewModel = Injector.CreateRegisterAccommodationViewModel();
+                    case "Accommodations":
+                        CurrentViewModel = Injector.CreateAccommodationsViewModel(
+                            () => NavigateCommand?.Execute("Home"),
+                            () => NavigateCommand?.Execute("RegisterAccommodation")
+                        );
                         break;
                     case "Requests":
                         CurrentViewModel = Injector.CreateRequestsViewModel(); 
                         break;
-                    case "Statistic":
-                      //  CurrentViewModel = Injector.CreateStatisticViewModel(); 
+                    case "Statistics":
+                        CurrentViewModel = Injector.CreateStatisticViewModel(); 
                         break;
                     case "Reviews":
                         CurrentViewModel = Injector.CreateReviewsViewModel();
                         break;
-                    case "PDFReports":
-                       // CurrentViewModel = Injector.CreatePdfReportsViewModel(); 
+                    case "Forums":
+                        var forumViewModel = Injector.CreateForumViewModel();
+                        forumViewModel.OnShowCommentsRequested += (forum) =>
+                        {
+                            var commentsViewModel = Injector.CreateForumCommentsViewModel(forum);
+                            commentsViewModel.OnBackToForumsRequested += () =>
+                            {
+                                CurrentViewModel = forumViewModel; 
+                            };
+                            CurrentViewModel = commentsViewModel;
+                        };
+                        CurrentViewModel = forumViewModel;
                         break;
                     case "Demo":
-                        //CurrentViewModel = Injector.CreateDemoViewModel(); 
+                        if (IsDemoRunning)
+                        {
+                            _demoManager.StopDemo();
+                        }
+                        else
+                        {
+                            _demoManager.StartDemo();
+                        }
+                        OnPropertyChanged(nameof(IsDemoRunning));
+                        break;
+                    case "UnratedGuests":  
+                        CurrentViewModel = Injector.CreateUnratedGuestsViewModel(() => NavigateCommand?.Execute("Home"));
+                        break;
+                    case "RegisterAccommodation":
+                        CurrentViewModel = Injector.CreateRegisterAccommodationViewModel(
+                            () => NavigateCommand?.Execute("Accommodations")
+                        );
+                        break;
+                    case "Suggestions":
+                        CurrentViewModel = Injector.CreateSuggestionsViewModel(() => NavigateCommand?.Execute("Home"),
+                        (location) => NavigateCommand?.Execute("RegisterAccommodation"));
                         break;
                 }
             }
         }
+
         private void ExecuteLogout(object parameter)
         {
-          
+            // Stop demo if running
+            if (IsDemoRunning)
+            {
+                _demoManager.StopDemo();
+            }
+
             Session.CurrentUser = null;
             _closeWindowAction.Invoke();
             var signInWindow = new SignInForm();

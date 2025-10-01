@@ -89,5 +89,42 @@ namespace BookingApp.Services
                 _accommodationImageRepository.Save(image);
             }
         }
+        public List<AccommodationDTO> GetAccommodationsByOwnerId(int ownerId)
+        {
+            return _accommodationRepository.GetAll()
+                .Where(a => a.OwnerId == ownerId)
+                .Select(a => new AccommodationDTO(a))
+                .ToList();
+        }
+
+        public int GetActiveAccommodationsCount(int ownerId)
+        {
+            return _accommodationRepository.GetAll()
+                .Count(a => a.OwnerId == ownerId);
+        }
+
+        public int GetTotalAccommodationsCount(int ownerId)
+        {
+            return _accommodationRepository.GetAll()
+                .Count(a => a.OwnerId == ownerId);
+        }
+        public List<Accommodation> GetByOwnerId(int ownerId)
+        {
+            // Implementacija
+            return _accommodationRepository.GetByOwnerId(ownerId);
+        }
+
+        public string GetLocationString(int locationId)
+        {
+            
+            var location = _locationRepository.GetById(locationId);
+
+            if (location != null)
+            {
+                return $"{location.City}, {location.Country}";
+            }
+
+            return "Unknown Location";
+        }
     }
 }

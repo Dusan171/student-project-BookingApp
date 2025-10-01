@@ -5,6 +5,6 @@
              xmlns:utilities="clr-namespace:BookingApp.Utilities"
              StartupUri="View/SignInForm.xaml">
     <Application.Resources>
-        
+
     </Application.Resources>
 </Application>

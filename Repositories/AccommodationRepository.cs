@@ -67,7 +67,7 @@ namespace BookingApp.Repositories
             Accommodation current = _accommodations.Find(a => a.Id == accommodation.Id);
             int index = _accommodations.IndexOf(current);
             _accommodations.Remove(current);
-            _accommodations.Insert(index, accommodation);      
+            _accommodations.Insert(index, accommodation);
             _serializer.ToCSV(FilePath, _accommodations);
             return accommodation;
         }
@@ -76,6 +76,11 @@ namespace BookingApp.Repositories
         {
             _accommodations = _serializer.FromCSV(FilePath);
             return _accommodations.FindAll(c => c.GeoLocation.Id == location.Id);
+        }
+
+        public List<Accommodation> GetByOwnerId(int ownerId)
+        {
+            return GetAll().Where(a => a.OwnerId == ownerId).ToList();
         }
     }
 }

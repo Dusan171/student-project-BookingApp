@@ -1,11 +1,10 @@
 ﻿using System.Windows.Controls;
 
-
 namespace BookingApp.Presentation.View.Owner
 {
-    public partial class WelcomeView : UserControl
+    public partial class ForumCommentView : UserControl
     {
-        public WelcomeView()
+        public ForumCommentView()
         {
             InitializeComponent();
         }

@@ -15,5 +15,6 @@ namespace BookingApp.Domain.Interfaces
         void Delete(Accommodation accommodation);
         Accommodation Update(Accommodation accommodation);
         List<Accommodation> GetByLocation(Location location);
+        List<Accommodation> GetByOwnerId(int ownerId);
     }
 }

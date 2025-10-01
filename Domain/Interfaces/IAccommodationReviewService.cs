@@ -15,6 +15,7 @@ namespace BookingApp.Domain.Interfaces
         List<AccommodationReviewDTO> GetAll();
         void SubmitReview(CreateAccommodationReviewDTO reviewDto, DateTime reservationEndDate);
         AccommodationReviewDetailsDTO GetDetailsByReservationId(int reservationId);
+        List<AccommodationReview> GetReviewsByAccommodationId(int accommodationId);
 
     }
 }
