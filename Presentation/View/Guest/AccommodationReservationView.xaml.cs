@@ -9,12 +9,7 @@ namespace BookingApp.Presentation.View.Guest
         public AccommodationReservationView(AccommodationDetailsDTO accommodationDetails)
         {
             InitializeComponent();
-
-            var viewModel = new AccommodationReservationViewModel(accommodationDetails);
-
-            DataContext = viewModel;
-
-            viewModel.CloseAction = new System.Action(this.Close);
+            this.DataContext = new AccommodationReservationViewModel(accommodationDetails);
         }
     }
 }

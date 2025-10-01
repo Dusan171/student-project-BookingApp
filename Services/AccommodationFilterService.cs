@@ -50,9 +50,9 @@ namespace BookingApp.Services
             string.IsNullOrEmpty(type) || type == "All" || acc.Type.ToString() == type;
 
         private static bool MaxGuestsMatches(Accommodation acc, int maxGuests) =>
-            maxGuests == 0 || acc.MaxGuests <= maxGuests;
+            maxGuests == 0 || acc.MaxGuests >= maxGuests;
 
         private static bool MinDaysMatches(Accommodation acc, int minDays) =>
-            minDays == 0 || acc.MinReservationDays >= minDays;
+            minDays == 0 || acc.MinReservationDays <= minDays;
     }
 }

@@ -1,0 +1,101 @@
+﻿<UserControl x:Class="BookingApp.Presentation.View.Guest.AccommodationDetailsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:loc="clr-namespace:BookingApp.Utilities"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Background="{DynamicResource PrimaryBackgroundColor}">
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.8*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" Margin="0,0,20,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Border CornerRadius="8" ClipToBounds="True" Background="{DynamicResource SecondaryBackgroundColor}">
+                    <Image Source="{Binding SelectedImage}" Stretch="UniformToFill"/>
+                </Border>
+                <Button Command="{Binding PreviousImageCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0" Style="{StaticResource ImageNavButtonStyle}">
+                    <Path Data="M 15,0 L 0,15 L 15,30" Stroke="{DynamicResource AccentForegroundColor}" StrokeThickness="3"/>
+                </Button>
+                <Button Command="{Binding NextImageCommand}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="15,0" Style="{StaticResource ImageNavButtonStyle}">
+                    <Path Data="M 0,0 L 15,15 L 0,30" Stroke="{DynamicResource AccentForegroundColor}" StrokeThickness="3"/>
+                </Button>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,10,0,0">
+                <ItemsControl ItemsSource="{Binding ImagePaths}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding DataContext.SelectImageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}" Margin="5,0" Padding="0" BorderThickness="2" Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="BorderBrush" Value="Transparent"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryColor}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <Image Source="{Binding}" Width="100" Height="75" Stretch="UniformToFill"/>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="{Binding AccommodationName, Mode=OneWay}" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding Location, Mode=OneWay}" FontSize="18" Foreground="{DynamicResource SecondaryTextColor}" Margin="0,5,0,0"/>
+                <TextBlock Text="{Binding Type, Mode=OneWay}" FontSize="16" FontStyle="Italic" Foreground="{DynamicResource SecondaryTextColor}" Margin="0,5,0,0"/>
+
+                <Separator Style="{StaticResource GuestSeparatorStyle}" Margin="0,20"/>
+
+                <Grid Margin="0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Max Guests" FontSize="16" Foreground="{DynamicResource SecondaryTextColor}"/>
+                        <TextBlock FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextColor}">
+                            <Run Text="👥"/> <Run Text="{Binding MaxGuests, Mode=OneWay}"/>
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Min. Stay" FontSize="16" Foreground="{DynamicResource SecondaryTextColor}"/>
+                        <TextBlock FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryTextColor}">
+                            <Run Text="📅"/> <Run Text="{Binding MinReservationDays, Mode=OneWay}"/> days
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+
+                <GroupBox Header="About this accommodation" Style="{StaticResource GuestGroupBoxStyle}" Margin="0,20,0,0">
+                    <TextBlock Text="A more detailed description of the accommodation will be available here, including amenities, house rules, and other relevant information for guests." 
+                               Foreground="{DynamicResource SecondaryTextColor}" FontSize="16" TextWrapping="Wrap"/>
+                </GroupBox>
+
+                <Button Content="Reserve this Accommodation" Command="{Binding ReserveCommand}" Style="{StaticResource PrimaryButton}" Margin="0,30,0,10" HorizontalAlignment="Stretch"/>
+                <Button Content="Back to Search Results" Command="{Binding GoBackCommand}" Style="{StaticResource SecondaryButton}" HorizontalAlignment="Stretch"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

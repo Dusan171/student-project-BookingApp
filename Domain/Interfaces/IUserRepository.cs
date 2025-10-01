@@ -13,5 +13,6 @@ namespace BookingApp.Domain.Interfaces
     {
         User? GetByUsername(string username);
         User? GetById(int id);
+        public List<User> GetAll();
     }
 }

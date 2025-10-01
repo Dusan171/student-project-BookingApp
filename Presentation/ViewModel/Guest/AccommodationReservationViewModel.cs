@@ -1,20 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Collections.Generic;
-using BookingApp.Domain;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Presentation.View.Guest;
 using BookingApp.Services;
-using BookingApp.Utilities;
 using BookingApp.Services.DTO;
-using BookingApp.Domain.Model;
+using BookingApp.Utilities;
 
 namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class AccommodationReservationViewModel : ViewModelBase
     {
         private readonly AccommodationDetailsDTO _accommodationDetails;
-        private readonly IReservationService _reservationService;
+        public AccommodationDetailsDTO AccommodationDetails => _accommodationDetails;
+        private readonly IReservationCreationService _reservationCreationService;
 
         public Action CloseAction { get; set; }
 
@@ -26,14 +27,14 @@ namespace BookingApp.Presentation.ViewModel.Guest
         public DateTime? StartDate
         {
             get => _startDate;
-            set { _startDate = value; OnPropertyChanged(); }
+            set { _startDate = value; OnPropertyChanged(nameof(StayDuration)); }
         }
 
         private DateTime? _endDate;
         public DateTime? EndDate
         {
             get => _endDate;
-            set { _endDate = value; OnPropertyChanged(); }
+            set { _endDate = value; OnPropertyChanged(nameof(StayDuration)); }
         }
 
         private string _guestsNumber;
@@ -42,8 +43,19 @@ namespace BookingApp.Presentation.ViewModel.Guest
             get => _guestsNumber;
             set { _guestsNumber = value; OnPropertyChanged(); }
         }
+        public int StayDuration
+        {
+            get
+            {
+                if (StartDate.HasValue && EndDate.HasValue && EndDate.Value > StartDate.Value)
+                {
+                    return (EndDate.Value - StartDate.Value).Days;
+                }
+                return 0;
+            }
+        }
 
-        public List<DateTime> OccupiedDates { get; set; }
+        public List<DateTime> OccupiedDates { get; private set; }
 
         #endregion
 
@@ -55,7 +67,7 @@ namespace BookingApp.Presentation.ViewModel.Guest
         {
             _accommodationDetails = accommodationDetails ?? throw new ArgumentNullException(nameof(accommodationDetails));
 
-            _reservationService = Injector.CreateInstance<IReservationService>();
+            _reservationCreationService = Injector.CreateInstance<IReservationCreationService>();
 
             ReserveCommand = new RelayCommand(Reserve);
 
@@ -66,7 +78,7 @@ namespace BookingApp.Presentation.ViewModel.Guest
 
         private void LoadOccupiedDates()
         {
-            OccupiedDates = _reservationService.GetOccupiedDatesForAccommodation(_accommodationDetails.Id);
+            OccupiedDates = _reservationCreationService.GetOccupiedDatesForAccommodation(_accommodationDetails.Id);
         }
         private void Reserve(object obj)
         {
@@ -122,24 +134,31 @@ namespace BookingApp.Presentation.ViewModel.Guest
         }
         private void ExecuteReservation(int guestNumber)
         {
-            try
+            var reservationDto = new ReservationDTO
             {
-                var reservationDto = new ReservationDTO
-                {
-                    AccommodationId = _accommodationDetails.Id,
-                    GuestId = Session.CurrentUser.Id,
-                    StartDate = StartDate.Value.Date,
-                    EndDate = EndDate.Value.Date,
-                    GuestsNumber = guestNumber
-                };
+                AccommodationId = _accommodationDetails.Id,
+                GuestId = Session.CurrentUser.Id,
+                StartDate = StartDate.Value.Date,
+                EndDate = EndDate.Value.Date,
+                GuestsNumber = guestNumber
+            };
 
-                _reservationService.Create(reservationDto);
+            var result = _reservationCreationService.AttemptReservation(reservationDto);
 
+            if (result.IsSuccess)
+            {
                 HandleReservationSuccess();
             }
-            catch (Exception ex)
+            else
             {
-                HandleReservationFailure(ex);
+                if (result.SuggestedRanges.Any())
+                {
+                    HandleUnavailableDates(result.SuggestedRanges, guestNumber);
+                }
+                else
+                {
+                    HandleReservationFailure(new Exception(result.ErrorMessage));
+                }
             }
         }
         private void HandleReservationSuccess()
@@ -150,6 +169,27 @@ namespace BookingApp.Presentation.ViewModel.Guest
         private void HandleReservationFailure(Exception ex)
         {
             MessageBox.Show(ex.Message, "Reservation Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        private void HandleUnavailableDates(List<DateRange> suggestions, int guestNumber)
+        {
+            var suggestionsWindow = new SuggestedDatesView(suggestions);
+            suggestionsWindow.ShowDialog();
+
+            var suggestionsViewModel = (SuggestedDatesViewModel)suggestionsWindow.DataContext;
+            if (suggestionsViewModel.IsConfirmed)
+            {
+                var chosenRange = suggestionsViewModel.SelectedDateRange;
+
+                this.StartDate = chosenRange.StartDate;
+                this.EndDate = chosenRange.EndDate;
+
+                MessageBox.Show(
+                    $"New dates ({chosenRange.StartDate:dd.MM.yyyy} - {chosenRange.EndDate:dd.MM.yyyy}) have been selected. Please click 'Reserve' again to confirm.",
+                    "Dates Updated",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
+            }
         }
         #endregion
     }

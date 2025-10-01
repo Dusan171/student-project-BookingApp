@@ -10,5 +10,6 @@ namespace BookingApp.Domain.Interfaces
         List<OccupiedDate> GetByAccommodationId(int accommodationId);
         void Save(List<OccupiedDate> newDates);
         int NextId();
+        void DeleteByReservationId(int reservationId);
     }
 }
