@@ -16,5 +16,6 @@ namespace BookingApp.Services.DTO
         public Reservation OriginalReservation { get; set; } 
         public bool IsRatingEnabled { get; set; }
         public bool IsGuestReviewVisible { get; set; }
+        public bool IsCancellationEnabled { get; set; }
     }
 }

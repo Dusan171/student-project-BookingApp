@@ -1,11 +1,11 @@
-﻿using System.Windows;
+﻿using System.Windows.Controls;
 using BookingApp.Presentation.ViewModel.Guest;
 
 namespace BookingApp.Presentation.View.Guest
 {
-    public partial class MyReservationsView : Window
+    public partial class MyReservationsPage : UserControl
     {
-        public MyReservationsView()
+        public MyReservationsPage()
         {
             InitializeComponent();
             DataContext = new MyReservationsViewModel();

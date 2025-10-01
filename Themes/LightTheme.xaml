@@ -1,0 +1,29 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!--svetla tema-->
+    <SolidColorBrush x:Key="PrimaryBackgroundColor" Color="#F0F2F5"/>
+    <SolidColorBrush x:Key="SecondaryBackgroundColor" Color="White"/>
+    <SolidColorBrush x:Key="BorderColor" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="PrimaryTextColor" Color="#1c1c1e"/>
+    <SolidColorBrush x:Key="SecondaryTextColor" Color="#555555"/>
+
+    <!--dugmad i linkovi-->
+    <SolidColorBrush x:Key="AccentPrimaryColor" Color="#007BFF"/>
+    <SolidColorBrush x:Key="AccentForegroundColor" Color="White"/>
+
+    <SolidColorBrush x:Key="MenuButtonHoverColor" Color="#E6F2FF"/>
+    <SolidColorBrush x:Key="MenuButtonCheckedColor" Color="#CCE4FF"/>
+    <SolidColorBrush x:Key="SecondaryButtonBackground" Color="#6c757d"/>
+
+    <SolidColorBrush x:Key="SecondaryButtonForeground" Color="White"/>
+
+    <SolidColorBrush x:Key="DangerColor" Color="Crimson"/>
+    <SolidColorBrush x:Key="SuccessColor" Color="#28a745"/>
+    <SolidColorBrush x:Key="WarningTextColor" Color="DarkRed"/>
+
+    <SolidColorBrush x:Key="UsefulTagBackground" Color="ForestGreen"/>
+    <SolidColorBrush x:Key="VisitorTagBackground" Color="DodgerBlue"/>
+    <SolidColorBrush x:Key="OwnerTagBackground" Color="DarkOrange"/>
+    <SolidColorBrush x:Key="TagForeground" Color="White"/>
+
+</ResourceDictionary>

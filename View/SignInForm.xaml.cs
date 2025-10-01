@@ -67,7 +67,7 @@ namespace BookingApp.View
                             break;
 
                         case UserRole.GUEST:
-                            var guestView = new GuestMainView();//samo ovdje treba pozvati drugi prozor
+                            var guestView = new GuestMainWindow();//samo ovdje treba pozvati drugi prozor
                             guestView.Show();
                             break;
                         case UserRole.GUIDE:

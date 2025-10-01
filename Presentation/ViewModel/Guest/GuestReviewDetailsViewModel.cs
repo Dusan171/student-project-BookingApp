@@ -10,8 +10,6 @@ namespace BookingApp.Presentation.ViewModel.Guest
     {
         #region Svojstva za prikaz
 
-
-
         public int CleanlinessRating { get; }
         public int RuleRespectingRating { get; }
         public string Comment { get; }

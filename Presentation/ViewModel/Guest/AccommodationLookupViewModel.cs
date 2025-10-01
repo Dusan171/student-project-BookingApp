@@ -1,91 +1,80 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
-using BookingApp.Presentation.View.Guest;
 using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
-using BookingApp.View;
 
 namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class AccommodationLookupViewModel : ViewModelBase
     {
-        private readonly IAccommodationService _accommodationService;
-
-        public AccommodationSearchViewModel SearchViewModel { get; }
-
+        private IAccommodationService _accommodationService;
+        public static event Action<AccommodationDetailsDTO> ViewDetailsRequested;
+        public static event Action LogoutRequested;
+        public event Action<AccommodationDetailsDTO> ReserveRequested;
+        public AccommodationSearchViewModel SearchViewModel { get; private set; }
         public ObservableCollection<AccommodationDetailsDTO> Accommodations { get; set; }
-
-        private AccommodationDetailsDTO _selectedAccommodation;
-        public AccommodationDetailsDTO SelectedAccommodation
-        {
-            get => _selectedAccommodation;
-            set { _selectedAccommodation = value; OnPropertyChanged(); }
-        }
-
-        public ICommand ReserveCommand { get; }
-        public ICommand LogoutCommand { get; }
+        public ICommand ReserveCommand { get; private set; }
+        public ICommand ViewDetailsCommand { get; private set; }
+        public ICommand LogoutCommand { get; private set; }
 
         public AccommodationLookupViewModel()
+        {
+            Accommodations = new ObservableCollection<AccommodationDetailsDTO>();
+        }
+
+        public void Initialize()
         {
             _accommodationService = Injector.CreateInstance<IAccommodationService>();
             var filterService = Injector.CreateInstance<IAccommodationFilterService>();
 
             SearchViewModel = new AccommodationSearchViewModel(filterService);
-
             SearchViewModel.SearchCompleted += OnSearchCompleted;
 
-            ReserveCommand = new RelayCommand(Reserve, CanReserve);
+            ReserveCommand = new RelayCommand(Reserve);
             LogoutCommand = new RelayCommand(Logout);
-
-            Accommodations = new ObservableCollection<AccommodationDetailsDTO>();
+            ViewDetailsCommand = new RelayCommand(ViewDetails);
 
             SearchViewModel.ResetSearchCommand.Execute(null);
+
+            OnPropertyChanged(nameof(SearchViewModel));
         }
 
         #region Logika Komandi
-
-        private void Reserve(object obj)
+        private void ViewDetails(object parameter)
         {
-            if (SelectedAccommodation == null)
+            if (parameter is AccommodationDetailsDTO selectedDto)
             {
-                return;
+                ViewDetailsRequested?.Invoke(selectedDto);
             }
-            var reservationWindow = new AccommodationReservationView(SelectedAccommodation);
-            reservationWindow.ShowDialog();
         }
-
-        private bool CanReserve(object obj)
+        private void Reserve(object parameter)
         {
-            return SelectedAccommodation != null;
+            if (parameter is AccommodationDetailsDTO selectedDto)
+            {
+                ReserveRequested?.Invoke(selectedDto);
+            }
         }
-
         private void Logout(object obj)
         {
             var result = MessageBox.Show("Are you sure you want to logout?", "Logout", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                Session.CurrentUser = null;
-                var signInWindow = new SignInForm();
-                signInWindow.Show();
-                Application.Current.Windows.OfType<AccommodationLookup>().FirstOrDefault()?.Close();
+                LogoutRequested?.Invoke();
             }
         }
-
         #endregion
 
         #region Pomoćne metode
-
         private void OnSearchCompleted(List<AccommodationDetailsDTO> result)
         {
             Accommodations = new ObservableCollection<AccommodationDetailsDTO>(result);
             OnPropertyChanged(nameof(Accommodations));
         }
-
         #endregion
     }
 }

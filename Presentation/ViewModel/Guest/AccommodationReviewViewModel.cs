@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Input;
+using System.Collections.ObjectModel;
+using System.Linq;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
+using Microsoft.Win32;
 
 namespace BookingApp.Presentation.ViewModel.Guest
 {
@@ -16,39 +19,59 @@ namespace BookingApp.Presentation.ViewModel.Guest
         public Action CloseAction { get; set; }
 
         #region Svojstva za unos
-        public string CleanlinessRating { get; set; }
-        public string OwnerRating { get; set; }
+        private int _cleanlinessRating = 3;
+        public int CleanlinessRating
+        {
+            get => _cleanlinessRating;
+            set 
+            {
+                _cleanlinessRating = value;
+                OnPropertyChanged();
+            }
+        }
+        private int _ownerRating = 3;
+        public int OwnerRating
+        {
+            get => _ownerRating;
+            set 
+            {
+                _ownerRating = value;
+                OnPropertyChanged();
+            }
+        }
         public string Comment { get; set; }
-        public string ImagePaths { get; set; }
+        public ObservableCollection<string> ImagePaths { get; set; }
         #endregion
 
         public ICommand SubmitCommand { get; }
+        public ICommand UploadImageCommand { get; }
+        public ICommand RemoveImageCommand { get; }
 
         public AccommodationReviewViewModel(ReservationDetailsDTO reservationDetails)
         {
             _reservationDetails = reservationDetails ?? throw new ArgumentNullException(nameof(reservationDetails));
             _accommodationReviewService = Injector.CreateInstance<IAccommodationReviewService>();
+
+            ImagePaths = new ObservableCollection<string>();
+
             SubmitCommand = new RelayCommand(Submit);
+            UploadImageCommand = new RelayCommand(UploadImage);
+            RemoveImageCommand = new RelayCommand(RemoveImage);
         }
 
         #region Logika
 
         private void Submit(object obj)
         {
-            if (!IsInputValid(out int cleanliness, out int ownerRating))
-            {
-                return;
-            }
-
             try
             {
                 var reviewDto = new CreateAccommodationReviewDTO
                 {
                     ReservationId = _reservationDetails.ReservationId,
-                    CleanlinessRating = cleanliness,
-                    OwnerRating = ownerRating,
+                    CleanlinessRating = this.CleanlinessRating,
+                    OwnerRating = this.OwnerRating,
                     Comment = this.Comment,
-                    ImagePaths = this.ImagePaths
+                    ImagePaths = string.Join(";", ImagePaths)
                 };
 
                 _accommodationReviewService.SubmitReview(reviewDto, _reservationDetails.EndDate);
@@ -61,23 +84,31 @@ namespace BookingApp.Presentation.ViewModel.Guest
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        private bool IsInputValid(out int cleanliness, out int ownerRating)
+        private void UploadImage(object obj)
         {
-            cleanliness = 0;
-            ownerRating = 0;
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg",
+                Multiselect = true 
+            };
 
-            if (!int.TryParse(CleanlinessRating, out cleanliness) || cleanliness < 1 || cleanliness > 5)
+            if (openFileDialog.ShowDialog() == true)
             {
-                MessageBox.Show("Enter a valid cleanliness rating (1-5).");
-                return false;
+                foreach (string filename in openFileDialog.FileNames)
+                {
+                    if (!ImagePaths.Contains(filename))
+                    {
+                        ImagePaths.Add(filename);
+                    }
+                }
             }
-            if (!int.TryParse(OwnerRating, out ownerRating) || ownerRating < 1 || ownerRating > 5)
+        }
+        private void RemoveImage(object parameter)
+        {
+            if (parameter is string imagePathToRemove)
             {
-                MessageBox.Show("Enter a valid owner rating (1-5).");
-                return false;
+                ImagePaths.Remove(imagePathToRemove);
             }
-            return true;
         }
 
         #endregion

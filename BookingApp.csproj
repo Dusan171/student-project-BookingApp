@@ -9,7 +9,15 @@
 
   <ItemGroup>
     <None Remove="Resources\Images\add.png" />
+
+    <None Remove="Resources\Images\amsterdam.jpg" />
+    <None Remove="Resources\Images\apartman.jpg" />
+    <None Remove="Resources\Images\barcelona.jpg" />
+    <None Remove="Resources\Images\bec.jpg" />
+    <None Remove="Resources\Images\budimpesta.jpg" />
+
     <None Remove="Resources\Images\cats.jpg" />
+    <None Remove="Resources\Images\cottage.jpg" />
     <None Remove="Resources\Images\delete.png" />
     <None Remove="Resources\Images\edit.png" />
     <None Remove="Resources\Images\kej.jpg" />
@@ -17,6 +25,7 @@
     <None Remove="Resources\Images\photos.png" />
     <None Remove="Resources\Images\search.png" />
     <None Remove="Resources\Images\sky.jpg" />
+    <None Remove="Resources\Images\soba.jpg" />
     <None Remove="Resources\Images\star_empty.png" />
     <None Remove="Resources\Images\star_filled.png" />
     <None Remove="Resources\Images\view.png" />
@@ -38,6 +47,16 @@
     <Content Include="Resources\Images\kej.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Resources\Images\apartman.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\cottage.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Images\soba.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+
     <Resource Include="Resources\Images\star_empty.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
@@ -56,10 +75,30 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="itext7" Version="9.3.0" />
+    <PackageReference Include="itext7.bouncy-castle-adapter" Version="9.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Resources\Images\photos.png" />
     <Resource Include="Resources\Images\star_filled.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
