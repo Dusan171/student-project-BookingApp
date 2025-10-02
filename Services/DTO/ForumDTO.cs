@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain.Model;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -15,7 +16,9 @@ namespace BookingApp.Services.DTO
         private string _locationName;
         private string _creatorName;
         private int _commentCount;
-
+        public DateTime CreatedDate { get; set; }
+        public int OwnerCommentsCount { get; set; }
+        public int GuestCommentsCount { get; set; }
         public ObservableCollection<CommentDTO> Comments { get; set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -75,7 +78,7 @@ namespace BookingApp.Services.DTO
             Id = forum.Id;
             Title = forum.Title;
             IsClosed = forum.IsClosed;
-
+            CreatedDate = forum.CreationDate; 
             LocationName = forum.Location != null ? $"{forum.Location.City}, {forum.Location.Country}" : "Unknown Location";
             CreatorName = forum.Creator != null ? forum.Creator.Username : "Unknown User";
             Comments = new ObservableCollection<CommentDTO>();

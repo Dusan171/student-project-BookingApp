@@ -183,12 +183,13 @@ namespace BookingApp.Presentation.ViewModel.Owner
                         break;
                     case "Forums":
                         var forumViewModel = Injector.CreateForumViewModel();
-                        forumViewModel.OnShowCommentsRequested += (forum) =>
+                        forumViewModel.OnShowCommentsRequested += (forumId) => // Sada je int, ne DTO objekat
                         {
-                            var commentsViewModel = Injector.CreateForumCommentsViewModel(forum);
+                            var commentsViewModel = Injector.CreateForumCommentsViewModel(forumId); // Šalješ int
                             commentsViewModel.OnBackToForumsRequested += () =>
                             {
-                                CurrentViewModel = forumViewModel; 
+                                forumViewModel.RefreshForums();
+                                CurrentViewModel = forumViewModel;
                             };
                             CurrentViewModel = commentsViewModel;
                         };
@@ -224,6 +225,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
             }
         }
 
+        
         private void ExecuteLogout(object parameter)
         {
             // Stop demo if running
