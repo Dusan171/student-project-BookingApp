@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Input;
 using BookingApp.Utilities;
 using BookingApp.Services.DTO;
+using BookingApp.Domain.Interfaces.ServiceInterfaces;
+using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Presentation.ViewModel.Owner
 {
@@ -13,6 +15,9 @@ namespace BookingApp.Presentation.ViewModel.Owner
     {
         private readonly Action _navigateBack;
         private readonly Action<HighDemandLocationDTO> _navigateToAddAccommodation;
+        private readonly ISystemSuggestionsService _suggestionsService;
+        private readonly IAccommodationService _accommodationService;
+        private readonly int _ownerId;
 
         public ObservableCollection<HighDemandLocationDTO> HighDemandLocations { get; set; }
         public ObservableCollection<LowDemandAccommodationDTO> LowDemandAccommodations { get; set; }
@@ -28,8 +33,16 @@ namespace BookingApp.Presentation.ViewModel.Owner
         public ICommand ViewAccommodationCommand { get; }
         public ICommand CloseAccommodationCommand { get; }
 
-        public SystemSuggestionsViewModel(Action navigateBack = null, Action<HighDemandLocationDTO> navigateToAddAccommodation = null)
+        public SystemSuggestionsViewModel(
+            ISystemSuggestionsService suggestionsService,
+            IAccommodationService accommodationService,
+            int ownerId,
+            Action navigateBack = null,
+            Action<HighDemandLocationDTO> navigateToAddAccommodation = null)
         {
+            _suggestionsService = suggestionsService;
+            _accommodationService = accommodationService;
+            _ownerId = ownerId;
             _navigateBack = navigateBack;
             _navigateToAddAccommodation = navigateToAddAccommodation;
 
@@ -42,70 +55,29 @@ namespace BookingApp.Presentation.ViewModel.Owner
             ViewAccommodationCommand = new RelayCommand<LowDemandAccommodationDTO>(ViewAccommodation);
             CloseAccommodationCommand = new RelayCommand<LowDemandAccommodationDTO>(CloseAccommodation);
 
-            LoadMockData();
+            LoadData();
         }
 
-        private void LoadMockData()
+        private void LoadData()
         {
             AnalysisDate = DateTime.Now;
 
-            // High Demand Mock Data
-            HighDemandLocations.Add(new HighDemandLocationDTO
-            {
-                City = "Belgrade",
-                Country = "Serbia",
-                ReservationCount = 85,
-                OccupancyRate = 92.5,
-                Recommendation = "Excellent location for new property investment"
-            });
+            HighDemandLocations.Clear();
+            LowDemandAccommodations.Clear();
 
-            HighDemandLocations.Add(new HighDemandLocationDTO
-            {
-                City = "Novi Sad",
-                Country = "Serbia",
-                ReservationCount = 67,
-                OccupancyRate = 88.3,
-                Recommendation = "Growing tourism market with high potential"
-            });
+            // Učitavanje podataka iz servisa
+            var highDemand = _suggestionsService.GetHighDemandLocations(_ownerId);
+            var lowDemand = _suggestionsService.GetLowDemandAccommodations(_ownerId);
 
-            HighDemandLocations.Add(new HighDemandLocationDTO
+            foreach (var location in highDemand)
             {
-                City = "Zlatibor",
-                Country = "Serbia",
-                ReservationCount = 74,
-                OccupancyRate = 91.2,
-                Recommendation = "Popular mountain resort destination"
-            });
+                HighDemandLocations.Add(location);
+            }
 
-            HighDemandLocations.Add(new HighDemandLocationDTO
+            foreach (var accommodation in lowDemand)
             {
-                City = "Kopaonik",
-                Country = "Serbia",
-                ReservationCount = 58,
-                OccupancyRate = 86.7,
-                Recommendation = "Ski resort with year-round appeal"
-            });
-
-            // Low Demand Mock Data
-            LowDemandAccommodations.Add(new LowDemandAccommodationDTO
-            {
-                AccommodationName = "Villa Sunset",
-                City = "Pancevo",
-                Country = "Serbia",
-                ReservationCount = 3,
-                OccupancyRate = 15.2,
-                Recommendation = "Consider relocating or closing this property"
-            });
-
-            LowDemandAccommodations.Add(new LowDemandAccommodationDTO
-            {
-                AccommodationName = "Riverside Apartments",
-                City = "Smederevo",
-                Country = "Serbia",
-                ReservationCount = 7,
-                OccupancyRate = 23.8,
-                Recommendation = "Low performance, review pricing strategy"
-            });
+                LowDemandAccommodations.Add(accommodation);
+            }
 
             OnPropertyChanged(nameof(HasNoHighDemand));
             OnPropertyChanged(nameof(HasNoLowDemand));
@@ -118,8 +90,8 @@ namespace BookingApp.Presentation.ViewModel.Owner
 
         private void RefreshSuggestions()
         {
-            LoadMockData();
-            MessageBox.Show("Suggestions refreshed (F5)", "System", MessageBoxButton.OK, MessageBoxImage.Information);
+            LoadData();
+            MessageBox.Show("Suggestions refreshed successfully", "System", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void AddAccommodation(HighDemandLocationDTO location)
@@ -143,18 +115,32 @@ namespace BookingApp.Presentation.ViewModel.Owner
         {
             if (accommodation != null)
             {
-                var result = MessageBox.Show($"Are you sure you want to close {accommodation.AccommodationName}?",
-                                           "Close Property", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBox.Show(
+                    $"Are you sure you want to permanently delete {accommodation.AccommodationName}?\n\nThis action cannot be undone.",
+                    "Delete Property",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    LowDemandAccommodations.Remove(accommodation);
-                    OnPropertyChanged(nameof(HasNoLowDemand));
-                    MessageBox.Show("Property closed successfully", "System", MessageBoxButton.OK, MessageBoxImage.Information);
+                    try
+                    {
+                        var accommodationEntity = _accommodationService.GetAccommodationById(accommodation.AccommodationId);
+                        if (accommodationEntity != null)
+                        {
+                            _accommodationService.DeleteAccommodation(accommodationEntity);
+                            LowDemandAccommodations.Remove(accommodation);
+                            OnPropertyChanged(nameof(HasNoLowDemand));
+                            MessageBox.Show("Property deleted successfully", "System", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error deleting property: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
         }
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

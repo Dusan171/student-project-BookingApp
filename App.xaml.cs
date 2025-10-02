@@ -8,6 +8,7 @@ namespace BookingApp
 {
     public partial class App : Application
     {
+
         protected override void OnStartup(StartupEventArgs e)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -18,6 +19,7 @@ namespace BookingApp
 
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
         }
+
         void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             string errorMessage = $"An unhandled exception occurred: \n\n" +

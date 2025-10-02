@@ -214,8 +214,11 @@ namespace BookingApp.Presentation.ViewModel.Owner
                         );
                         break;
                     case "Suggestions":
-                        CurrentViewModel = Injector.CreateSuggestionsViewModel(() => NavigateCommand?.Execute("Home"),
-                        (location) => NavigateCommand?.Execute("RegisterAccommodation"));
+                        CurrentViewModel = Injector.CreateSuggestionsViewModel(
+                            Session.CurrentUser.Id, // ili LoggedUser.Id - zavisno kako čuvaš trenutnog korisnika
+                            () => NavigateCommand?.Execute("Home"),
+                            (location) => NavigateCommand?.Execute("RegisterAccommodation")
+                        );
                         break;
                 }
             }

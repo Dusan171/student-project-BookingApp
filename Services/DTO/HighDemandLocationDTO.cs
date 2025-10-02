@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BookingApp.Services.DTO
+﻿namespace BookingApp.Services.DTO
 {
     public class HighDemandLocationDTO
     {
@@ -13,5 +7,10 @@ namespace BookingApp.Services.DTO
         public int ReservationCount { get; set; }
         public double OccupancyRate { get; set; }
         public string Recommendation { get; set; }
+
+        public HighDemandLocationDTO()
+        {
+            Recommendation = "Strong market opportunity - consider expanding in this location";
+        }
     }
 }
