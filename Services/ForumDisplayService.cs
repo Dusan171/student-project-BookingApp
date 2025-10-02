@@ -24,7 +24,12 @@ namespace BookingApp.Services
 
             dto.Comments = new ObservableCollection<CommentDTO>(comments);
             dto.CommentCount = dto.Comments.Count;
-            dto.IsVeryUseful = CalculateIsVeryUseful(dto.Comments);
+
+            dto.OwnerCommentsCount = dto.Comments.Count(c => c.IsFromOwner);
+            dto.GuestCommentsCount = dto.Comments.Count(c => c.IsFromVisitor);
+
+            dto.IsVeryUseful = dto.OwnerCommentsCount >= 10 && dto.GuestCommentsCount >= 20;
+
             dto.CanBeClosed = CalculateCanBeClosed(forum);
 
             return dto;
@@ -64,6 +69,29 @@ namespace BookingApp.Services
             var dto = new CommentDTO(context.Comment);
             dto.IsFromVisitor = IsUserVisitor(context);
             dto.IsFromOwner = context.Comment.User.Role == UserRole.OWNER;
+
+            dto.CanReport = Session.CurrentUser.Role == UserRole.OWNER && !dto.IsFromOwner;
+
+            if (dto.IsFromVisitor)
+            {
+                var reservation = context.AllReservations
+                    .Where(r => r.GuestId == context.Comment.User.Id)
+                    .Where(r => context.AllAccommodations.Any(a =>
+                        a.Id == r.AccommodationId &&
+                        a.GeoLocation.Id == context.Location.Id))
+                    .OrderByDescending(r => r.EndDate)
+                    .FirstOrDefault();
+
+                if (reservation != null)
+                {
+                    dto.StayDatesText = $"{reservation.StartDate:dd-MM-yyyy} - {reservation.EndDate:dd-MM-yyyy}";
+                }
+            }
+            else if (dto.IsFromOwner)
+            {
+                dto.StayDatesText = "Property owner";
+            }
+
             return dto;
         }
         private bool IsUserVisitor(CommentStatusContext context)
@@ -72,14 +100,6 @@ namespace BookingApp.Services
                 r.GuestId == context.Comment.User.Id &&
                 context.AllAccommodations.Any(a => a.Id == r.AccommodationId && a.GeoLocation.Id == context.Location.Id));
         }
-
-        private bool CalculateIsVeryUseful(ObservableCollection<CommentDTO> comments)
-        {
-            int ownerComments = comments.Count(c => c.IsFromOwner);
-            int visitorComments = comments.Count(c => c.IsFromVisitor);
-            return ownerComments >= 10 && visitorComments >= 20;
-        }
-
         private bool CalculateCanBeClosed(Forum forum)
         {
             return !forum.IsClosed && forum.CreatorId == Session.CurrentUser.Id;

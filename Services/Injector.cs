@@ -192,9 +192,7 @@ namespace BookingApp.Services
                CreateInstance<IReservationService>()
            );
 
-            // NOVI Servisi iz konfliktne grane (premešteno iz CreateStatisticViewModel)
 
-            // 1. Forum Display Service
             var displayServiceDependencies = new AssemblerDependencies(
                 CreateInstance<IUserRepository>(),
                 CreateInstance<ILocationRepository>(),
@@ -205,13 +203,11 @@ namespace BookingApp.Services
              );
             _implementations[typeof(IForumDisplayService)] = new ForumDisplayService(displayServiceDependencies);
 
-            // 2. Forum "Read" Service
             _implementations[typeof(IForumService)] = new ForumService(
                 CreateInstance<IForumRepository>(),
                 CreateInstance<IForumDisplayService>()
             );
 
-            // 3. Forum "Write" Service
             _implementations[typeof(IForumManagementService)] = new ForumManagementService(
                 CreateInstance<IForumRepository>(),
                 CreateInstance<ICommentRepository>(),
@@ -219,20 +215,26 @@ namespace BookingApp.Services
                 CreateInstance<ILocationRepository>()
             );
 
-            // 4. Reservation Creation Service
+
             _implementations[typeof(IReservationCreationService)] = new ReservationCreationService(
                 CreateInstance<IReservationRepository>(),
                 CreateInstance<IOccupiedDateRepository>(),
                 CreateInstance<IAccommodationRepository>()
             );
 
-            // 5. Reservation Cancellation Service
             _implementations[typeof(IReservationCancellationService)] = new ReservationCancellationService(
                 CreateInstance<IReservationRepository>(),
                 CreateInstance<IAccommodationRepository>(),
                 CreateInstance<IOccupiedDateRepository>(),
                 CreateInstance<ISystemNotificationRepository>(),
                 CreateInstance<IUserRepository>()
+            );
+
+            _implementations[typeof(IOwnerForumService)] = new OwnerForumService(
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<IForumManagementService>(),
+                CreateInstance<IForumRepository>(),
+                CreateInstance<ILocationRepository>()
             );
 
         }
@@ -360,16 +362,18 @@ namespace BookingApp.Services
             return new PDFSettingsViewModel(closeWindowAction, pdfReportService, accommodationService, accommodationReviewService);
         }
 
-        // NOVO: Factory za ForumViewModel
         public static ForumViewModel CreateForumViewModel()
         {
-            return new ForumViewModel();
+            return new ForumViewModel(CreateInstance<IForumService>());
         }
 
-        // NOVO: Factory za ForumCommentsViewModel
-        public static ForumCommentsViewModel CreateForumCommentsViewModel(ForumItemDTO selectedForum)
+        public static ForumCommentsViewModel CreateForumCommentsViewModel(int forumId) // int umesto ForumItemDTO
         {
-            return new ForumCommentsViewModel(selectedForum);
+            return new ForumCommentsViewModel(
+                CreateInstance<IForumService>(),
+                CreateInstance<IOwnerForumService>(),
+                forumId
+            );
         }
 
         public static SystemSuggestionsViewModel CreateSuggestionsViewModel(int ownerId, Action navigateBack = null, Action<HighDemandLocationDTO> navigateToAddAccommodation = null)

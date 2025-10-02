@@ -127,7 +127,7 @@
                                                 <!-- Location -->
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                                                     <TextBlock Text="📍" FontSize="12" Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding Location}" 
+                                                    <TextBlock Text="{Binding LocationName}" 
                                                                FontSize="14" 
                                                                Foreground="#1e293b"
                                                                FontWeight="SemiBold"/>
@@ -136,7 +136,7 @@
                                                 <!-- Created by and date -->
                                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                                     <TextBlock Text="Created by " FontSize="13" Foreground="#1e293b"/>
-                                                    <TextBlock Text="{Binding CreatedBy}" FontSize="13" FontWeight="Medium" Foreground="#1e293b"/>
+                                                    <TextBlock Text="{Binding CreatorName}" FontSize="13" FontWeight="Medium" Foreground="#1e293b"/>
                                                     <TextBlock Text=" on " FontSize="13" Foreground="#1e293b" Margin="4,0"/>
                                                     <TextBlock Text="{Binding CreatedDate, StringFormat=dd.MM.yyyy}" 
                                                                FontSize="13" FontWeight="Medium" Foreground="#1e293b"/>

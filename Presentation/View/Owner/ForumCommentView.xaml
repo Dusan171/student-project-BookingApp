@@ -66,7 +66,7 @@
                     </Button>
 
                     <TextBlock Grid.Column="1"
-                               Text="{Binding ForumTitle}"
+                               Text="{Binding SelectedForum.Title}"
                                FontSize="28"
                                FontWeight="SemiBold"
                                Foreground="#1e293b"
@@ -98,7 +98,7 @@
                                     CornerRadius="12" 
                                     Padding="8,4" 
                                     Margin="12,0,0,0"
-                                    Visibility="{Binding IsVeryUseful, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    Visibility="{Binding SelectedForum.IsVeryUseful, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="VERY USEFUL FORUM" 
                                            FontSize="10" 
                                            FontWeight="Bold" 
@@ -109,11 +109,11 @@
 
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8" >
                             <TextBlock Text="📍" FontSize="12" Margin="0,0,6,0"/>
-                            <TextBlock Text="{Binding ForumLocation}" FontSize="14" Foreground="#64748b" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding SelectedForum.LocationName}" FontSize="14" Foreground="#64748b" FontWeight="Medium"/>
                             <TextBlock Text=" • Created by " FontSize="14" Foreground="#64748b" Margin="8,0,0,0"/>
-                            <TextBlock Text="{Binding CreatedBy}" FontSize="14" FontWeight="Medium" Foreground="#64748b"/>
+                            <TextBlock Text="{Binding SelectedForum.CreatorName}" FontSize="14" FontWeight="Medium" Foreground="#64748b"/>
                             <TextBlock Text=" on " FontSize="14" Foreground="#64748b" Margin="4,0"/>
-                            <TextBlock Text="{Binding CreatedDate, StringFormat='dd.MM.yyyy'}" FontSize="14" FontWeight="Medium" Foreground="#64748b"/>
+                            <TextBlock Text="{Binding SelectedForum.CreatedDate, StringFormat='dd.MM.yyyy'}" FontSize="14" FontWeight="Medium" Foreground="#64748b"/>
                         </StackPanel>
 
                         <TextBlock Text="{Binding ForumDescription}" 
@@ -126,13 +126,13 @@
                         <StackPanel Orientation="Horizontal">
                             <Border Background="#dbeafe" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding OwnerCommentsCount}" FontSize="13" FontWeight="Bold" Foreground="#1e40af"/>
+                                    <TextBlock Text="{Binding SelectedForum.OwnerCommentsCount}" FontSize="13" FontWeight="Bold" Foreground="#1e40af"/>
                                     <TextBlock Text=" owner comments" FontSize="11" Foreground="#1e40af" Margin="3,0,0,0"/>
                                 </StackPanel>
                             </Border>
                             <Border Background="#fef3c7" CornerRadius="4" Padding="8,3">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding GuestCommentsCount}" FontSize="13" FontWeight="Bold" Foreground="#d97706"/>
+                                    <TextBlock Text="{Binding SelectedForum.GuestCommentsCount}" FontSize="13" FontWeight="Bold" Foreground="#d97706"/>
                                     <TextBlock Text=" guest comments" FontSize="11" Foreground="#d97706" Margin="3,0,0,0"/>
                                 </StackPanel>
                             </Border>
@@ -297,13 +297,13 @@
                                        Foreground="#1e293b"/>
 
                             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                <TextBlock Text="{Binding TotalCommentsCount}" FontSize="16" FontWeight="Bold" Foreground="#1e40af"/>
+                                <TextBlock Text="{Binding SelectedForum.CommentCount}" FontSize="16" FontWeight="Bold" Foreground="#1e40af"/>
                                 <TextBlock Text=" total" FontSize="14" Foreground="#64748b" Margin="4,0,0,0"/>
                             </StackPanel>
                         </Grid>
 
                         <!-- Comments List -->
-                        <ItemsControl ItemsSource="{Binding Comments}" TabIndex="4">
+                        <ItemsControl ItemsSource="{Binding SelectedForum.Comments}" TabIndex="4">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Margin="0,0,0,16" Padding="20">
