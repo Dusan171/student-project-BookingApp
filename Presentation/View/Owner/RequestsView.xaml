@@ -11,7 +11,106 @@
 
     <UserControl.Resources>
         <utilities:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <!-- Style za centriranje ćelija -->
+        <Style x:Key="CenterAlignedCell" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Style za DataGrid -->
+        <Style TargetType="DataGrid">
+            <Setter Property="BorderBrush" Value="#DDDDDD"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#EEEEEE"/>
+            <Setter Property="RowHeight" Value="35"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Background" Value="#F8F9FA"/>
+            <Setter Property="Foreground" Value="#1e293b"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Padding" Value="8,0"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#E3F2FD"/>
+                    <Setter Property="Foreground" Value="#1e293b"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style za dugmad -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="MinWidth" Value="100"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="#007BFF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Padding="15,8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#0056B3"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#CCCCCC"/>
+                    <Setter Property="Cursor" Value="Arrow"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="RejectButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#DC3545"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#C82333"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ApproveButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#28A745"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#218838"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SubmitButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#DC3545"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#5A6268"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -19,47 +118,112 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Requests"
-                   FontSize="50" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,60,0,10"/>
+        <!-- Header -->
+        <TextBlock Grid.Row="0" 
+                   Text="Requests"
+                   FontSize="28" 
+                   FontWeight="SemiBold" 
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Foreground="#1e293b"
+                   Margin="0,0,0,30"/>
 
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Requests}"
+        <!-- DataGrid -->
+        <DataGrid Grid.Row="1" 
+                  ItemsSource="{Binding Requests}"
                   SelectedItem="{Binding SelectedRequest}"
-                  AutoGenerateColumns="False" IsReadOnly="True"
-                  Margin="40,40,40,0">
+                  AutoGenerateColumns="False" 
+                  IsReadOnly="True"
+                  Margin="50,0,50,0">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Accommodation Name" Binding="{Binding AccommodationName}" Width="*"/>
-                <DataGridTextColumn Header="Check-in date" Binding="{Binding OriginalStartDate, StringFormat='dd/MM/yyyy'}" Width="*"/>
-                <DataGridTextColumn Header="Check-out date" Binding="{Binding OriginalEndDate, StringFormat='dd/MM/yyyy'}" Width="*"/>
-                <DataGridTextColumn Header="New check-in date" Binding="{Binding NewStartDate, StringFormat='dd/MM/yyyy'}" Width="*"/>
-                <DataGridTextColumn Header="New check-out date" Binding="{Binding NewEndDate, StringFormat='dd/MM/yyyy'}" Width="*"/>
-                <DataGridTextColumn Header="Availability" Binding="{Binding AvailabilityStatus}" Width="*"/>
-                </DataGrid.Columns>
+                <DataGridTextColumn Header="Accommodation Name" 
+                                    Binding="{Binding AccommodationName}" 
+                                    Width="180"
+                                    ElementStyle="{StaticResource CenterAlignedCell}"/>
+
+                <DataGridTextColumn Header="Check-in Date" 
+                                    Binding="{Binding OriginalStartDate, StringFormat='dd/MM/yyyy'}" 
+                                    Width="*"
+                                    ElementStyle="{StaticResource CenterAlignedCell}"/>
+
+                <DataGridTextColumn Header="Check-out Date" 
+                                    Binding="{Binding OriginalEndDate, StringFormat='dd/MM/yyyy'}" 
+                                    Width="*"
+                                    ElementStyle="{StaticResource CenterAlignedCell}"/>
+
+                <DataGridTextColumn Header="New Check-in" 
+                                    Binding="{Binding NewStartDate, StringFormat='dd/MM/yyyy'}" 
+                                    Width="*"
+                                    ElementStyle="{StaticResource CenterAlignedCell}"/>
+
+                <DataGridTextColumn Header="New Check-out" 
+                                    Binding="{Binding NewEndDate, StringFormat='dd/MM/yyyy'}" 
+                                    Width="*"
+                                    ElementStyle="{StaticResource CenterAlignedCell}"/>
+
+                <DataGridTextColumn Header="Availability" 
+                                    Binding="{Binding AvailabilityStatus}" 
+                                    Width="*"
+                                    ElementStyle="{StaticResource CenterAlignedCell}"/>
+            </DataGrid.Columns>
         </DataGrid>
 
-        <Grid Grid.Row="2" Margin="40,20,40,20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="15*"/>
-                <RowDefinition Height="56*"/>
-            </Grid.RowDefinitions>
+        <!-- Action panel -->
+        <Grid Grid.Row="2" Margin="50,25,50,40">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Button Content="Reject" Command="{Binding RejectCommand}" MinWidth="100" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.RowSpan="2"/>
+            <!-- Reject button -->
+            <Button Grid.Column="0"
+                    Content="Reject" 
+                    Command="{Binding RejectCommand}" 
+                    Style="{StaticResource RejectButton}"
+                    HorizontalAlignment="Left" 
+                    VerticalAlignment="Center"/>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"
-                        Visibility="{Binding IsRejecting, Converter={StaticResource BooleanToVisibilityConverter}}" Grid.RowSpan="2">
+            <!-- Rejection reason panel -->
+            <StackPanel Grid.Column="1" 
+                        Orientation="Horizontal" 
+                        Margin="25,0"
+                        HorizontalAlignment="Center" 
+                        VerticalAlignment="Center"
+                        Visibility="{Binding IsRejecting, Converter={StaticResource BooleanToVisibilityConverter}}">
+
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <TextBlock Text="Enter reason for rejection:" FontSize="12" Margin="0,0,0,5"/>
+                    <TextBlock Text="Enter reason for rejection:" 
+                               FontSize="13"
+                               Foreground="#1e293b"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
                     <TextBox Text="{Binding RejectReason, UpdateSourceTrigger=PropertyChanged}"
-                             MinWidth="200" MinHeight="50" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Width="228"/>
+                             MinWidth="350" 
+                             Height="60" 
+                             Padding="10"
+                             FontSize="13"
+                             TextWrapping="Wrap" 
+                             VerticalScrollBarVisibility="Auto"
+                             AcceptsReturn="True"
+                             BorderBrush="#CED4DA"
+                             BorderThickness="1"/>
                 </StackPanel>
-                <Button Content="Submit" Command="{Binding SubmitRejectCommand}" Margin="10,0,0,0" VerticalAlignment="Bottom" MinWidth="100" Width="150"/>
+
+                <Button Content="Submit" 
+                        Command="{Binding SubmitRejectCommand}" 
+                        Style="{StaticResource SubmitButton}"
+                        Margin="15,28,0,0" 
+                        VerticalAlignment="Bottom"/>
             </StackPanel>
 
-            <Button Grid.Column="2" Content="Approve" Command="{Binding ApproveCommand}" MinWidth="100" HorizontalAlignment="Center" VerticalAlignment="Top" Grid.RowSpan="2"/>
+            <!-- Approve button -->
+            <Button Grid.Column="2"
+                    Content="Approve" 
+                    Command="{Binding ApproveCommand}" 
+                    Style="{StaticResource ApproveButton}"
+                    HorizontalAlignment="Right" 
+                    VerticalAlignment="Center"/>
         </Grid>
     </Grid>
 </UserControl>

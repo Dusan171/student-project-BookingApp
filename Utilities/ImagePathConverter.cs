@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 
 namespace BookingApp.Utilities
 {
@@ -9,25 +10,51 @@ namespace BookingApp.Utilities
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string relativePath && !string.IsNullOrEmpty(relativePath))
-            {
-                try
-                {
-                    // Konvertuj relativnu putanju u apsolutnu
-                    string absolutePath = Path.GetFullPath(relativePath);
+            if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
+                return null;
 
-                    // Proveri da li fajl postoji
-                    if (File.Exists(absolutePath))
-                    {
-                        return absolutePath;
-                    }
-                }
-                catch
+            try
+            {
+                string relativePath = value.ToString();
+
+                // Proveri da li putanja već počinje sa Resources/Images
+                if (!relativePath.StartsWith("Resources", StringComparison.OrdinalIgnoreCase))
                 {
-                    
+                    relativePath = Path.Combine("Resources", "Images", relativePath);
                 }
+
+                // Kreiraj apsolutnu putanju
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string fullPath = Path.Combine(baseDirectory, relativePath);
+
+                // Normalizuj putanju
+                fullPath = Path.GetFullPath(fullPath);
+
+                if (!File.Exists(fullPath))
+                {
+                    // Pokušaj alternativnu putanju (3 nivoa gore)
+                    fullPath = Path.Combine(baseDirectory, "..", "..", "..", relativePath);
+                    fullPath = Path.GetFullPath(fullPath);
+                }
+
+                if (File.Exists(fullPath))
+                {
+                    BitmapImage bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(fullPath, UriKind.Absolute);
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    bitmap.Freeze(); // Za thread safety
+                    return bitmap;
+                }
+
+                return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading image: {ex.Message}");
+                return null;
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

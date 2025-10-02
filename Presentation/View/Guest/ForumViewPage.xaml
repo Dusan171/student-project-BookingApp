@@ -26,7 +26,7 @@
                        VerticalAlignment="Center" TextWrapping="Wrap"/>
 
             <Button Grid.Column="1" Content="{loc:Translate ForumView_CloseForum}" Style="{StaticResource DangerButton}" Command="{Binding CloseForumCommand}"
-                    Visibility="{Binding IsCloseButtonVisible, Converter={StaticResource BoolToVisibility}}"/>
+                    Visibility="{Binding IsCloseButtonVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </Grid>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10">
@@ -40,12 +40,12 @@
                                     <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16" VerticalAlignment="Center"/>
 
                                     <Border Background="{DynamicResource VisitorTagBackground}" CornerRadius="10" Padding="8,3" Margin="10,0,0,0" 
-                                            Visibility="{Binding IsFromVisitor, Converter={StaticResource BoolToVisibility}}">
+                                            Visibility="{Binding IsFromVisitor, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock Text="{loc:Translate ForumView_TagVisited}" Foreground="{DynamicResource TagForeground}" FontSize="12"/>
                                     </Border>
 
                                     <Border Background="{DynamicResource OwnerTagBackground}" CornerRadius="10" Padding="8,3" Margin="10,0,0,0" 
-                                            Visibility="{Binding IsFromOwner, Converter={StaticResource BoolToVisibility}}">
+                                            Visibility="{Binding IsFromOwner, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <TextBlock Text="{loc:Translate ForumView_TagOwner}" Foreground="{DynamicResource TagForeground}" FontSize="12"/>
                                     </Border>
                                 </WrapPanel>
@@ -58,7 +58,7 @@
         </ScrollViewer>
 
         <Border Grid.Row="2" Padding="15" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0" Margin="10,0"
-                Visibility="{Binding IsCommentingEnabled, Converter={StaticResource BoolToVisibility}}">
+                Visibility="{Binding IsCommentingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

@@ -3,89 +3,225 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:utilities="clr-namespace:BookingApp.Utilities"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Border BorderBrush="#C5D5E4" BorderThickness="1" CornerRadius="10" Background="#F8FAFC" Padding="15">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <StackPanel HorizontalAlignment="Stretch">
-                    <ItemsControl ItemsSource="{Binding UnratedReservations}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="#C5D5E4" BorderThickness="1" CornerRadius="8" Background="White" Margin="0,0,0,10" Padding="15">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+             d:DesignHeight="720" d:DesignWidth="1200">
 
-                                        <TextBlock Grid.Row="0"
-                                                   Text="Unrated Guest"
-                                                   FontSize="28"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="#2D3E50"
-                                                   HorizontalAlignment="Center"
-                                                   Margin="0,0,0,10"/>
+    <UserControl.Resources>
+        <utilities:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
 
-                                        <Grid Grid.Row="1">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding BackToHomeCommand}"/>
+    </UserControl.InputBindings>
+
+    <Grid Background="#fafbfc">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="40">
+            <StackPanel>
+
+                <!-- Header sa Back dugmetom -->
+                <Grid Margin="0,20,0,32">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Content="← Back"
+                            Command="{Binding BackToHomeCommand}"
+                            Background="Transparent"
+                            Foreground="#475569"
+                            FontSize="14"
+                            FontWeight="Medium"
+                            Padding="12,8"
+                            BorderThickness="1"
+                            BorderBrush="#e2e8f0"
+                            Cursor="Hand"
+                            VerticalAlignment="Center"
+                            TabIndex="1">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="6" 
+                                        Padding="{TemplateBinding Padding}"
+                                        x:Name="border">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="border" Property="Background" Value="#f8fafc"/>
+                                        <Setter TargetName="border" Property="BorderBrush" Value="#cbd5e1"/>
+                                    </Trigger>
+                                    <Trigger Property="IsFocused" Value="True">
+                                        <Setter TargetName="border" Property="BorderBrush" Value="#3b82f6"/>
+                                        <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- Centrirani naslov -->
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="Unrated Guests"
+                                   FontSize="28"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1e293b"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Main Content Container -->
+                <Border Background="White" 
+                        BorderBrush="#e2e8f0" 
+                        BorderThickness="1" 
+                        CornerRadius="16" 
+                        Padding="24">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#000" Direction="270" ShadowDepth="4" Opacity="0.06" BlurRadius="12"/>
+                    </Border.Effect>
+
+                    <StackPanel>
+
+
+
+                        <!-- Guest Cards -->
+                        <ItemsControl ItemsSource="{Binding DisplayItems}" TabIndex="2">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#f8fafc" 
+                                            BorderBrush="#e2e8f0" 
+                                            BorderThickness="1" 
+                                            CornerRadius="10" 
+                                            Padding="20" 
+                                            Margin="0,0,0,12">
+
+                                        <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
 
-                                            <Grid Grid.Column="0">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Text="Guest name:" FontSize="14" Foreground="#555" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                                <TextBlock Grid.Column="1" Text="{Binding Id}" FontSize="16" FontWeight="SemiBold" Foreground="#2D3E50" VerticalAlignment="Center"/>
-                                            </Grid>
+                                            <!-- Guest Info - Left aligned -->
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <!-- Guest Name -->
+                                                <TextBlock Text="{Binding GuestName}" 
+                                                           FontSize="16" 
+                                                           FontWeight="SemiBold" 
+                                                           Foreground="#1e293b"
+                                                           Margin="0,0,0,6"/>
 
-                                            <Grid Grid.Column="1" HorizontalAlignment="Right">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
+                                                <!-- Property -->
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                    <TextBlock Text="🏠" FontSize="12" Margin="0,0,6,0"/>
+                                                    <TextBlock Text="{Binding AccommodationName}" 
+                                                               FontSize="14" 
+                                                               Foreground="#475569"
+                                                               FontWeight="Medium"/>
+                                                </StackPanel>
 
-                                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Check in date:" FontSize="14" Foreground="#555"/>
-                                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy.}'}" FontSize="14" FontWeight="SemiBold" Foreground="#2D3E50" Margin="5,0,0,0"/>
+                                                <!-- Dates -->
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="📅" FontSize="12" Margin="0,0,6,0"/>
+                                                    <TextBlock FontSize="14" Foreground="#1e293b">
+                                                        <Run Text="{Binding StartDate, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+                                                        <Run Text=" - "/>
+                                                        <Run Text="{Binding EndDate, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                            </StackPanel>
 
-                                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Check out date:" FontSize="14" Foreground="#555" Margin="0,5,0,0"/>
-                                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding EndDate, StringFormat='{}{0:dd.MM.yyyy.}'}" FontSize="14" FontWeight="SemiBold" Foreground="#2D3E50" Margin="5,5,0,0"/>
-                                            </Grid>
+                                            <!-- Rate Button - Right aligned -->
+                                            <Button Grid.Column="1"
+                                                    Content="Rate Guest"
+                                                    Command="{Binding DataContext.RateGuestCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                    CommandParameter="{Binding ReservationId}"
+                                                    Foreground="White"
+                                                    FontSize="14"
+                                                    FontWeight="SemiBold"
+                                                    Padding="20,10"
+                                                    BorderThickness="0"
+                                                    Cursor="Hand"
+                                                    VerticalAlignment="Center">
+
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border CornerRadius="6" Padding="{TemplateBinding Padding}" x:Name="border">
+                                                            <Border.Background>
+                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                    <GradientStop Color="#1e40af" Offset="0"/>
+                                                                    <GradientStop Color="#3b82f6" Offset="1"/>
+                                                                </LinearGradientBrush>
+                                                            </Border.Background>
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <!-- Hover -->
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="border" Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                            <GradientStop Color="#1d4ed8" Offset="0"/>
+                                                                            <GradientStop Color="#60a5fa" Offset="1"/>
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Trigger>
+                                                            <!-- Focus -->
+                                                            <Trigger Property="IsFocused" Value="True">
+                                                                <Setter TargetName="border" Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                            <GradientStop Color="#1e293b" Offset="0"/>
+                                                                            <GradientStop Color="#334155" Offset="1"/>
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Setter TargetName="border" Property="BorderBrush" Value="#3b82f6"/>
+                                                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
                                         </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
-                                        <Button Grid.Row="2"
-                                                Content="Rate now"
-                                                Width="120"
-                                                Height="35"
-                                                HorizontalAlignment="Center"
-                                                Background="#2D3E50"
-                                                Foreground="White"
-                                                FontWeight="SemiBold"
-                                                BorderThickness="0"
-                                                Margin="0,15,0,0"
-                                                Command="{Binding DataContext.RateGuestCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
-                                                CommandParameter="{Binding Id}">
-                                            <Button.Resources>
-                                                <Style TargetType="Border">
-                                                    <Setter Property="CornerRadius" Value="8"/>
-                                                </Style>
-                                            </Button.Resources>
-                                        </Button>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </ScrollViewer>
-        </Border>
+                        <!-- Empty State -->
+                        <Border Background="#f8fafc" 
+                                BorderBrush="#e2e8f0" 
+                                BorderThickness="1" 
+                                CornerRadius="10" 
+                                Padding="40" 
+                                Visibility="{Binding HasNoUnratedGuests, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="✅" 
+                                           FontSize="32" 
+                                           HorizontalAlignment="Center" 
+                                           Margin="0,0,0,12"/>
+                                <TextBlock Text="All caught up!" 
+                                           FontSize="18" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#475569" 
+                                           HorizontalAlignment="Center" 
+                                           Margin="0,0,0,6"/>
+                                <TextBlock Text="No guests waiting for reviews." 
+                                           FontSize="14" 
+                                           Foreground="#64748b" 
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

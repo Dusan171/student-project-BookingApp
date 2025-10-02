@@ -15,9 +15,19 @@ namespace BookingApp.Services
     public class GuestReviewService : IGuestReviewService
     {
         private readonly IGuestReviewRepository _repository;
-        public GuestReviewService(IGuestReviewRepository repository)
+        private readonly IReservationService _reservationService;
+        private readonly IUserService _userService;
+        private readonly IAccommodationService _accommodationService;
+
+        public GuestReviewService(IGuestReviewRepository repository,
+                                 IReservationService reservationService,
+                                 IUserService userService,
+                                 IAccommodationService accommodationService)
         {
             _repository = repository;
+            _reservationService = reservationService;
+            _userService = userService;
+            _accommodationService = accommodationService;
         }
         public List<GuestReviewDTO> GetAllReviews()
         {
@@ -73,6 +83,52 @@ namespace BookingApp.Services
             }
 
             return new GuestReviewDTO(reviewModel);
+        }
+        public GuestRatingDetailsDTO GetRatingDetailsForReservation(int reservationId)
+        {
+            try
+            {
+                var reservation = _reservationService.GetById(reservationId);
+                if (reservation == null)
+                {
+                    throw new Exception($"Reservation with ID {reservationId} not found.");
+                }
+
+                var guest = _userService.GetUserById(reservation.GuestId);
+                var accommodation = _accommodationService.GetAccommodationById(reservation.AccommodationId);
+
+                var guestName = "Unknown Guest";
+                if (guest != null)
+                {
+                    guestName = $"{guest.FirstName} {guest.LastName}".Trim();
+                    if (string.IsNullOrWhiteSpace(guestName))
+                    {
+                        guestName = guest.Username ?? "Guest";
+                    }
+                }
+
+                return new GuestRatingDetailsDTO
+                {
+                    ReservationId = reservationId,
+                    StartDate = reservation.StartDate,
+                    EndDate = reservation.EndDate,
+                    GuestName = guestName,
+                    AccommodationName = accommodation?.Name ?? "Unknown Property",
+                    Review = new GuestReviewDTO { ReservationId = reservationId }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new GuestRatingDetailsDTO
+                {
+                    ReservationId = reservationId,
+                    StartDate = DateTime.Now.AddDays(-7),
+                    EndDate = DateTime.Now,
+                    GuestName = "Guest",
+                    AccommodationName = "Property",
+                    Review = new GuestReviewDTO { ReservationId = reservationId }
+                };
+            }
         }
     }
 }
