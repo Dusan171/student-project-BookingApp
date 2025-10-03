@@ -10,11 +10,13 @@ namespace BookingApp.Services
 {
     public class ForumDisplayService: IForumDisplayService
     {
-        private readonly AssemblerDependencies _deps; 
+        private readonly AssemblerDependencies _deps;
+        private readonly ICommentReportService _reportService;
 
-        public ForumDisplayService(AssemblerDependencies dependencies)
+        public ForumDisplayService(AssemblerDependencies dependencies, ICommentReportService reportService) 
         {
             _deps = dependencies;
+            _reportService = reportService;
         }
         public ForumDTO AssembleForumDTO(Forum forum)
         {
@@ -70,7 +72,10 @@ namespace BookingApp.Services
             dto.IsFromVisitor = IsUserVisitor(context);
             dto.IsFromOwner = context.Comment.User.Role == UserRole.OWNER;
 
+            // Owner ne može da reportuje svoje komentare ili komentare drugih ownera
             dto.CanReport = Session.CurrentUser.Role == UserRole.OWNER && !dto.IsFromOwner;
+
+            dto.ReportsCount = _reportService.GetReportsCount(context.Comment.Id);
 
             if (dto.IsFromVisitor)
             {
