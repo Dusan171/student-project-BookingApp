@@ -162,6 +162,8 @@ namespace BookingApp.Services
                 CreateInstance<IReservationRepository>(),
                 CreateInstance<IRescheduleRequestRepository>()
             );
+            _implementations[typeof(ICommentReportRepository)] = new CommentReportRepository();
+
 
             // ------------------- Tour Services - novi (AŽURIRANO) -------------------
             _implementations[typeof(ITourPresenceService)] = new TourPresenceService(
@@ -200,9 +202,15 @@ namespace BookingApp.Services
                 CreateInstance<IForumCommentRepository>(),
                 CreateInstance<IReservationRepository>(),
                 CreateInstance<IAccommodationRepository>()
-             );
-            _implementations[typeof(IForumDisplayService)] = new ForumDisplayService(displayServiceDependencies);
+                );
 
+            _implementations[typeof(ICommentReportService)] = new CommentReportService(
+                CreateInstance<ICommentReportRepository>());
+   
+            _implementations[typeof(IForumDisplayService)] = new ForumDisplayService(
+             displayServiceDependencies,
+              CreateInstance<ICommentReportService>() 
+);
             _implementations[typeof(IForumService)] = new ForumService(
                 CreateInstance<IForumRepository>(),
                 CreateInstance<IForumDisplayService>()
@@ -367,11 +375,12 @@ namespace BookingApp.Services
             return new ForumViewModel(CreateInstance<IForumService>());
         }
 
-        public static ForumCommentsViewModel CreateForumCommentsViewModel(int forumId) // int umesto ForumItemDTO
+        public static ForumCommentsViewModel CreateForumCommentsViewModel(int forumId)
         {
             return new ForumCommentsViewModel(
                 CreateInstance<IForumService>(),
                 CreateInstance<IOwnerForumService>(),
+                CreateInstance<ICommentReportService>(), 
                 forumId
             );
         }

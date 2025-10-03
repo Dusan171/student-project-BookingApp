@@ -15,6 +15,8 @@ namespace BookingApp.Presentation.ViewModel.Owner
     {
         private readonly IForumService _forumService;
         private readonly IOwnerForumService _ownerForumService;
+        private readonly ICommentReportService _reportService; 
+
         private ForumDTO _selectedForum;
         private string _newCommentText;
         private bool _canAddComment;
@@ -22,7 +24,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
         private string _restrictionMessage;
         private string _userStatus;
 
-        // Direktan binding na DTO
         public ForumDTO SelectedForum
         {
             get => _selectedForum;
@@ -91,10 +92,15 @@ namespace BookingApp.Presentation.ViewModel.Owner
         public ICommand PostCommentCommand { get; private set; }
         public ICommand ReportCommentCommand { get; private set; }
 
-        public ForumCommentsViewModel(IForumService forumService, IOwnerForumService ownerForumService, int forumId)
+        public ForumCommentsViewModel(
+        IForumService forumService,
+        IOwnerForumService ownerForumService,
+        ICommentReportService reportService, 
+        int forumId)
         {
             _forumService = forumService;
             _ownerForumService = ownerForumService;
+            _reportService = reportService; 
 
             InitializeCommands();
             LoadForum(forumId);
@@ -201,10 +207,66 @@ namespace BookingApp.Presentation.ViewModel.Owner
             OnBackToForumsRequested?.Invoke();
         }
 
+        
         private void ExecuteReportComment(object parameter)
         {
-            MessageBox.Show("Report functionality will be implemented soon.", "Info",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            if (parameter is CommentDTO comment)
+            {
+                // Vlasnik ne može da prijavi komentare drugih vlasnika
+                if (comment.IsOwnerComment)
+                {
+                    MessageBox.Show("You cannot report comments from property owners.",
+                        "Report Denied", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+                if (comment.HasVerifiedStay)
+                {
+                    MessageBox.Show(
+                        "This guest has a verified stay at this location and cannot be reported.",
+                        "Cannot Report Verified Guest",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                    return;
+                }
+                // Proveri da li je već prijavio
+                if (_reportService.HasUserReported(comment.Id, Session.CurrentUser.Id))
+                {
+                    MessageBox.Show("You have already reported this comment.",
+                        "Already Reported", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var result = MessageBox.Show(
+                    $"Are you sure you want to report this comment?\n\n\"{comment.CommentText}\"",
+                    "Report Comment",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    bool success = _reportService.ReportComment(comment.Id, Session.CurrentUser.Id);
+
+                    if (success)
+                    {
+                        // Refresh forum da dobiješ ažurirane reports count
+                        LoadForum(SelectedForum.Id);
+
+                        MessageBox.Show(
+                            "Comment has been reported. Thank you for helping maintain forum quality.",
+                            "Report Submitted",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            "Failed to report comment. Please try again.",
+                            "Error",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                }
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -212,5 +274,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
     }
 }
