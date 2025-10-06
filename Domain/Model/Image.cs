@@ -10,6 +10,7 @@ namespace BookingApp.Domain.Model
     {
         public int Id { get; set; }
         public string Path { get; set; }
+        public string FullPath => System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Path);
 
         public Images()
         {
