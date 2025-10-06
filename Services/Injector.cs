@@ -34,6 +34,7 @@ namespace BookingApp.Services
             _implementations[typeof(INotificationRepository)] = new NotificationRepository();
             _implementations[typeof(IKeyPointRepository)] = new KeyPointRepository();
             _implementations[typeof(ITouristAttendanceRepository)] = new TouristAttendanceRepository();
+    
 
             _implementations[typeof(AccommodationValidationService)] = new AccommodationValidationService();
 
@@ -49,13 +50,19 @@ namespace BookingApp.Services
             _implementations[typeof(ITourRequestRepository)] = new TourRequestRepository();
             _implementations[typeof(ITourRequestParticipantRepository)] = new TourRequestParticipantRepository();
 
-            // NOVI - Repositoriji iz konfliktne grane
+
+           
             _implementations[typeof(IForumRepository)] = new ForumRepository();
             _implementations[typeof(IForumCommentRepository)] = new ForumCommentRepository();
             _implementations[typeof(ISystemNotificationRepository)] = new SystemNotificationRepository();
 
-            // NOVI - Tour Presence Notification moduli (dodati PRE servisa)
+
+
             _implementations[typeof(ITourPresenceNotificationRepository)] = new TourPresenceNotificationRepository();
+            _implementations[typeof(ITourNotificationRepository)] = new TourNotificationRepository();
+            _implementations[typeof(IComplexTourRequestRepository)] = new ComplexTourRequestRepository();
+            _implementations[typeof(IComplexTourRequestPartRepository)] = new ComplexTourRequestPartRepository();
+            _implementations[typeof(IComplexTourRequestParticipantRepository)] = new ComplexTourRequestParticipantRepository();
 
 
             // ------------------- Services -------------------
@@ -176,7 +183,7 @@ namespace BookingApp.Services
                 CreateInstance<ITourPresenceNotificationService>()
             );
 
-            // DODATO: ITouristAttendanceService
+            
             _implementations[typeof(ITouristAttendanceService)] = new TouristAttendanceService(
                 CreateInstance<ITouristAttendanceRepository>()
             );
@@ -187,6 +194,7 @@ namespace BookingApp.Services
                 CreateInstance<IUserRepository>(),
                 CreateInstance<INotificationService>()
             );
+
 
             _implementations[typeof(IHomeStatisticsService)] = new HomeStatisticsService(
                CreateInstance<IAccommodationService>(),
@@ -243,6 +251,24 @@ namespace BookingApp.Services
                 CreateInstance<IForumManagementService>(),
                 CreateInstance<IForumRepository>(),
                 CreateInstance<ILocationRepository>()
+            );
+
+
+            _implementations[typeof(ITourRequestStatisticsService)] = new TourRequestStatisticsService(
+                CreateInstance<ITourRequestRepository>()
+            );
+
+            _implementations[typeof(ITourNotificationService)] = new TourNotificationService(
+                CreateInstance<ITourNotificationRepository>(),
+                CreateInstance<ITourRequestRepository>(),
+                CreateInstance<ITourRepository>(),
+                CreateInstance<IUserRepository>()
+            );
+
+            _implementations[typeof(IComplexTourRequestService)] = new ComplexTourRequestService(
+                CreateInstance<IComplexTourRequestRepository>(),
+                CreateInstance<IComplexTourRequestPartRepository>(),
+                CreateInstance<IComplexTourRequestParticipantRepository>()
             );
 
         }
@@ -340,7 +366,7 @@ namespace BookingApp.Services
         {
             var presenceService = CreateInstance<ITourPresenceService>();
             var tourService = CreateInstance<ITourService>();
-            return new TourPresenceViewModel(presenceService, tourService, userId);
+            return new TourPresenceViewModel(userId);
         }
 
         public static TourRequestViewModel CreateTourRequestViewModel(int userId)
@@ -349,7 +375,7 @@ namespace BookingApp.Services
             return new TourRequestViewModel(requestService, userId);
         }
 
-        // NOVO: Factory za StatisticViewModel
+
         public static StatisticViewModel CreateStatisticViewModel()
         {
             return new StatisticViewModel(
@@ -396,6 +422,13 @@ namespace BookingApp.Services
                 ownerId,
                 navigateBack,
                 navigateToAddAccommodation);
+        }
+
+            public static ComplexTourRequestViewModel CreateComplexTourRequestViewModel(int userId)
+        {
+            var requestService = CreateInstance<IComplexTourRequestService>();
+            return new ComplexTourRequestViewModel(requestService, userId);
+
         }
     }
 }
