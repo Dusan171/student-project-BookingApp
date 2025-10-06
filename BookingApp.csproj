@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Fonts\arial.ttf" />
+    <None Remove="Resources\Fonts\arialbd.ttf" />
+    <None Remove="Resources\Fonts\arialbi.ttf" />
+    <None Remove="Resources\Fonts\ariali.ttf" />
     <None Remove="Resources\Images\amsterdam.jpg" />
     <None Remove="Resources\Images\apartman.jpg" />
     <None Remove="Resources\Images\barcelona.jpg" />
@@ -30,9 +34,22 @@
     <None Remove="Resources\Images\4416c2b3-1e55-4a05-bbb9-e9e29cfe828e.jpg" />
     <None Remove="Resources\Images\6dfaecf6-7e58-4108-b687-fbd9df4f59e7.jpg" />
     <None Remove="Resources\Images\835045f9-c621-4b41-8c52-cb96e004b67a.jpg" />
+    <None Remove="Resources\Videos\tutorijal.mp4" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Resources\Fonts\arial.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Fonts\arialbd.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Fonts\arialbi.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Fonts\ariali.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\Images\add.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -59,6 +76,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
 
+    <Content Include="Resources\Videos\tutorijal.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
     <Resource Include="Resources\Images\star_empty.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
@@ -70,16 +91,6 @@
     </Resource>
     <Resource Include="Resources\Images\photos.png" />
     <Resource Include="Resources\Images\star_filled.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-
-    <Resource Include="Resources\Images\4416c2b3-1e55-4a05-bbb9-e9e29cfe828e.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Images\6dfaecf6-7e58-4108-b687-fbd9df4f59e7.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\Images\835045f9-c621-4b41-8c52-cb96e004b67a.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -95,6 +106,11 @@
     <PackageReference Include="MvvmLightLibs" Version="5.4.1.1" />
     <PackageReference Include="QuestPDF" Version="2025.7.2" />
     <PackageReference Include="Refractored.MvvmHelpers" Version="1.6.2" />
+
+	<PackageReference Include="PdfSharp" Version="6.1.1" />
+	<PackageReference Include="LibVLCSharp" Version="3.9.0" />
+	<PackageReference Include="LibVLCSharp.WPF" Version="3.9.0" />
+	<PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
   </ItemGroup>
 
   <ItemGroup>

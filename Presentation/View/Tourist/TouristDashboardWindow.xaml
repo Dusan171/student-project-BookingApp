@@ -1,6 +1,7 @@
 ﻿<Window x:Class="BookingApp.Presentation.View.Tourist.TouristDashboardWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vlc="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
         xmlns:views="clr-namespace:BookingApp.Presentation.View.Tourist"
         Title="BookingApp - Tourist Dashboard" 
         Height="800" Width="1400"
@@ -12,17 +13,17 @@
         <Style x:Key="TabButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#7F8C8D"/>
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="25,12"/>
-            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="2,0"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="8" 
+                                CornerRadius="4" 
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" 
                                               VerticalAlignment="Center"/>
@@ -46,24 +47,59 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="TopButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F5F5F5"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#E8E8E8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid Background="#F8F9FA">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header/Navigation Bar -->
+        
         <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
-            <Grid Height="70" Margin="30,0">
+            <Grid Height="60" Margin="30,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Logo/Branding -->
+                
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <Border Width="40" Height="40" Background="#2E86C1" CornerRadius="8" Margin="0,0,15,0">
                         <TextBlock Text="B" FontSize="24" FontWeight="Bold" Foreground="White" 
@@ -75,76 +111,235 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Navigation Tabs -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Button x:Name="SearchToursTab" Content="🔍 Pretraga tura" 
-                            Style="{StaticResource TabButtonStyle}" IsDefault="True"
-                            Click="SearchTours_Click"/>
-
-                    <Button x:Name="MyReservationsTab" Content="📋 Moje rezervacije" 
-                            Style="{StaticResource TabButtonStyle}"
-                            Click="MyReservations_Click"/>
-
-                    <Button x:Name="ReviewsTab" Content="⭐ Ocene i komentari" 
-                            Style="{StaticResource TabButtonStyle}"
-                            Click="Reviews_Click"/>
-                    <Button x:Name="TourPresenceTab" Content="📍 Praćenje tura" 
-                            Style="{StaticResource TabButtonStyle}"
-                            Click="TourPresence_Click"/>
-
-                    <Button x:Name="TourRequestsTab" Content="📝 Zahtevi za ture" 
-                            Style="{StaticResource TabButtonStyle}"
-                            Click="TourRequests_Click"/>
-                </StackPanel>
-
-                <!-- User Info & Logout -->
+                
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="#F8F9FA" CornerRadius="20" Padding="15,8" Margin="0,0,15,0">
+                   
+                    <Button x:Name="TutorialButton" Style="{StaticResource TopButtonStyle}"
+                            Click="Tutorial_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="24" Height="24" Fill="#2E86C1" Margin="0,0,8,0"/>
-                            <TextBlock Text="{Binding CurrentUserName}" FontSize="14" FontWeight="SemiBold"
+                            <Path Width="16" Height="16" 
+                                  Data="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" 
+                                  Fill="#555555" 
+                                  Margin="0,0,6,0"/>
+                            <TextBlock Text="Pogledajte tutorijal" FontWeight="Medium" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+
+                    
+                    <Border Background="#F8F9FA" CornerRadius="20" Padding="12,6" Margin="10,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="16" Height="16" Margin="0,0,8,0">
+                                <Path Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" 
+                                      Fill="#2E86C1"/>
+                            </Viewbox>
+                            <TextBlock Text="{Binding CurrentUserName}" FontSize="13" FontWeight="SemiBold"
                                        Foreground="#2C3E50" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Background="#E74C3C" CornerRadius="6" Cursor="Hand">
-                        <Button Content="Odjavi se" Background="Transparent" Foreground="White"
-                                Padding="15,8" FontSize="13" FontWeight="SemiBold" BorderThickness="0"
-                                Click="Logout_Click"/>
-                    </Border>
+                  
+                    <Button Content="Odjavi se" Background="#E74C3C" Foreground="White"
+                            Padding="12,6" FontSize="12" FontWeight="SemiBold" BorderThickness="0"
+                            Click="Logout_Click">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="{TemplateBinding Background}" 
+                                        CornerRadius="6" 
+                                        Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Main Content Area -->
-        <Border Grid.Row="1" Background="Transparent" Margin="0,10,0,0">
+        
+        <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+            <Grid Height="50" Margin="30,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button x:Name="SearchToursTab" Style="{StaticResource TabButtonStyle}" IsDefault="True"
+                            Click="SearchTours_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" Margin="0,0,8,0">
+                                <Path Data="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" 
+                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            </Viewbox>
+                            <TextBlock Text="PRETRAŽITE TURE" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="MyReservationsTab" Style="{StaticResource TabButtonStyle}"
+                            Click="MyReservations_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" Margin="0,0,8,0">
+                                <Path Data="M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 9h-4v4h-2v-4H7v-2h4V6h2v4h4v2z" 
+                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                                      Stroke="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                                      StrokeThickness="0.5"/>
+                            </Viewbox>
+                            <TextBlock Text="REZERVACIJE" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="ReviewsTab" Style="{StaticResource TabButtonStyle}"
+                            Click="Reviews_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" Margin="0,0,8,0">
+                                <Path Data="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" 
+                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            </Viewbox>
+                            <TextBlock Text="OCENI TURU" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="TourPresenceTab" Style="{StaticResource TabButtonStyle}"
+                            Click="TourPresence_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" Margin="0,0,8,0">
+                                <Path Data="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" 
+                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            </Viewbox>
+                            <TextBlock Text="PRAĆENJE TURE" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="TourRequestsTab" Style="{StaticResource TabButtonStyle}"
+                            Click="TourRequests_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" Margin="0,0,8,0">
+                                <Path Data="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" 
+                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            </Viewbox>
+                            <TextBlock Text="NOVI ZAHTEV" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="ComplexTourRequestsTab" Style="{StaticResource TabButtonStyle}"
+                              Click="ComplexTourRequests_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" Margin="0,0,8,0">
+                                <Path Data="M3 14h4v-4H3v4zm0 5h4v-4H3v4zM3 9h4V5H3v4zm5 5h13v-4H8v4zm0 5h13v-4H8v4zM8 5v4h13V5H8z" 
+                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            </Viewbox>
+                            <TextBlock Text="SLOŽENI ZAHTEV" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button x:Name="StatisticsTab" Style="{StaticResource TabButtonStyle}"
+                            Click="Statistics_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" Margin="0,0,8,0">
+                                <Path Data="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" 
+                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            </Viewbox>
+                            <TextBlock Text="STATISTIKA" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="NotificationsTab" Style="{StaticResource TabButtonStyle}"
+                              Click="Notifications_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="14" Height="14" Margin="0,0,8,0">
+                                <Path Data="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" 
+                                      Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            </Viewbox>
+                            <TextBlock Text="OBAVEŠTENJA" FontWeight="SemiBold" FontSize="12"/>
+                        </StackPanel>
+                    </Button>
+
+                 
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        
+        <Border Grid.Row="2" Background="Transparent" Margin="0,10,0,0">
             <Grid x:Name="ContentArea">
-                <!-- Search Tours View (Default) -->
+                
                 <views:TourSearchView x:Name="TourSearchView" Visibility="Visible"/>
 
-                <!-- Reservation Form View -->
+                
                 <views:TourReservationView x:Name="TourReservationView" Visibility="Collapsed"/>
 
-               
-                <views:MojeRezervacijeView x:Name="MyReservationsContent" Visibility="Collapsed"/>
-
+                <views:MyReservationsView x:Name="MyReservationsContent" Visibility="Collapsed"/>
+                <views:TourDetailView x:Name="TourDetailView" Visibility="Collapsed"/>
                 <views:TourReviewView x:Name="TourReviewViewContent" Visibility="Collapsed"/>
 
                 <views:TourPresenceView x:Name="TourPresenceContent" Visibility="Collapsed"/>
                 <views:TourRequestsView x:Name="TourRequestsContent" Visibility="Collapsed"/>
 
-                <Border x:Name="ReviewsContent" Background="White" CornerRadius="8" 
-                        Margin="20" Visibility="Collapsed">
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="⭐" FontSize="64" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-                        <TextBlock Text="Ocene i komentari" FontSize="24" FontWeight="Bold" 
-                                   HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                        <TextBlock Text="Ocenite ture i vodiče" FontSize="16" 
-                                   Foreground="#7F8C8D" HorizontalAlignment="Center"/>
-                    </StackPanel>
+                
+                <views:ComplexTourRequestsView x:Name="ComplexTourRequestsContent" Visibility="Collapsed"/>
+
+                <views:TourRequestStatisticsView x:Name="TourStatisticsContent" Visibility="Collapsed"/>
+                <views:TourNotificationsView x:Name="TourNotificationsContent" Visibility="Collapsed"/>
+
+                
+
+               
+                <Border x:Name="TutorialContent"
+                          Background="White"
+                          CornerRadius="8"
+                          Margin="20"
+                          Padding="16"
+                          Visibility="Collapsed"
+                          VerticalAlignment="Stretch"
+                          HorizontalAlignment="Stretch">
+
+                    
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <Grid VerticalAlignment="Stretch">
+                            <Grid.RowDefinitions>
+                               
+                                <RowDefinition Height="*"/>
+                                
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                           
+                            <Viewbox Grid.Row="0"
+                                    Stretch="Uniform"
+                                    MaxWidth="1000"
+                                    MaxHeight="560"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,0,16">
+                                
+                                <vlc:VideoView x:Name="TutorialVideo"
+                               Width="1280"
+                               Height="720"
+                               Background="Black"/>
+                            </Viewbox>
+
+                           
+                            <StackPanel Grid.Row="1"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,4,0,0">
+                                <Button Content="Pusti"
+                        Width="120" Height="40"
+                        Background="#2E86C1" Foreground="White"
+                        FontWeight="SemiBold"
+                        Click="PlayTutorial_Click"
+                        Margin="6,0"/>
+                                <Button Content="Pauziraj"
+                        Width="120" Height="40"
+                        Background="#F39C12" Foreground="White"
+                        FontWeight="SemiBold"
+                        Click="PauseTutorial_Click"
+                        Margin="6,0"/>
+                                <Button Content="Stop"
+                        Width="120" Height="40"
+                        Background="#E74C3C" Foreground="White"
+                        FontWeight="SemiBold"
+                        Click="StopTutorial_Click"
+                        Margin="6,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
                 </Border>
-
-
             </Grid>
         </Border>
     </Grid>

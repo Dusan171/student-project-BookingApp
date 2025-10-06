@@ -5,25 +5,24 @@ using BookingApp.Services.DTO;
 
 namespace BookingApp.Presentation.View.Tourist
 {
-    public partial class MojeRezervacijeView : UserControl
+    public partial class MyReservationsView : UserControl
     {
-        public MojeRezervacijeViewModel ViewModel { get; private set; }
-
+        public MyReservationsViewModel ViewModel { get; private set; }
         public event EventHandler<TourReservationDTO>? ReviewRequested;
 
-
-
-        public MojeRezervacijeView()
+        public MyReservationsView()
         {
             InitializeComponent();
-            ViewModel = new MojeRezervacijeViewModel();
+            ViewModel = new MyReservationsViewModel();
             DataContext = ViewModel;
 
+            
             ViewModel.ReviewRequested += OnReviewRequested;
         }
 
         private void OnReviewRequested(object? sender, TourReservationDTO reservation)
         {
+            
             ReviewRequested?.Invoke(this, reservation);
         }
     }

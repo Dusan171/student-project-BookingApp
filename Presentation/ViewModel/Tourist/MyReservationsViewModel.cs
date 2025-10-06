@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Domain.Model;
@@ -10,7 +10,7 @@ using BookingApp.Utilities;
 
 namespace BookingApp.Presentation.ViewModel.Tourist
 {
-    public class MojeRezervacijeViewModel : ViewModelBase
+    public class MyReservationsViewModel : ViewModelBase
     {
         private readonly ITourReservationService _reservationService;
         private ObservableCollection<TourReservationDTO> _allReservations = new();
@@ -18,7 +18,23 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         private string _selectedStatusFilter = "Sve";
         private bool _isLoading = false;
         private string _statusMessage = "";
-        private TourReservationDTO? _selectedReservation;
+
+       
+        private static readonly List<string> MockGuides = new List<string>
+        {
+            "Marko Petrović",
+            "Ana Stojanović",
+            "Stefan Jovanović",
+            "Milica Nikolić",
+            "Aleksandar Mitrović",
+            "Jovana Pavlović",
+            "Nikola Stanković",
+            "Tamara Đorđević",
+            "Milan Radović",
+            "Jelena Milosavljević"
+        };
+
+        private static readonly Random _random = new Random();
 
         public event EventHandler<TourReservationDTO>? ReviewRequested;
 
@@ -27,11 +43,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             get => _filteredReservations;
             set => SetProperty(ref _filteredReservations, value);
         }
-
-        public ObservableCollection<string> StatusFilterOptions { get; set; } = new()
-        {
-            "Sve", "Aktivne", "Završene", "Otkazane"
-        };
 
         public string SelectedStatusFilter
         {
@@ -57,22 +68,16 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             set => SetProperty(ref _statusMessage, value);
         }
 
-        public TourReservationDTO? SelectedReservation
-        {
-            get => _selectedReservation;
-            set => SetProperty(ref _selectedReservation, value);
-        }
-
         public bool HasReservations => FilteredReservations.Count > 0;
         public bool HasNoReservations => !HasReservations && !IsLoading;
 
+        public ICommand FilterCommand { get; private set; } = null!;
         public ICommand RefreshCommand { get; private set; } = null!;
-        public ICommand CancelReservationCommand { get; private set; } = null!;
         public ICommand ReviewTourCommand { get; private set; } = null!;
 
-        public MojeRezervacijeViewModel() : this(null) { }
+        public MyReservationsViewModel() : this(null) { }
 
-        public MojeRezervacijeViewModel(ITourReservationService? reservationService)
+        public MyReservationsViewModel(ITourReservationService? reservationService)
         {
             _reservationService = reservationService ?? Services.Injector.CreateInstance<ITourReservationService>();
             InitializeCommands();
@@ -81,9 +86,24 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
         private void InitializeCommands()
         {
+            FilterCommand = new RelayCommand<string>(ExecuteFilter);
             RefreshCommand = new RelayCommand(ExecuteRefresh);
-            CancelReservationCommand = new RelayCommand<TourReservationDTO>(ExecuteCancelReservation, CanCancelReservation);
             ReviewTourCommand = new RelayCommand<TourReservationDTO>(ExecuteReviewTour, CanReviewTour);
+        }
+
+        private void ExecuteFilter(string? filterType)
+        {
+            SelectedStatusFilter = filterType switch
+            {
+                "Aktivne" => "Aktivne",
+                "Završene" => "Završene",
+                _ => "Sve"
+            };
+        }
+
+        private void ExecuteRefresh()
+        {
+            LoadReservations();
         }
 
         private void LoadReservations()
@@ -105,7 +125,13 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 _allReservations.Clear();
                 foreach (var reservation in reservations.OrderByDescending(r => r.ReservationDate))
                 {
-                    _allReservations.Add(reservation);
+                    // Uklanjamo otkazane rezervacije iz prikaza
+                    if (reservation.Status != TourReservationStatus.CANCELLED)
+                    {
+                        // Dodaj mock podatke za vodiča ako ne postoji
+                        AddMockGuideData(reservation);
+                        _allReservations.Add(reservation);
+                    }
                 }
 
                 ApplyFilter();
@@ -116,7 +142,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 }
                 else
                 {
-                    StatusMessage = $"Učitano {FilteredReservations.Count} rezervacija";
+                    StatusMessage = "";
                 }
             }
             catch (Exception ex)
@@ -131,6 +157,27 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
         }
 
+        private void AddMockGuideData(TourReservationDTO reservation)
+        {
+            try
+            {
+                
+                if (string.IsNullOrWhiteSpace(reservation.GuideName))
+                {
+                    reservation.GuideName = MockGuides[_random.Next(MockGuides.Count)];
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error adding mock guide data: {ex.Message}");
+               
+                if (string.IsNullOrWhiteSpace(reservation.GuideName))
+                {
+                    reservation.GuideName = "Profesionalni vodič";
+                }
+            }
+        }
+
         private void ApplyFilter()
         {
             FilteredReservations.Clear();
@@ -139,7 +186,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             {
                 "Aktivne" => _allReservations.Where(r => r.Status == TourReservationStatus.ACTIVE),
                 "Završene" => _allReservations.Where(r => r.Status == TourReservationStatus.COMPLETED),
-                "Otkazane" => _allReservations.Where(r => r.Status == TourReservationStatus.CANCELLED),
                 _ => _allReservations
             };
 
@@ -148,49 +194,38 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 FilteredReservations.Add(reservation);
             }
 
+            // Ažuriraj status message u zavisnosti od filtera
+            if (FilteredReservations.Count == 0 && !IsLoading)
+            {
+                StatusMessage = SelectedStatusFilter switch
+                {
+                    "Aktivne" => "Nemate aktivnih rezervacija.",
+                    "Završene" => "Nemate završenih rezervacija.",
+                    _ => "Nemate nijednu rezervaciju."
+                };
+            }
+            else
+            {
+                StatusMessage = "";
+            }
+
             OnPropertyChanged(nameof(HasReservations));
             OnPropertyChanged(nameof(HasNoReservations));
         }
 
-        private void ExecuteRefresh()
+        private void ExecuteReviewTour(TourReservationDTO? reservation)
         {
-            LoadReservations();
-        }
-
-        private void ExecuteCancelReservation(TourReservationDTO? reservation)
-        {
-            if (reservation == null) return;
-
             try
             {
-                if (!_reservationService.CanCancelReservation(reservation.Id))
+                if (reservation != null)
                 {
-                    StatusMessage = "Rezervaciju nije moguće otkazati.";
-                    return;
+                    ReviewRequested?.Invoke(this, reservation);
+                    StatusMessage = $"Otvaranje forme za ocenjivanje ture: {reservation.TourName}";
                 }
-
-                _reservationService.CancelReservation(reservation.Id);
-                StatusMessage = "Rezervacija je uspešno otkazana.";
-                LoadReservations();
             }
             catch (Exception ex)
             {
-                StatusMessage = $"Greška pri otkazivanju rezervacije: {ex.Message}";
-            }
-        }
-
-        private bool CanCancelReservation(TourReservationDTO? reservation)
-        {
-            return reservation != null &&
-                   reservation.Status == TourReservationStatus.ACTIVE &&
-                   _reservationService.CanCancelReservation(reservation.Id);
-        }
-
-        private void ExecuteReviewTour(TourReservationDTO? reservation)
-        {
-            if (reservation != null)
-            {
-                ReviewRequested?.Invoke(this, reservation);
+                StatusMessage = $"Greška pri otvaranju forme za ocenjivanje: {ex.Message}";
             }
         }
 
@@ -205,7 +240,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             {
                 _allReservations?.Clear();
                 FilteredReservations?.Clear();
-                StatusFilterOptions?.Clear();
             }
             base.Dispose(disposing);
         }

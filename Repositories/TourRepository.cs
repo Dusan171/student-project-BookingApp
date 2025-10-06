@@ -25,7 +25,10 @@ namespace BookingApp.Repositories
 
         public List<Tour> GetAll() => _tours.ToList();
 
-        public Tour GetById(int id) => _tours.First(t => t.Id == id);
+        public Tour GetById(int id)
+        {
+            return _tours.FirstOrDefault(t => t.Id == id);
+        }
 
         public List<Tour> GetByLocation(string city, string country)
         {
