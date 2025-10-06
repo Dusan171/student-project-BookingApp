@@ -1,0 +1,74 @@
+﻿<UserControl x:Class="BookingApp.Presentation.View.Guest.ForumViewPage" 
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             
+             xmlns:loc="clr-namespace:BookingApp.Utilities"
+             
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             Background="{DynamicResource PrimaryBackgroundColor}">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="{Binding ForumTitle}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}"
+                       VerticalAlignment="Center" TextWrapping="Wrap"/>
+
+            <Button Grid.Column="1" Content="{loc:Translate ForumView_CloseForum}" Style="{StaticResource DangerButton}" Command="{Binding CloseForumCommand}"
+                    Visibility="{Binding IsCloseButtonVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,10">
+            <ItemsControl ItemsSource="{Binding Comments}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="8" BorderBrush="{DynamicResource BorderColor}" 
+                                BorderThickness="1" Margin="10" Padding="15">
+                            <StackPanel>
+                                <WrapPanel>
+                                    <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16" VerticalAlignment="Center"/>
+
+                                    <Border Background="{DynamicResource VisitorTagBackground}" CornerRadius="10" Padding="8,3" Margin="10,0,0,0" 
+                                            Visibility="{Binding IsFromVisitor, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="{loc:Translate ForumView_TagVisited}" Foreground="{DynamicResource TagForeground}" FontSize="12"/>
+                                    </Border>
+
+                                    <Border Background="{DynamicResource OwnerTagBackground}" CornerRadius="10" Padding="8,3" Margin="10,0,0,0" 
+                                            Visibility="{Binding IsFromOwner, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Text="{loc:Translate ForumView_TagOwner}" Foreground="{DynamicResource TagForeground}" FontSize="12"/>
+                                    </Border>
+                                </WrapPanel>
+                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,10,0,0" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Padding="15" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0" Margin="10,0"
+                Visibility="{Binding IsCommentingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding NewCommentText, UpdateSourceTrigger=PropertyChanged}" MinLines="3" 
+                         AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Style="{StaticResource GuestTextBoxStyle}"/>
+                <Button Grid.Column="1" Content="{loc:Translate ForumView_PostComment}" Command="{Binding PostCommentCommand}" 
+                        Style="{StaticResource PrimaryButton}" VerticalAlignment="Bottom" Margin="10,0,0,0"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -5,6 +5,186 @@
              xmlns:utilities="clr-namespace:BookingApp.Utilities"
              StartupUri="View/SignInForm.xaml">
     <Application.Resources>
-        
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+               
+                <ResourceDictionary Source="/Themes/LightTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style x:Key="MenuButtonStyle" TargetType="RadioButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="{DynamicResource SecondaryTextColor}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="20,15"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource MenuButtonHoverColor}"/>
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource MenuButtonCheckedColor}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource AccentPrimaryColor}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="Button" x:Key="PrimaryButton">
+                <Setter Property="Background" Value="{DynamicResource AccentPrimaryColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource AccentForegroundColor}"/>
+                <Setter Property="Padding" Value="20,12"/>
+                <Setter Property="MinWidth" Value="140"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Style>
+
+            <Style x:Key="SecondaryButton" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource SecondaryButtonBackground}"/>
+                <Setter Property="Foreground" Value="{DynamicResource SecondaryButtonForeground}"/>
+                <Setter Property="Padding" Value="20,12"/>
+                <Setter Property="MinWidth" Value="140"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Cursor" Value="Hand"/>
+            </Style>
+
+            <Style x:Key="GuestTextBoxStyle" TargetType="TextBox">
+                <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="10,8"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+
+            <Style x:Key="GuestComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="10,8"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+
+            <Style x:Key="GuestSeparatorStyle" TargetType="Separator">
+                <Setter Property="Background" Value="{DynamicResource BorderColor}"/>
+                <Setter Property="Height" Value="1"/>
+            </Style>
+
+            <Style x:Key="GuestDatePickerStyle" TargetType="{x:Type DatePicker}">
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+                <Setter Property="IsTodayHighlighted" Value="True"/>
+                <Setter Property="SelectedDateFormat" Value="Short"/>
+                <Setter Property="Padding" Value="10,8"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+                <Setter Property="Background" Value="{DynamicResource SecondaryBackgroundColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type DatePicker}">
+                            <Grid x:Name="PART_Root">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <DatePickerTextBox x:Name="PART_TextBox"
+                                       Grid.Column="0"
+                                       Foreground="{DynamicResource PrimaryTextColor}"
+                                       Background="{TemplateBinding Background}"
+                                       BorderThickness="0"
+                                       Padding="{TemplateBinding Padding}"
+                                       VerticalContentAlignment="Center"/>
+
+                                <Button x:Name="PART_Button" Grid.Column="1" Foreground="{DynamicResource SecondaryTextColor}" Background="Transparent" BorderThickness="0" Width="35">
+                                    <TextBlock Text="📅" FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Button>
+
+                                <Popup x:Name="PART_Popup"
+                           AllowsTransparency="True"
+                           Placement="Bottom"
+                           PlacementTarget="{Binding ElementName=PART_TextBox}"
+                           StaysOpen="False"/>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+           
+            <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                <Setter Property="Background" Value="{DynamicResource DangerColor}"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+
+           
+            <Style x:Key="SuccessButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+                <Setter Property="Background" Value="{DynamicResource SuccessColor}"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style x:Key="GuestSliderStyle" TargetType="Slider">
+                <Setter Property="Background" Value="{DynamicResource BorderColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource AccentPrimaryColor}"/>
+                <Setter Property="Minimum" Value="1"/>
+                <Setter Property="Maximum" Value="5"/>
+                <Setter Property="TickPlacement" Value="BottomRight"/>
+                <Setter Property="TickFrequency" Value="1"/>
+                <Setter Property="IsSnapToTickEnabled" Value="True"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+            <Style x:Key="GuestGroupBoxStyle" TargetType="GroupBox">
+                <Setter Property="Padding" Value="15"/>
+                <Setter Property="Margin" Value="0,0,0,20"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryTextColor}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Background" Value="Transparent"/>
+            </Style>
+
+            <Style x:Key="ImageNavButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="50"/>
+                <Setter Property="Height" Value="50"/>
+                <Setter Property="Background" Value="#80000000"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="25">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="#B0000000"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <utilities:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

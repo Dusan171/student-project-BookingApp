@@ -15,5 +15,6 @@ namespace BookingApp.Domain.Interfaces
         bool HasGuestRated(int reservationId);
         AccommodationReview Save(AccommodationReview review);
         int NextId();
+        List<AccommodationReview> GetByAccommodationId(int accommodationId);
     }
 }

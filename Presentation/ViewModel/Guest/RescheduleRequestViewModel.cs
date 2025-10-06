@@ -25,18 +25,27 @@ namespace BookingApp.Presentation.ViewModel.Guest
         public DateTime? NewStartDate
         {
             get => _newStartDate;
-            set { _newStartDate = value; OnPropertyChanged(); }
+            set { _newStartDate = value; OnPropertyChanged(nameof(NewStayDuration)); }
         }
 
         private DateTime? _newEndDate;
         public DateTime? NewEndDate
         {
             get => _newEndDate;
-            set { _newEndDate = value; OnPropertyChanged(); }
+            set { _newEndDate = value; OnPropertyChanged(nameof(NewStayDuration)); }
         }
 
-        public List<DateTime> OccupiedDates { get; private set; }
-
+        public int NewStayDuration
+        {
+            get
+            {
+                if (NewStartDate.HasValue && NewEndDate.HasValue && NewEndDate.Value > NewStartDate.Value)
+                {
+                    return (NewEndDate.Value - NewStartDate.Value).Days;
+                }
+                return 0;
+            }
+        }
         #endregion
 
         public ICommand SendRequestCommand { get; }
@@ -48,18 +57,10 @@ namespace BookingApp.Presentation.ViewModel.Guest
 
             SendRequestCommand = new RelayCommand(SendRequest);
 
-            LoadInitialData();
+           // LoadInitialData();
         }
 
         #region Logika
-
-        private void LoadInitialData()
-        {
-            var reservationDto = new ReservationDTO(_reservationDetails.OriginalReservation);
-
-            OccupiedDates = _rescheduleRequestService.GetBlackoutDatesForReschedule(reservationDto);
-            OnPropertyChanged(nameof(OccupiedDates));
-        }
 
         private void SendRequest(object obj)
         {

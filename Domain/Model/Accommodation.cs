@@ -22,8 +22,16 @@ namespace BookingApp.Domain.Model
         public int? MinReservationDays { get; set; }
         public int CancellationDeadlineDays { get; set; }
         public List<AccommodationImage> Images { get; set; }
-        public Accommodation() { CancellationDeadlineDays = 1; Images = new List<AccommodationImage>(); }
-        public Accommodation(int id, string name, Location geolocation, AccommodationType type, int maxguests, int minreservationdays, int cancellationdeadlinedays = 1)
+        public int OwnerId { get; set; } 
+
+        public Accommodation()
+        {
+            CancellationDeadlineDays = 1;
+            Images = new List<AccommodationImage>();
+            OwnerId = 1;
+        }
+
+        public Accommodation(int id, string name, Location geolocation, AccommodationType type, int maxguests, int minreservationdays, int cancellationdeadlinedays = 1, int ownerId = 1)
         {
             Id = id;
             Name = name;
@@ -33,8 +41,11 @@ namespace BookingApp.Domain.Model
             MinReservationDays = minreservationdays;
             CancellationDeadlineDays = cancellationdeadlinedays;
             Images = new List<AccommodationImage>();
+            OwnerId = ownerId; 
         }
+
         public event PropertyChangedEventHandler? PropertyChanged;
+
         public string[] ToCSV()
         {
             string[] csvValues = {
@@ -47,10 +58,11 @@ namespace BookingApp.Domain.Model
                 MaxGuests.ToString(),
                 MinReservationDays.ToString(),
                 CancellationDeadlineDays.ToString(),
-
+                OwnerId.ToString() // NOVO - dodaj na kraj
             };
             return csvValues;
         }
+
         public void FromCSV(string[] values)
         {
             Id = Convert.ToInt32(values[0]);
@@ -65,6 +77,16 @@ namespace BookingApp.Domain.Model
             MaxGuests = int.Parse(values[6]);
             MinReservationDays = int.Parse(values[7]);
             CancellationDeadlineDays = int.Parse(values[8]);
+
+           
+            if (values.Length > 9)
+            {
+                OwnerId = int.Parse(values[9]);
+            }
+            else
+            {
+                OwnerId = 1; 
+            }
         }
     }
 }

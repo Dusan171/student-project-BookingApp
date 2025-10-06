@@ -12,6 +12,7 @@ namespace BookingApp.Domain.Interfaces
         GuestReviewDTO UpdateReview(GuestReviewDTO review);
         List<GuestReviewDTO> GetReviewsByReservation(ReservationDTO reservation);
         GuestReviewDTO GetReviewForReservation(int reservationId);
+        GuestRatingDetailsDTO GetRatingDetailsForReservation(int reservationId);
 
     }
 }

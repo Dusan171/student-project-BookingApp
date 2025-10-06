@@ -20,7 +20,7 @@ namespace BookingApp.Services
             _accommodationRepository = accommodationRepository;
             _reservationRepository = reservationRepository;
         }
-        public List<DateTime> GetBlackoutDatesForReschedule(ReservationDTO reservationDto)
+       /* public List<DateTime> GetBlackoutDatesForReschedule(ReservationDTO reservationDto)
         {
             if (reservationDto == null)
             {
@@ -39,7 +39,7 @@ namespace BookingApp.Services
                 .Where(od => !currentReservationDates.Contains(od.Date.Date))
                 .Select(od => od.Date)
                 .ToList();
-        }
+        }*/
         public void CreateRequest(RescheduleRequestDTO requestDto)
         {
             var reservation = _reservationRepository.GetById(requestDto.ReservationId);
@@ -50,7 +50,7 @@ namespace BookingApp.Services
 
             ValidateRequestRules(accommodation, requestDto.NewStartDate, requestDto.NewEndDate);
 
-            CheckForAvailability(reservation, requestDto.NewStartDate, requestDto.NewEndDate);
+           // CheckForAvailability(reservation, requestDto.NewStartDate, requestDto.NewEndDate);
 
             var newRequest = requestDto.ToRequest(); 
 
@@ -73,7 +73,7 @@ namespace BookingApp.Services
                 throw new InvalidOperationException($"Minimum stay is {accommodation.MinReservationDays} days.");
             }
         }
-        private void CheckForAvailability(Reservation originalReservation, DateTime newStart, DateTime newEnd)
+        /*private void CheckForAvailability(Reservation originalReservation, DateTime newStart, DateTime newEnd)
         {
             var reservationDtoForCheck = new ReservationDTO(originalReservation);
             var blackoutDates = GetBlackoutDatesForReschedule(reservationDtoForCheck);
@@ -87,7 +87,7 @@ namespace BookingApp.Services
             {
                 throw new InvalidOperationException("Selected period overlaps with another reservation.");
             }
-        }  
+        }  */
         public List<RescheduleRequestDTO> GetAll() 
         {
             return _rescheduleRequestRepository.GetAll().Select(r => new RescheduleRequestDTO(r)).ToList(); 
@@ -106,8 +106,22 @@ namespace BookingApp.Services
             if (existingRequestIndex != -1)
             {
                 allRequests[existingRequestIndex] = request;
+                UpdateReservation(request);
                 _rescheduleRequestRepository.SaveAll(allRequests);
             }
+        }
+        private void UpdateReservation(RescheduleRequest request)
+        {
+            var originalReservation = _reservationRepository.GetById(request.ReservationId);
+            if (originalReservation == null)
+            {
+                throw new InvalidOperationException("Reservation not found.");
+            }
+
+            originalReservation.StartDate = request.NewStartDate;
+            originalReservation.EndDate = request.NewEndDate;
+
+            _reservationRepository.Update(originalReservation);
         }
         public void Create(CreateRescheduleRequestDTO requestDto)
         {
@@ -120,7 +134,7 @@ namespace BookingApp.Services
                 throw new InvalidOperationException("Associated accommodation could not be found.");
 
             ValidateRequestRules(accommodation, requestDto.NewStartDate, requestDto.NewEndDate);
-            CheckForAvailability(reservation, requestDto.NewStartDate, requestDto.NewEndDate);
+           // CheckForAvailability(reservation, requestDto.NewStartDate, requestDto.NewEndDate);
 
             var newRequest = new RescheduleRequest
             {

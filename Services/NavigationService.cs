@@ -8,15 +8,24 @@ namespace BookingApp.Services
 {
     public class NavigationService : INavigationService
     {
+        /* public void ShowAccommodations()
+         {
+             var accommodationsWindow = new AccommodationLookup();
+             accommodationsWindow.ShowDialog();
+         }
+         public void ShowMyReservations()
+         {
+             var myReservationsWindow = new MyReservationsView();
+             myReservationsWindow.ShowDialog();
+         }*/
         public void ShowAccommodations()
         {
-            var accommodationsWindow = new AccommodationLookup();
-            accommodationsWindow.ShowDialog();
+            throw new NotImplementedException();
         }
+
         public void ShowMyReservations()
         {
-            var myReservationsWindow = new MyReservationsView();
-            myReservationsWindow.ShowDialog();
+            throw new NotImplementedException();
         }
     }
 }

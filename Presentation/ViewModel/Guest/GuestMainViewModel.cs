@@ -1,37 +1,86 @@
-﻿using BookingApp.Presentation.View.Guest; 
-using BookingApp.Utilities;
-using BookingApp.Domain.Interfaces;
+﻿using System;
 using System.Windows.Input;
-using BookingApp.Services;
+using BookingApp.Services.DTO;
+using BookingApp.Utilities;
+using BookingApp.View;
 
 namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class GuestMainViewModel : ViewModelBase
     {
-        private readonly INavigationService _navigationService;
+        private ViewModelBase _currentViewModel;
+        public ViewModelBase CurrentViewModel
+        {
+            get => _currentViewModel;
+            set { _currentViewModel = value; OnPropertyChanged(); }
+        }
         #region Komande
-        public ICommand OpenAccommodationsCommand { get; }
-        public ICommand OpenMyReservationsCommand { get; }
+        public ICommand ShowAccommodationsCommand { get; }
+        public ICommand ShowMyReservationsCommand { get; }
+        public ICommand ShowForumsCommand { get; }
+        public ICommand ShowSettingsCommand { get; }
+        public ICommand ShowAnywhereAnytimeCommand { get; }
         #endregion
-
+        public static event Action CloseMainWindowRequested;
+        public static event Action<AccommodationDetailsDTO> OpenReservationWindowRequested;
         public GuestMainViewModel()
         {
-            _navigationService = Injector.CreateInstance<INavigationService>();
+            ShowAccommodationsCommand = new RelayCommand(p => ShowAccommodations());
+            ShowMyReservationsCommand = new RelayCommand(p => CurrentViewModel = new MyReservationsViewModel());
+            ShowForumsCommand = new RelayCommand(p => CurrentViewModel = new ForumListViewModel());
+            ShowSettingsCommand = new RelayCommand(p => CurrentViewModel = new SettingsViewModel());
+            ShowAnywhereAnytimeCommand = new RelayCommand(p => CurrentViewModel = new AnywhereAnytimeViewModel());
+        }
+        public void InitializeSubscribers()
+        {
+            AccommodationLookupViewModel.ViewDetailsRequested += ShowAccommodationDetails;
+            AccommodationDetailsViewModel.GoBackToSearchRequested += ShowAccommodations;
+            AccommodationDetailsViewModel.ReserveFromDetailsRequested += OnReserveFromDetailsRequested;
+            ForumListViewModel.ViewForumRequested += ShowForumDetails;
 
-            OpenAccommodationsCommand = new RelayCommand(OpenAccommodations);
-            OpenMyReservationsCommand = new RelayCommand(OpenMyReservations);
+            ShowAccommodations();
         }
 
-        #region Logika Komandi
+        #region Logika Navigacije i Akcija
 
-        private void OpenAccommodations(object obj)
+        private void OnReserveFromDetailsRequested(AccommodationDetailsDTO accommodation)
         {
-            _navigationService.ShowAccommodations();
+            OpenReservationWindowRequested?.Invoke(accommodation);
         }
-
-        private void OpenMyReservations(object obj)
+        private void ShowAccommodations() 
         {
-            _navigationService.ShowMyReservations();
+            var vm = new AccommodationLookupViewModel();
+
+            vm.Initialize();
+
+            CurrentViewModel = vm;
+        }
+        private void ShowMyReservations(object obj) => CurrentViewModel = new MyReservationsViewModel();
+        private void ShowForums(object obj) => CurrentViewModel = new ForumListViewModel();
+        private void ShowSettings(object obj) => CurrentViewModel = new SettingsViewModel();
+        private void ShowAnywhereAnytime(object obj) => CurrentViewModel = new AnywhereAnytimeViewModel();
+        private void ShowAccommodationDetails(AccommodationDetailsDTO accommodation)
+        {
+            CurrentViewModel = new AccommodationDetailsViewModel(accommodation);
+        }
+        public void ShowForumDetails(ForumDTO forum)
+        {
+            CurrentViewModel = new ForumViewViewModel(forum);
+        }
+        public void HandleLogout()
+        {
+            Cleanup(); 
+            Session.CurrentUser = null;
+            var signInWindow = new SignInForm();
+            signInWindow.Show();
+            CloseMainWindowRequested?.Invoke();
+        }
+        public void Cleanup()
+        {
+            AccommodationLookupViewModel.ViewDetailsRequested -= ShowAccommodationDetails;
+            AccommodationDetailsViewModel.GoBackToSearchRequested -= ShowAccommodations;
+            AccommodationDetailsViewModel.ReserveFromDetailsRequested -= OnReserveFromDetailsRequested;
+            ForumListViewModel.ViewForumRequested -= ShowForumDetails;
         }
 
         #endregion

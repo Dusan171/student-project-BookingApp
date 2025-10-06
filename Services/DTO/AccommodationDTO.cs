@@ -21,16 +21,20 @@ namespace BookingApp.Services.DTO
         private int? _minReservationDays;
         private int _cancellationDeadlineDays;
         private List<AccommodationImageDTO> _imagePaths;
+        private int _ownerId; 
+
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
         public int Id
         {
             get => _id;
             set => _id = value;
         }
+
         public string Name
         {
             get => _name;
@@ -42,6 +46,7 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
+
         public LocationDTO GeoLocation
         {
             get => _geoLocation;
@@ -53,6 +58,7 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
+
         public string Type
         {
             get => _type;
@@ -64,6 +70,7 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
+
         public int? MaxGuests
         {
             get => _maxGuests;
@@ -75,17 +82,19 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
+
         public int? MinReservationDays
         {
             get => _minReservationDays;
             set
-    {
+            {
                 if (_minReservationDays != value)
                 {
                     _minReservationDays = value; OnPropertyChanged();
                 }
             }
         }
+
         public int CancellationDeadlineDays
         {
             get => _cancellationDeadlineDays;
@@ -97,6 +106,7 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
+
         public List<AccommodationImageDTO> ImagePaths
         {
             get => _imagePaths;
@@ -108,11 +118,27 @@ namespace BookingApp.Services.DTO
                 }
             }
         }
+
+        
+        public int OwnerId
+        {
+            get => _ownerId;
+            set
+            {
+                if (_ownerId != value)
+                {
+                    _ownerId = value; OnPropertyChanged();
+                }
+            }
+        }
+
         public AccommodationDTO()
         {
             GeoLocation = new LocationDTO();
             _imagePaths = new List<AccommodationImageDTO>();
+            _ownerId = 1; 
         }
+
         public AccommodationDTO(Accommodation a)
         {
             Id = a.Id;
@@ -123,22 +149,24 @@ namespace BookingApp.Services.DTO
             MinReservationDays = a.MinReservationDays;
             CancellationDeadlineDays = a.CancellationDeadlineDays;
             ImagePaths = a.Images.Select(i => new AccommodationImageDTO { Path = i.Path }).ToList();
+            OwnerId = a.OwnerId; 
         }
+
         public Accommodation ToAccommodation()
         {
             var accommodation = new Accommodation
             {
                 Id = this.Id,
                 Name = this.Name,
-                GeoLocation=this.GeoLocation.ToLocation(),
+                GeoLocation = this.GeoLocation.ToLocation(),
                 Type = Enum.Parse<AccommodationType>(this.Type),
                 MaxGuests = this.MaxGuests,
                 MinReservationDays = this.MinReservationDays,
                 CancellationDeadlineDays = this.CancellationDeadlineDays,
-                Images = this.ImagePaths.Select(i => new AccommodationImage { Path = i.Path }).ToList()
+                Images = this.ImagePaths.Select(i => new AccommodationImage { Path = i.Path }).ToList(),
+                OwnerId = this.OwnerId 
             };
             return accommodation;
         }
     }
 }
-

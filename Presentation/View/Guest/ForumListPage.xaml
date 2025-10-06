@@ -1,0 +1,85 @@
+﻿<UserControl x:Class="BookingApp.Presentation.View.Guest.ForumListPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             
+             xmlns:loc="clr-namespace:BookingApp.Utilities"
+             
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             Background="{DynamicResource PrimaryBackgroundColor}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="20,20,20,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="{loc:Translate ForumList_Title}" FontSize="32" FontWeight="Bold" 
+                       Foreground="{DynamicResource PrimaryTextColor}" VerticalAlignment="Center"/>
+
+            <Button Grid.Column="1" Content="{loc:Translate ForumList_CreateNew}" Command="{Binding CreateNewForumCommand}" 
+                    Style="{StaticResource PrimaryButton}"/>
+        </Grid>
+
+        <Separator Grid.Row="1" Style="{StaticResource GuestSeparatorStyle}" Margin="20,5"/>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="10,0,10,10">
+            <ItemsControl ItemsSource="{Binding Forums}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="8" Width="420"
+                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" 
+                                Margin="10" Padding="20">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Row="0">
+                                    <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding LocationName}" Foreground="{DynamicResource SecondaryTextColor}" Margin="0,5,0,0" FontSize="16"/>
+
+                                    <WrapPanel Margin="0,15,0,0">
+                                        <TextBlock FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextColor}" FontSize="16">
+                                            <Run Text="{Binding CommentCount}"/>
+                                            <Run Text=" "/>
+                                            <Run Text="{loc:Translate ForumList_CommentsSuffix}"/>
+                                        </TextBlock>
+
+                                        <Border Background="{DynamicResource UsefulTagBackground}" CornerRadius="10" Padding="8,3" Margin="15,0,0,0" 
+                                                Visibility="{Binding IsVeryUseful, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <TextBlock Text="{loc:Translate ForumList_TagUseful}" Foreground="{DynamicResource TagForeground}" FontSize="12"/>
+                                        </Border>
+
+                                        <Border Background="{DynamicResource DangerColor}" CornerRadius="10" Padding="8,3" Margin="15,0,0,0" 
+                                                Visibility="{Binding IsClosed, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <TextBlock Text="{loc:Translate ForumList_TagClosed}" Foreground="{DynamicResource TagForeground}" FontSize="12"/>
+                                        </Border>
+                                    </WrapPanel>
+                                </StackPanel>
+
+                                <Button Grid.Row="1" Content="{loc:Translate ForumList_ViewForum}" Command="{Binding DataContext.OpenForumCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                        CommandParameter="{Binding}" HorizontalAlignment="Right" Margin="0,20,0,0" Style="{StaticResource SecondaryButton}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
