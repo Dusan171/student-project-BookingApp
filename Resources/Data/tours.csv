@@ -1,6 +1,6 @@
-1|Ruma - Obilazak grada|1|srpski|20|3|25|NONE|3|1|1|1|0
-2|Zlatibor|2|engleski|4|3|15|NONE|3|3|2|2|0
-3|Nis - Obilazak starog grada|4|srpski|2|2|1|NONE|3|8|3|3|0
+1|Ruma - Obilazak grada|1|srpski|20|3|25|FINISHED|3|1|1|1|0
+2|Zlatibor|2|engleski|4|3|15|FINISHED|3|3|2|2|0
+3|Nis - Obilazak starog grada|4|srpski|2|2|1|FINISHED|3|8|3|3|0
 4|Pariz|5|engleski|20|3|3|CANCELLED|3|4|5||0
 5|Nis - Muzej|4|srpski|12|2|1|NONE|3|8|3|3|0
 6|Nis - Tvrdjava|4|srpski|15|2|8|FINISHED|3|7|22|3|0
@@ -14,4 +14,8 @@
 14|Tura Madjarska|0|srpski|10|0|24|FINISHED|3|28|32||0
 15|Tura Praga|30|Ceski|10|0|1|FINISHED|3|29,30,31|33||0
 16|Tura Bec|0|nemacki|7|0|24|FINISHED|3|32,33,34|34||0
-17|Tura Spanija|31|engleski|20|0|24|ACTIVE|3|35,36,37|35||0
+17|Tura Spanija|31|engleski|20|0|24|FINISHED|3|35,36,37|35||0
+18|Tura Praga|32|Srpski|1|0|3|FINISHED|3|38,39|36||0
+19|Tura Beca|33|Serbian|10|0|1|FINISHED|3|40,41|37|7|0
+20|Tura Bratislave|34|English|10|0|5|NONE|3|42,43|38|8|0
+21|Tour of Bratislava|35|English|6|0|3|NONE|3|44,45|39|9|0
