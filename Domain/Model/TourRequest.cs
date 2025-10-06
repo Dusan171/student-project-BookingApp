@@ -35,7 +35,9 @@ namespace BookingApp.Domain.Model
         public List<TourRequestParticipant> Participants { get; set; } = new List<TourRequestParticipant>();
         public User Tourist { get; set; }
         public User AcceptedGuide { get; set; }
-
+        public string TouristName => Tourist != null
+            ? Tourist.FirstName + " " + Tourist.LastName
+            : $"Unknown Tourist {TouristId}";
         public bool IsValid => Status != TourRequestStatus.INVALID && DateFrom > DateTime.Now.AddDays(2);
 
         public TourRequest()
