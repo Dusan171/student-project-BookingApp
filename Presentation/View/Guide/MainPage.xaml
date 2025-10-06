@@ -4,22 +4,53 @@
       Background="White">
 
     <Grid Background="White">
-        <Grid Height="50" Background="#FF2D2D30" VerticalAlignment="Top">
-            <TextBlock Text="BookingApp" Foreground="White" FontSize="18" VerticalAlignment="Center" Margin="10,0,0,0"/>
+        <Grid Height="56" Background="#FF2D2D30" VerticalAlignment="Top">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+
+                <Button Content="←" Width="40" Height="40" 
+                        Background="Transparent" Foreground="White"
+                        FontSize="18" BorderThickness="0"
+                        HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Cursor="Hand" Click="Back_Button"/>
+
+                <TextBlock Text="BookingApp" Foreground="White" 
+                           FontSize="20" FontWeight="Bold"
+                           VerticalAlignment="Center" Margin="10,0,0,0"/>
+            </StackPanel>
+
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0">
-                <Button Content="?" Width="30" Margin="0,0,5,0"/>
-                <Button Content="⎋" Width="30"/>
+                <Button Content="🧙‍♂️" Width="40" Height="40"
+                        Background="Transparent" Foreground="White" 
+                        FontSize="16" BorderThickness="0" Cursor="Hand" Click="WizardButton_Click"/>
+                <Button Content="❓" Width="40" Height="40"
+                        Background="Transparent" Foreground="White" 
+                        FontSize="16" BorderThickness="0" Cursor="Hand" Click="HelpButton_Click"/>
+                <Button x:Name="ToolTipToggleButton" Content="💡" Width="40" Height="40"
+        Background="Transparent" Foreground="Yellow" 
+        FontSize="16" BorderThickness="0" Cursor="Hand" Click="ToolTipButton_Click"/>
+
+                <Button Content="➜]" Width="40" Height="40"
+                        Background="Transparent" Foreground="White" 
+                        FontSize="16" BorderThickness="0" Cursor="Hand" Click="LogoutButton_Click"/>
             </StackPanel>
         </Grid>
 
-        <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden" Margin="10,60,10,60" />
+        <Frame x:Name="MainFrame" Margin="0,60,0,60" NavigationUIVisibility="Hidden" />
 
-        <DockPanel Height="50" VerticalAlignment="Bottom" Background="#FF2D2D30">
-            <Button DockPanel.Dock="Left" Content="📍" FontSize="20" Width="85" Background="Transparent" Foreground="White" Click="Tours_Click"/>
-            <Button DockPanel.Dock="Left" Content="⭐" FontSize="20" Width="85" Background="Transparent" Foreground="White" Click="Reviews_Click"/>
-            <Button DockPanel.Dock="Left" Content="❌" FontSize="20" Width="85" Background="Transparent" Foreground="White" Click="Statistics_Click"/>
-            <Button DockPanel.Dock="Left" Content="📷" FontSize="20" Width="85" Background="Transparent" Foreground="White"/>
-            <Button DockPanel.Dock="Left" Content="⚙️" FontSize="20" Width="85" Background="Transparent" Foreground="White"/>
+        <DockPanel Height="56" VerticalAlignment="Bottom" Background="#FF2D2D30">
+            <Button DockPanel.Dock="Left" Content="📍" ToolTip="Tours" FontSize="22" Width="106"
+                    Background="Transparent" Foreground="White" BorderThickness="0" Cursor="Hand"
+                    Click="ToursButton_Click"/>
+            <Button DockPanel.Dock="Left" Content="★" ToolTip="Reviews" FontSize="22" Width="106"
+                    Background="Transparent" Foreground="White" BorderThickness="0" Cursor="Hand"
+                    Click="ReviewsButton_Click"/>
+            <Button DockPanel.Dock="Left" Content="📊" ToolTip="Statistics" FontSize="22" Width="106"
+                    Background="Transparent" Foreground="White" BorderThickness="0" Cursor="Hand"
+                    Click="StatisticsButton_Click"/>
+            <Button DockPanel.Dock="Left" Content="💬" ToolTip="Requests" FontSize="22" Width="106"
+                    Background="Transparent" Foreground="White" BorderThickness="0" Cursor="Hand" Click="RequestButton_Click"/>
+            <!--<Button DockPanel.Dock="Left" Content="⚙️" ToolTip="Settings" FontSize="22" Width="85"
+                    Background="Transparent" Foreground="White" BorderThickness="0" Cursor="Hand"/>-->
         </DockPanel>
     </Grid>
 </Page>
