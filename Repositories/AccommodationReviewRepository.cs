@@ -43,5 +43,10 @@ namespace BookingApp.Repositories
             var allReviews = GetAll();
             return allReviews.Any() ? allReviews.Max(r => r.Id) + 1 : 1;
         }
+
+        public List<AccommodationReview> GetByAccommodationId(int accommodationId)
+        {
+            return GetAll();
+        }
     }
 }

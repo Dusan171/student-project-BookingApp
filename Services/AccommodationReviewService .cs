@@ -13,12 +13,17 @@ namespace BookingApp.Services
         
         private readonly IAccommodationReviewRepository _accommodationReviewRepository;
         private const int DaysToLeaveReview = 5;
+        private readonly IAccommodationRepository _accommodationRepository;
+        private readonly IReservationRepository _reservationRepository; 
 
-        public AccommodationReviewService(IAccommodationReviewRepository accommodationReviewRepository)
+        public AccommodationReviewService(IAccommodationReviewRepository reviewRepository, IAccommodationRepository accommodationRepository, IReservationRepository reservationRepository)
         {
-            _accommodationReviewRepository = accommodationReviewRepository;
+            _accommodationReviewRepository = reviewRepository;
+            _accommodationRepository = accommodationRepository;
+            _reservationRepository = reservationRepository;
         }
 
+      
         public bool IsReviewPeriodExpired(ReservationDTO reservation)
         {
             return (DateTime.Now - reservation.EndDate).TotalDays > DaysToLeaveReview;
@@ -96,6 +101,16 @@ namespace BookingApp.Services
                 Comment = reviewModel.Comment,
                 CreatedAt = reviewModel.CreatedAt
             };
+        }
+        public List<AccommodationReview> GetReviewsByAccommodationId(int accommodationId)
+        {
+            var accommodationsReservations = _reservationRepository.GetByAccommodationId(accommodationId);
+            var reservationIds = accommodationsReservations.Select(r => r.Id).ToList();
+            var allReviews = _accommodationReviewRepository.GetAll(); 
+
+            return allReviews
+                .Where(r => reservationIds.Contains(r.ReservationId))
+                .ToList();
         }
     }
 }

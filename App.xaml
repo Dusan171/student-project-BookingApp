@@ -183,7 +183,7 @@
                 </Style.Triggers>
             </Style>
 
-            <utilities:BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+            <utilities:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
         </ResourceDictionary>
     </Application.Resources>

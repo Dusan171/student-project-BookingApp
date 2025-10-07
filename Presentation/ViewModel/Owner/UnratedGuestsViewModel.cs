@@ -27,10 +27,23 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 OnPropertyChanged();
             }
         }
-    
-        public ICommand RateGuestCommand { get; }
+        private ObservableCollection<GuestRatingDetailsDTO> _displayItems;
+        public ObservableCollection<GuestRatingDetailsDTO> DisplayItems
+        {
+            get => _displayItems;
+            set
+            {
+                _displayItems = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HasNoUnratedGuests));
+            }
+        }
+        public bool HasNoUnratedGuests => DisplayItems?.Count == 0;
 
-        public UnratedGuestsViewModel(IReservationService reservationService, IGuestReviewService guestReviewService)
+        public ICommand RateGuestCommand { get; }
+        public ICommand BackToHomeCommand { get; set; }
+
+        public UnratedGuestsViewModel(IReservationService reservationService, IGuestReviewService guestReviewService, Action goBackAction)
         {
             _reservationService = reservationService;
             _guestReviewService = guestReviewService;
@@ -38,12 +51,50 @@ namespace BookingApp.Presentation.ViewModel.Owner
             LoadUnratedReservations();
 
             RateGuestCommand = new RelayCommand(param => RateGuest(param));
+            BackToHomeCommand = new RelayCommand(param => goBackAction?.Invoke());
         }
 
         private void LoadUnratedReservations()
         {
             var unrated = _reservationService.GetUnratedReservations();
             UnratedReservations = new ObservableCollection<ReservationDTO>(unrated);
+            LoadDisplayData();
+        }
+
+        private void LoadDisplayData()
+        {
+            if (UnratedReservations == null)
+            {
+                DisplayItems = new ObservableCollection<GuestRatingDetailsDTO>();
+                return;
+            }
+
+            var displayItems = UnratedReservations
+                .Select(CreateDisplayItem)
+                .Where(item => item != null)
+                .ToList();
+
+            DisplayItems = new ObservableCollection<GuestRatingDetailsDTO>(displayItems);
+        }
+
+        private GuestRatingDetailsDTO CreateDisplayItem(ReservationDTO reservation)
+        {
+            try
+            {
+                return _guestReviewService.GetRatingDetailsForReservation(reservation.Id);
+            }
+            catch
+            {
+                return new GuestRatingDetailsDTO
+                {
+                    ReservationId = reservation.Id,
+                    StartDate = reservation.StartDate,
+                    EndDate = reservation.EndDate,
+                    GuestName = "Guest",
+                    AccommodationName = "Property",
+                    Review = new GuestReviewDTO { ReservationId = reservation.Id }
+                };
+            }
         }
 
         private void RateGuest(object parameter)
@@ -54,6 +105,12 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 rateGuestView.ShowDialog();
                 LoadUnratedReservations();
             }
+        }
+
+      
+        private void BackToHome()
+        {
+            BackToHomeCommand?.Execute("Home");
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -5,13 +5,26 @@ using BookingApp.Utilities;
 using BookingApp.Presentation.View.Owner;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
+using BookingApp.Services.DTO;
 
 namespace BookingApp.Presentation.ViewModel.Owner
 {
     public class HomeViewModel : INotifyPropertyChanged
     {
-        private readonly IReservationService _reservationService; 
-        private readonly IGuestReviewService _guestReviewService; 
+        private readonly IHomeStatisticsService _statisticsService;
+        private readonly IUserService _userService;
+
+        private HomeStatisticDTO _statistics;
+
+        public HomeStatisticDTO Statistics
+        {
+            get => _statistics;
+            private set
+            {
+                _statistics = value;
+                OnPropertyChanged();
+            }
+        }
 
         private object _currentContent;
         public object CurrentContent
@@ -25,39 +38,49 @@ namespace BookingApp.Presentation.ViewModel.Owner
         }
 
         public ICommand ShowUnratedGuestsCommand { get; }
-        public ICommand ShowMyUnitsCommand { get; }
-        public ICommand ShowForumsCommand { get; }
+        public ICommand NavigateCommand { get; set; }
+        public ICommand ViewSuggestionsCommand { get; } 
 
-        public HomeViewModel(IReservationService reservationService, IGuestReviewService guestReviewService)
+        public HomeViewModel(IReservationService reservationService,
+                                     IGuestReviewService guestReviewService,
+                                     IHomeStatisticsService statisticsService,
+                                     IUserService userService)
         {
-            _reservationService = reservationService;
-            _guestReviewService = guestReviewService;
+            _statisticsService = statisticsService;
+            _userService = userService;
 
             ShowUnratedGuestsCommand = new RelayCommand(ShowUnratedGuests);
-            ShowMyUnitsCommand = new RelayCommand(ShowMyUnits);
-            ShowForumsCommand = new RelayCommand(ShowForums);
+            ViewSuggestionsCommand = new RelayCommand(() =>
+            {
+                NavigateCommand?.Execute("Suggestions");
+            });
+            LoadStatistics();
+        }
 
-            CurrentContent = new WelcomeView();
+        private void LoadStatistics()
+        {
+            try
+            {
+                int currentOwnerId = _userService.GetCurrentUserId();
+                Statistics = _statisticsService.GetOwnerStatistics(currentOwnerId);
+            }
+            catch
+            {
+                Statistics = new HomeStatisticDTO
+                {
+                    TotalReviews = 0,
+                    AverageGrade = 0.0,
+                    ActiveProperties = 0,
+                    WelcomeMessage = "Welcome!"
+                };
+            }
         }
 
         private void ShowUnratedGuests()
         {
-            var unratedViewModel = Injector.CreateUnratedGuestsViewModel();
-
-            var unratedView = new UnratedGuestsView();
-
-            unratedView.DataContext = unratedViewModel;
-
-            CurrentContent = unratedView;
+            NavigateCommand?.Execute("UnratedGuests");
         }
-
-        private void ShowMyUnits()
-        {
-        }
-
-        private void ShowForums()
-        {
-        }
+       
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)

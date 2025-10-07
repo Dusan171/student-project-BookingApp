@@ -1,13 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.View;
 using BookingApp.Presentation.ViewModel.Tourist;
-using System.Windows.Controls;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services;
+using LibVLCSharp.Shared;
+using System.Windows.Media;
+using VlcMediaPlayer = LibVLCSharp.Shared.MediaPlayer;
 
 namespace BookingApp.Presentation.View.Tourist
 {
@@ -15,12 +18,32 @@ namespace BookingApp.Presentation.View.Tourist
     {
         private bool _tourPresenceInitialized = false;
         private bool _tourRequestsInitialized = false;
+        private bool _tourStatisticsInitialized = false;
+        private bool _tourNotificationsInitialized = false;
+        private bool _complexTourRequestsInitialized = false;
+        private LibVLC _libVLC;
+        private VlcMediaPlayer _mediaPlayer;
+        private Media _currentMedia;
 
-        public string CurrentUserName => Session.CurrentUser?.FirstName + " " + Session.CurrentUser?.LastName ?? "Tourist";
+
+        public string CurrentUserName =>
+            $"{Session.CurrentUser?.FirstName} {Session.CurrentUser?.LastName}".Trim() == ""
+                ? "Tourist"
+                : $"{Session.CurrentUser?.FirstName} {Session.CurrentUser?.LastName}";
 
         public TouristDashboardWindow()
         {
+            Core.Initialize();
             InitializeComponent();
+
+            var libvlcPath = @"C:\Users\PC\.nuget\packages\videolan.libvlc.windows\3.0.21\runtimes\win-x64\native";
+            Core.Initialize();
+            _libVLC = new LibVLC("--plugin-path=" + System.IO.Path.Combine(libvlcPath, "plugins"), libvlcPath);
+            _mediaPlayer = new VlcMediaPlayer(_libVLC);
+            TutorialVideo.MediaPlayer = _mediaPlayer;
+
+           
+            DataContext = this;
             SetupEventHandlers();
             ShowSearchToursView();
         }
@@ -38,7 +61,7 @@ namespace BookingApp.Presentation.View.Tourist
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Greška pri inicijalizaciji praćenja tura: {ex.Message}",
-                                   "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -56,7 +79,25 @@ namespace BookingApp.Presentation.View.Tourist
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Greška pri inicijalizaciji zahteva za ture: {ex.Message}",
-                                   "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void EnsureComplexTourRequestsInitialized()
+        {
+            if (!_complexTourRequestsInitialized && ComplexTourRequestsContent != null)
+            {
+                var currentUserId = Session.CurrentUser?.Id ?? 0;
+                try
+                {
+                    ComplexTourRequestsContent.InitializeViewModel(currentUserId);
+                    _complexTourRequestsInitialized = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Greška pri inicijalizaciji složenih zahteva: {ex.Message}",
+                                    "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -66,12 +107,19 @@ namespace BookingApp.Presentation.View.Tourist
             if (TourSearchView?.ViewModel != null)
             {
                 TourSearchView.ViewModel.TourReserveRequested += OnTourReserveRequested;
+                TourSearchView.ViewModel.TourDetailsRequested += OnTourDetailsRequested;
             }
 
             if (TourReservationView != null)
             {
                 TourReservationView.ReservationCompleted += OnReservationCompleted;
                 TourReservationView.ReservationCancelled += OnReservationCancelled;
+            }
+
+            if (TourDetailView != null)
+            {
+                TourDetailView.BackRequested += OnTourDetailBackRequested;
+                TourDetailView.TourReserveRequested += OnTourReserveRequested;
             }
 
             if (MyReservationsContent?.ViewModel != null)
@@ -87,9 +135,25 @@ namespace BookingApp.Presentation.View.Tourist
             this.Closing += TouristDashboardWindow_Closing;
         }
 
-        private void OnTourReserveRequested(TourDTO tour)
+        private void OnTourReserveRequested(TourDTO tour) => ShowReservationView(tour);
+
+        private void OnTourDetailsRequested(TourDTO tour)
         {
-            ShowReservationView(tour);
+            try
+            {
+                ShowTourDetailView(tour);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška pri prikazivanju detalja ture: {ex.Message}",
+                                "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void OnTourDetailBackRequested()
+        {
+            ShowSearchToursView();
+            SetActiveTab(SearchToursTab);
         }
 
         private void OnReservationCompleted()
@@ -110,21 +174,16 @@ namespace BookingApp.Presentation.View.Tourist
             ShowReviewsView();
             SetActiveTab(ReviewsTab);
 
-            if (TourReviewViewContent?.ViewModel != null)
-            {
-                TourReviewViewContent.ViewModel.LoadCompletedTours();
-                TourReviewViewContent.ViewModel.SelectReservationForReview(reservation);
-            }
+            TourReviewViewContent?.ViewModel?.LoadCompletedTours();
+            TourReviewViewContent?.ViewModel?.SelectReservationForReview(reservation);
         }
 
         private void OnReviewSubmitted(object sender, int reviewedReservationId)
         {
-            if (MyReservationsContent?.ViewModel != null)
-            {
-                MyReservationsContent.ViewModel.RefreshCommand?.Execute(null);
-            }
+            MyReservationsContent?.ViewModel?.RefreshCommand?.Execute(null);
         }
 
+        
         private void SearchTours_Click(object sender, RoutedEventArgs e)
         {
             ShowSearchToursView();
@@ -150,46 +209,159 @@ namespace BookingApp.Presentation.View.Tourist
                 if (TourPresenceContent == null)
                 {
                     MessageBox.Show("TourPresenceContent nije inicijalizovan!", "Greška",
-                                   MessageBoxButton.OK, MessageBoxImage.Error);
+                                    MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
+              
                 EnsureTourPresenceInitialized();
+
+               
                 HideAllViews();
                 TourPresenceContent.Visibility = Visibility.Visible;
                 SetActiveTab(TourPresenceTab);
-                TourPresenceContent.RefreshData();
+
+                
+                var vm = TourPresenceContent.ViewModel ?? (TourPresenceContent.DataContext as TourPresenceViewModel);
+                if (vm != null) vm.RefreshData();
+                else TourPresenceContent.RefreshData();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Greška pri učitavanju praćenja tura: {ex.Message}",
-                               "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                                "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void TourRequests_Click(object sender, RoutedEventArgs e)
         {
+            EnsureTourRequestsInitialized();
+            HideAllViews();
+            TourRequestsContent.Visibility = Visibility.Visible;
+            SetActiveTab(TourRequestsTab);
+        }
+
+        private void ComplexTourRequests_Click(object sender, RoutedEventArgs e)
+        {
+            EnsureComplexTourRequestsInitialized();
+            HideAllViews();
+            ComplexTourRequestsContent.Visibility = Visibility.Visible;
+            SetActiveTab(ComplexTourRequestsTab);
+        }
+
+        private void Tutorial_Click(object sender, RoutedEventArgs e)
+        {
             try
             {
-                EnsureTourRequestsInitialized();
                 HideAllViews();
-                TourRequestsContent.Visibility = Visibility.Visible;
-                SetActiveTab(TourRequestsTab);
+                TutorialContent.Visibility = Visibility.Visible;
+                ResetAllTabs();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Greška pri učitavanju zahteva za ture: {ex.Message}",
+                MessageBox.Show($"Greška pri učitavanju tutorijala: {ex.Message}",
+                                "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void PlayTutorial_Click(object sender, RoutedEventArgs e)
+        {
+            var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Videos", "tutorijal.mp4");
+
+            if (!System.IO.File.Exists(path))
+            {
+                MessageBox.Show($"Video fajl nije pronađen: {path}");
+                return;
+            }
+
+            _currentMedia = new Media(_libVLC, new Uri(path));
+            _mediaPlayer.Play(_currentMedia);
+        }
+
+        private void PauseTutorial_Click(object sender, RoutedEventArgs e)
+        {
+            _mediaPlayer.Pause();
+        }
+
+        private void StopTutorial_Click(object sender, RoutedEventArgs e)
+        {
+            _mediaPlayer.Stop();
+        }
+        private void Statistics_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_tourStatisticsInitialized && TourStatisticsContent != null)
+            {
+                var user = Session.CurrentUser;
+                string fullName = user != null ? $"{user.FirstName} {user.LastName}" : "N/A";
+                TourStatisticsContent.InitializeViewModel(user?.Id ?? 0, fullName);
+                _tourStatisticsInitialized = true;
+            }
+
+            HideAllViews();
+            TourStatisticsContent.Visibility = Visibility.Visible;
+            SetActiveTab(StatisticsTab);
+        }
+
+        private void Notifications_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_tourNotificationsInitialized && TourNotificationsContent != null)
+            {
+                TourNotificationsContent.InitializeViewModel(Session.CurrentUser?.Id ?? 0);
+                _tourNotificationsInitialized = true;
+            }
+
+            // DODAJ OVO:
+            if (TourNotificationsContent?.ViewModel != null)
+            {
+                TourNotificationsContent.ViewModel.ReservationRequested -= OnNotificationReservationRequested;
+                TourNotificationsContent.ViewModel.ReservationRequested += OnNotificationReservationRequested;
+            }
+
+            HideAllViews();
+            TourNotificationsContent.Visibility = Visibility.Visible;
+            SetActiveTab(NotificationsTab);
+        }
+
+        private void OnNotificationReservationRequested(object sender, NotifiedTourDTO notifiedTour)
+        {
+            try
+            {
+                if (notifiedTour == null)
+                {
+                    MessageBox.Show("Greška: Podaci o turi nisu dostupni.", "Greška",
+                                  MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                
+                var tourService = Injector.CreateInstance<ITourService>();
+                var fullTour = tourService.GetTourById(notifiedTour.Id);
+
+                if (fullTour != null)
+                {
+                    
+                    var tourDTO = TourDTO.FromDomain(fullTour);
+                    ShowReservationView(tourDTO);
+                    SetActiveTab(SearchToursTab);
+                }
+                else
+                {
+                    MessageBox.Show("Tura nije pronađena u sistemu.", "Greška",
+                                  MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška pri otvaranju rezervacije: {ex.Message}",
                                "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show(
-                "Da li ste sigurni da se želite odjaviti?",
-                "Potvrda odjave",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+            var result = MessageBox.Show("Da li ste sigurni da se želite odjaviti?",
+                                         "Potvrda odjave",
+                                         MessageBoxButton.YesNo,
+                                         MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -200,66 +372,87 @@ namespace BookingApp.Presentation.View.Tourist
             }
         }
 
+        
         private void ShowSearchToursView()
         {
             HideAllViews();
-            if (TourSearchView != null)
-                TourSearchView.Visibility = Visibility.Visible;
+            TourSearchView.Visibility = Visibility.Visible;
         }
 
         private void ShowReservationView(TourDTO tour)
         {
             HideAllViews();
             TourReservationView?.SetTour(tour);
-            if (TourReservationView != null)
-                TourReservationView.Visibility = Visibility.Visible;
+            TourReservationView.Visibility = Visibility.Visible;
+        }
+
+        private void ShowTourDetailView(TourDTO tour)
+        {
+            if (tour == null)
+            {
+                MessageBox.Show("Greška: Tura nije validna", "Greška",
+                                MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            HideAllViews();
+            TourDetailView?.SetTour(tour);
+            TourDetailView.Visibility = Visibility.Visible;
+            ResetAllTabs();
         }
 
         private void ShowMyReservationsView()
         {
             HideAllViews();
-            if (MyReservationsContent != null)
-                MyReservationsContent.Visibility = Visibility.Visible;
+            MyReservationsContent.Visibility = Visibility.Visible;
         }
 
         private void ShowReviewsView()
         {
             HideAllViews();
-            if (TourReviewViewContent != null)
-            {
-                TourReviewViewContent.Visibility = Visibility.Visible;
+            TourReviewViewContent.Visibility = Visibility.Visible;
 
-                if (TourReviewViewContent.ViewModel != null)
-                {
-                    TourReviewViewContent.ViewModel.ReviewSubmitted -= OnReviewSubmitted;
-                    TourReviewViewContent.ViewModel.ReviewSubmitted += OnReviewSubmitted;
-                    TourReviewViewContent.ViewModel.LoadCompletedTours();
-                }
+            if (TourReviewViewContent.ViewModel != null)
+            {
+                TourReviewViewContent.ViewModel.ReviewSubmitted -= OnReviewSubmitted;
+                TourReviewViewContent.ViewModel.ReviewSubmitted += OnReviewSubmitted;
+                TourReviewViewContent.ViewModel.LoadCompletedTours();
             }
         }
 
         private void HideAllViews()
         {
-            if (TourSearchView != null) TourSearchView.Visibility = Visibility.Collapsed;
-            if (TourReservationView != null) TourReservationView.Visibility = Visibility.Collapsed;
-            if (MyReservationsContent != null) MyReservationsContent.Visibility = Visibility.Collapsed;
-            if (TourReviewViewContent != null) TourReviewViewContent.Visibility = Visibility.Collapsed;
-            if (ReviewsContent != null) ReviewsContent.Visibility = Visibility.Collapsed;
-            if (TourPresenceContent != null) TourPresenceContent.Visibility = Visibility.Collapsed;
-            if (TourRequestsContent != null) TourRequestsContent.Visibility = Visibility.Collapsed;
+            TourSearchView.Visibility = Visibility.Collapsed;
+            TourReservationView.Visibility = Visibility.Collapsed;
+            TourDetailView.Visibility = Visibility.Collapsed;
+            MyReservationsContent.Visibility = Visibility.Collapsed;
+            TourReviewViewContent.Visibility = Visibility.Collapsed;
+            TourPresenceContent.Visibility = Visibility.Collapsed;
+            TourRequestsContent.Visibility = Visibility.Collapsed;
+            ComplexTourRequestsContent.Visibility = Visibility.Collapsed;
+            TutorialContent.Visibility = Visibility.Collapsed;
+            TourStatisticsContent.Visibility = Visibility.Collapsed;
+            TourNotificationsContent.Visibility = Visibility.Collapsed;
 
             TourReservationView?.ClearForm();
         }
 
         private void SetActiveTab(Button activeTab)
         {
+            ResetAllTabs();
+            activeTab.IsDefault = true;
+        }
+
+        private void ResetAllTabs()
+        {
             SearchToursTab.IsDefault = false;
             MyReservationsTab.IsDefault = false;
             ReviewsTab.IsDefault = false;
             TourPresenceTab.IsDefault = false;
             TourRequestsTab.IsDefault = false;
-
-            activeTab.IsDefault = true;
+            ComplexTourRequestsTab.IsDefault = false;
+            StatisticsTab.IsDefault = false;
+            NotificationsTab.IsDefault = false;
         }
 
         private void TouristDashboardWindow_Closing(object? sender, CancelEventArgs e)
@@ -267,12 +460,20 @@ namespace BookingApp.Presentation.View.Tourist
             if (TourSearchView?.ViewModel != null)
             {
                 TourSearchView.ViewModel.TourReserveRequested -= OnTourReserveRequested;
+                TourSearchView.ViewModel.TourDetailsRequested -= OnTourDetailsRequested;
             }
 
             if (TourReservationView != null)
             {
                 TourReservationView.ReservationCompleted -= OnReservationCompleted;
                 TourReservationView.ReservationCancelled -= OnReservationCancelled;
+            }
+
+            if (TourDetailView != null)
+            {
+                TourDetailView.BackRequested -= OnTourDetailBackRequested;
+                TourDetailView.TourReserveRequested -= OnTourReserveRequested;
+                TourDetailView.Cleanup();
             }
 
             if (MyReservationsContent?.ViewModel != null)
@@ -283,6 +484,11 @@ namespace BookingApp.Presentation.View.Tourist
             if (TourReviewViewContent?.ViewModel != null)
             {
                 TourReviewViewContent.ViewModel.ReviewSubmitted -= OnReviewSubmitted;
+            }
+
+            if (TourNotificationsContent?.ViewModel != null)
+            {
+                TourNotificationsContent.ViewModel.ReservationRequested -= OnNotificationReservationRequested;
             }
         }
 

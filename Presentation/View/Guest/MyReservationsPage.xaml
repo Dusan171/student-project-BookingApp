@@ -87,19 +87,19 @@
 
                                     <WrapPanel Grid.Row="1" HorizontalAlignment="Right">
                                         <Button Content="{loc:Translate MyReservations_Cancel}" Style="{StaticResource DangerButton}" Margin="5"
-                                                Visibility="{Binding IsCancellationEnabled, Converter={StaticResource BoolToVisibility}}"
+                                                Visibility="{Binding IsCancellationEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                 Command="{Binding DataContext.CancelReservationCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                 CommandParameter="{Binding}"/>
                                         <Button Content="{loc:Translate MyReservations_Reschedule}" Style="{StaticResource PrimaryButton}" Margin="5"
-                                                Visibility="{Binding IsRescheduleEnabled, Converter={StaticResource BoolToVisibility}}"
+                                                Visibility="{Binding IsRescheduleEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                 Command="{Binding DataContext.RescheduleCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                 CommandParameter="{Binding}"/>
                                         <Button Content="{loc:Translate MyReservations_Rate}" Style="{StaticResource PrimaryButton}" Margin="5"
-                                                Visibility="{Binding IsRatingEnabled, Converter={StaticResource BoolToVisibility}}"
+                                                Visibility="{Binding IsRatingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                 Command="{Binding DataContext.RateCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                 CommandParameter="{Binding}"/>
                                         <Button Content="{loc:Translate MyReservations_ViewReview}" Style="{StaticResource SecondaryButton}" Margin="5"
-                                                Visibility="{Binding IsGuestReviewVisible, Converter={StaticResource BoolToVisibility}}"
+                                                Visibility="{Binding IsGuestReviewVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                 Command="{Binding DataContext.ViewReviewCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                 CommandParameter="{Binding}"/>
                                     </WrapPanel>

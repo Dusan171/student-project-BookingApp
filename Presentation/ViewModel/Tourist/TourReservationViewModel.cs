@@ -14,7 +14,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
     {
         private readonly ITourReservationService _reservationService;
         private TourDTO _selectedTour;
-        private string _numberOfPeople = "1";
         private string _statusMessage = "";
         private bool _hasStatusMessage;
         private bool _isLoading;
@@ -25,16 +24,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         public string Language { get; private set; }
         public string AvailableSpotsText { get; private set; }
         public Brush AvailableSpotsColor { get; private set; }
-
-        public string NumberOfPeople
-        {
-            get => _numberOfPeople;
-            set
-            {
-                if (SetProperty(ref _numberOfPeople, value))
-                    GenerateGuestFields();
-            }
-        }
 
         public string StatusMessage
         {
@@ -59,9 +48,9 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         }
 
         public bool HasGuestDetails => GuestDetails.Count > 0;
+        public bool HasNoGuests => GuestDetails.Count == 0;
 
         public ObservableCollection<ReservationGuestDTO> GuestDetails { get; set; } = new();
-
         public ObservableCollection<AlternativeTourDTO> AlternativeTours { get; set; } = new();
 
         public bool HasAlternativeTours => AlternativeTours.Count > 0;
@@ -75,11 +64,11 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             set => SetProperty(ref _showingAlternatives, value);
         }
 
-        public bool CanAttemptReservation => !_reservationInProgress && !ShowingAlternatives;
+        public bool CanAttemptReservation => !_reservationInProgress && !ShowingAlternatives && HasGuestDetails;
 
+        public ICommand AddGuestCommand { get; private set; }
+        public ICommand RemoveGuestCommand { get; private set; }
         public ICommand SelectAlternativeCommand { get; private set; }
-        public ICommand IncreaseGuestsCommand { get; private set; }
-        public ICommand DecreaseGuestsCommand { get; private set; }
         public ICommand ConfirmReservationCommand { get; private set; }
         public ICommand CancelAlternativesCommand { get; private set; }
 
@@ -97,12 +86,23 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 OnPropertyChanged(nameof(HasAlternativeTours));
             };
 
+            GuestDetails.CollectionChanged += (s, e) =>
+            {
+                OnPropertyChanged(nameof(HasGuestDetails));
+                OnPropertyChanged(nameof(HasNoGuests));
+                OnPropertyChanged(nameof(CanAttemptReservation));
+            };
+
             InitializeProperties();
             RefreshTourData();
             InitializeCommands();
-            GenerateGuestFields();
+
+            // Dodaj glavnog kontakta po defaultu
+            AddMainContact();
+
             OnPropertyChanged(nameof(HasAlternativeTours));
             OnPropertyChanged(nameof(HasGuestDetails));
+            OnPropertyChanged(nameof(HasNoGuests));
         }
 
         private void InitializeProperties()
@@ -117,55 +117,80 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
         private void InitializeCommands()
         {
-            IncreaseGuestsCommand = new RelayCommand(() =>
-            {
-                if (int.TryParse(NumberOfPeople, out int count))
-                {
-                    var maxAllowed = Math.Min(20, _selectedTour.AvailableSpots);
-                    if (count < maxAllowed) NumberOfPeople = (count + 1).ToString();
-                }
-            });
+            AddGuestCommand = new RelayCommand(
+                execute: _ => ExecuteAddGuest(),
+                canExecute: _ => CanAddGuest()
+            );
 
-            DecreaseGuestsCommand = new RelayCommand(() =>
-            {
-                if (int.TryParse(NumberOfPeople, out int count) && count > 1)
-                    NumberOfPeople = (count - 1).ToString();
-            });
+            RemoveGuestCommand = new RelayCommand<ReservationGuestDTO>(ExecuteRemoveGuest);
 
-            CancelAlternativesCommand = new RelayCommand(() =>
+            CancelAlternativesCommand = new RelayCommand(_ =>
             {
                 ShowingAlternatives = false;
                 AlternativeTours.Clear();
                 StatusMessage = "";
-
                 OnPropertyChanged(nameof(HasAlternativeTours));
                 OnPropertyChanged(nameof(CanAttemptReservation));
             });
 
-            ConfirmReservationCommand = new RelayCommand(ExecuteConfirmReservation);
+            ConfirmReservationCommand = new RelayCommand(
+                execute: _ => ExecuteConfirmReservation(),
+                canExecute: _ => CanConfirmReservation()
+            );
 
             SelectAlternativeCommand = new RelayCommand<AlternativeTourDTO>(ExecuteSelectAlternative);
         }
 
-        private void GenerateGuestFields()
+        private void AddMainContact()
         {
-            GuestDetails.Clear();
-
-            if (!int.TryParse(NumberOfPeople, out int count) || count <= 0) return;
-
-            for (int i = 0; i < count; i++)
+            // Dodaj glavnog kontakta po defaultu
+            var mainContact = new ReservationGuestDTO
             {
-                GuestDetails.Add(new ReservationGuestDTO
-                {
-                    FirstName = "",
-                    LastName = "",
-                    Age = 0,
-                    Email = i == 0 ? "" : null,
-                    IsMainContact = i == 0
-                });
-            }
+                FirstName = "",
+                LastName = "",
+                Age = 0,
+                Email = "",
+                IsMainContact = true
+            };
 
-            OnPropertyChanged(nameof(HasGuestDetails));
+            GuestDetails.Add(mainContact);
+        }
+
+        private bool CanAddGuest()
+        {
+            // Dozvoliti dodavanje do 20 učesnika bez obzira na dostupnost ture
+            // Alternativne ture će se prikazati prilikom rezervacije ako nema mesta
+            return GuestDetails.Count < 20 && !IsLoading;
+        }
+
+        private void ExecuteAddGuest()
+        {
+            if (!CanAddGuest()) return;
+
+            var newGuest = new ReservationGuestDTO
+            {
+                FirstName = "",
+                LastName = "",
+                Age = 0,
+                Email = null,
+                IsMainContact = false
+            };
+
+            GuestDetails.Add(newGuest);
+            StatusMessage = "";
+        }
+
+        private void ExecuteRemoveGuest(ReservationGuestDTO? guest)
+        {
+            if (guest == null || guest.IsMainContact) return;
+
+            GuestDetails.Remove(guest);
+            StatusMessage = "";
+        }
+
+        private bool CanConfirmReservation()
+        {
+            return HasGuestDetails && !IsLoading && !ShowingAlternatives;
         }
 
         private void ShowAlternativeTours(int requiredSpots)
@@ -203,11 +228,11 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             OnPropertyChanged(nameof(CanAttemptReservation));
         }
 
-        private void ExecuteSelectAlternative(AlternativeTourDTO alternative)
+        private void ExecuteSelectAlternative(AlternativeTourDTO? alternative)
         {
             if (alternative == null) return;
 
-            int requiredSpots = int.TryParse(NumberOfPeople, out int count) ? count : 1;
+            int requiredSpots = GuestDetails.Count;
 
             if (alternative.AvailableSpots < requiredSpots)
             {
@@ -258,7 +283,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                     return;
                 }
 
-                var peopleCount = int.Parse(NumberOfPeople);
+                var peopleCount = GuestDetails.Count;
                 var currentUser = Session.CurrentUser;
                 if (currentUser == null)
                 {
@@ -299,7 +324,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
             catch (ArgumentException ex)
             {
-                var peopleCount = int.Parse(NumberOfPeople);
+                var peopleCount = GuestDetails.Count;
                 var availableSpots = _reservationService.GetAvailableSpotsForTour(_selectedTour.Id);
                 StatusMessage = $"Rezervacija nije moguća: {ex.Message}. Dostupno mesta: {availableSpots}";
                 ShowAlternativeTours(peopleCount);
@@ -332,7 +357,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 OnPropertyChanged(nameof(AvailableSpotsText));
                 OnPropertyChanged(nameof(AvailableSpotsColor));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Silent fail for refresh errors
             }
@@ -340,16 +365,16 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
         private bool ValidateReservation()
         {
-            if (!int.TryParse(NumberOfPeople, out int peopleCount) || peopleCount <= 0)
+            if (GuestDetails.Count == 0)
             {
-                StatusMessage = "Broj ljudi mora biti veći od 0.";
+                StatusMessage = "Morate dodati barem jednog učesnika.";
                 return false;
             }
 
             for (int i = 0; i < GuestDetails.Count; i++)
             {
                 var guest = GuestDetails[i];
-                var guestTitle = i == 0 ? "glavnog kontakta" : $"učesnika {i + 1}";
+                var guestTitle = guest.IsMainContact ? "glavnog kontakta" : $"učesnika {i + 1}";
 
                 if (string.IsNullOrWhiteSpace(guest.FirstName))
                 {
@@ -369,7 +394,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                     return false;
                 }
 
-                if (i == 0 && string.IsNullOrWhiteSpace(guest.Email))
+                if (guest.IsMainContact && string.IsNullOrWhiteSpace(guest.Email))
                 {
                     StatusMessage = $"Email je obavezan za {guestTitle}.";
                     return false;

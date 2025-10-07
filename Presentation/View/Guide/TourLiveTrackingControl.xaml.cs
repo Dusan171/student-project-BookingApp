@@ -1,7 +1,50 @@
 ﻿using System;
+using System.Windows.Controls;
+using BookingApp.Domain.Model;
+using BookingApp.Services;
+using BookingApp.Presentation.ViewModel.Guide;
+using BookingApp.Domain.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
+
+namespace BookingApp.Presentation.View.Guide
+{
+    public partial class TourLiveTrackingControl : Page
+    {
+        private readonly TourLiveTrackingViewModel _viewModel;
+
+        public TourLiveTrackingControl(Tour tour, DateTime startTime,
+                                       TourPresenceService tourPresenceService = null,
+                                       ITouristAttendanceService touristAttendanceService = null)
+        {
+            InitializeComponent();
+
+            _viewModel = new TourLiveTrackingViewModel(
+                tour,
+                startTime,
+                tourPresenceService,
+                touristAttendanceService
+            );
+
+            DataContext = _viewModel;
+
+            _viewModel.NavigateToReservedTouristsPageRequested += NavigateToReservedTouristsPage;
+        }
+
+        private void NavigateToReservedTouristsPage(Tour tour, List<KeyPoint> passedKeyPoints,
+                                            List<ReservationGuest> guests, List<TouristAttendance> attendance)
+        {
+            if (tour == null || passedKeyPoints == null || guests == null || attendance == null)
+                return; // dodatna sigurnost
+
+            NavigationService?.Navigate(new ReservedTouristsPage(tour, passedKeyPoints, guests, attendance));
+        }
+
+    }
+
+}
+
+
+/*using System.Windows;
 using System.Windows.Controls;
 using BookingApp.Domain;
 using BookingApp.Repositories;
@@ -11,7 +54,7 @@ using BookingApp.Domain.Interfaces;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class TourLiveTrackingControl : UserControl
+    public partial class TourLiveTrackingControl : Page
     {
         private Tour currentTour;
         private List<TourReservation> reservations;
@@ -25,12 +68,13 @@ namespace BookingApp.Presentation.View.Guide
         private readonly TourPresenceService _tourPresenceService;
         private readonly ITouristAttendanceService _touristAttendanceService;
 
-        public TourLiveTrackingControl(Tour tour, DateTime start, MainPage main,
+        public TourLiveTrackingControl(Tour tour, DateTime start, Action back,
                                      TourPresenceService tourPresenceService = null,
                                      ITouristAttendanceService touristAttendanceService = null)
         {
             InitializeComponent();
-            mainPage = main;
+            DataContext = new TourLiveTrackingViewModel();
+            //mainPage = main;
             currentTour = tour ?? throw new ArgumentNullException(nameof(tour));
 
             _tourPresenceService = tourPresenceService;
@@ -454,13 +498,7 @@ namespace BookingApp.Presentation.View.Guide
             MessageBox.Show("Sve ključne tačke su prošle. Tura je uspešno završena.",
                             "Kraj Ture", MessageBoxButton.OK, MessageBoxImage.Information);
 
-            mainPage.ContentFrame.Content = new ToursControl(mainPage);
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (mainPage.ContentFrame.CanGoBack)
-                mainPage.ContentFrame.GoBack();
+            //mainPage.ContentFrame.Content = new ToursControl(mainPage);
         }
 
         private void HelpButton_Click(object sender, RoutedEventArgs e)
@@ -473,4 +511,4 @@ namespace BookingApp.Presentation.View.Guide
            
         }
     }
-}
+}*/

@@ -34,7 +34,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             set { _email = value; OnPropertyChanged(nameof(Email)); }
         }
 
-        // Ovo polje definiše da li je trenutni gost glavni kontakt
+       
         public bool IsMainContact
         {
             get => _isMainContact;

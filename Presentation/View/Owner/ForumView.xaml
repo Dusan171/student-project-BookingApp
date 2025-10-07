@@ -1,0 +1,265 @@
+﻿<UserControl x:Class="BookingApp.Presentation.View.Owner.ForumView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:utilities="clr-namespace:BookingApp.Utilities"
+             mc:Ignorable="d" 
+             d:DesignHeight="720" d:DesignWidth="1200">
+
+    <UserControl.Resources>
+        <utilities:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <UserControl.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding RefreshCommand}"/>
+    </UserControl.InputBindings>
+
+    <Grid Background="#fafbfc">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="40">
+            <StackPanel>
+
+                <!-- Header -->
+                <Grid Margin="0,20,0,32">
+                    <TextBlock Text="Forums"
+                               FontSize="28"
+                               FontWeight="SemiBold"
+                               Foreground="#1e293b"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
+
+                <!-- Search Toolbar -->
+                <Border Background="White" 
+                        BorderBrush="#e2e8f0" 
+                        BorderThickness="1" 
+                        CornerRadius="6" 
+                        Padding="12,8"
+                        Margin="0,0,0,24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔍" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 FontSize="14"
+                                 VerticalContentAlignment="Center"
+                                 TabIndex="2">
+                            <TextBox.Style>
+                                <Style TargetType="TextBox">
+                                    <Style.Triggers>
+                                        <Trigger Property="Text" Value="">
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <VisualBrush Stretch="None" AlignmentX="Left">
+                                                        <VisualBrush.Visual>
+                                                            <TextBlock Text="Search forums by title or location..." 
+                                                                      Foreground="#94a3b8" 
+                                                                      FontSize="14"/>
+                                                        </VisualBrush.Visual>
+                                                    </VisualBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBox.Style>
+                        </TextBox>
+                    </Grid>
+                </Border>
+
+                <!-- Main Content Container -->
+                <Border Background="White" 
+                        BorderBrush="#e2e8f0" 
+                        BorderThickness="1" 
+                        CornerRadius="16" 
+                        Padding="24">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#000" Direction="270" ShadowDepth="4" Opacity="0.06" BlurRadius="12"/>
+                    </Border.Effect>
+
+                    <StackPanel>
+                   
+                        <!-- Forum Cards -->
+                        <ItemsControl ItemsSource="{Binding DisplayItems}" TabIndex="4">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#f8fafc" 
+                                            BorderBrush="#e2e8f0" 
+                                            BorderThickness="1" 
+                                            CornerRadius="10" 
+                                            Padding="20" 
+                                            Margin="0,0,0,12">
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Forum Info - Left side -->
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <!-- Forum Title with Very Useful Badge -->
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                    <TextBlock Text="{Binding Title}" 
+                                                               FontSize="16" 
+                                                               FontWeight="Bold" 
+                                                               Foreground="#1e293b"/>
+
+                                                    <!-- Very Useful Badge -->
+                                                    <Border Background="#10b981" 
+                                                            CornerRadius="4" 
+                                                            Padding="6,2" 
+                                                            Margin="8,0,0,0"
+                                                            Visibility="{Binding IsVeryUseful, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <TextBlock Text="VERY USEFUL" 
+                                                                   FontSize="9" 
+                                                                   Foreground="White" 
+                                                                   FontWeight="Bold"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </StackPanel>
+
+                                                <!-- Location -->
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                    <TextBlock Text="📍" FontSize="12" Margin="0,0,6,0"/>
+                                                    <TextBlock Text="{Binding LocationName}" 
+                                                               FontSize="14" 
+                                                               Foreground="#1e293b"
+                                                               FontWeight="SemiBold"/>
+                                                </StackPanel>
+
+                                                <!-- Created by and date -->
+                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                                    <TextBlock Text="Created by " FontSize="13" Foreground="#1e293b"/>
+                                                    <TextBlock Text="{Binding CreatorName}" FontSize="13" FontWeight="Medium" Foreground="#1e293b"/>
+                                                    <TextBlock Text=" on " FontSize="13" Foreground="#1e293b" Margin="4,0"/>
+                                                    <TextBlock Text="{Binding CreatedDate, StringFormat=dd.MM.yyyy}" 
+                                                               FontSize="13" FontWeight="Medium" Foreground="#1e293b"/>
+                                                </StackPanel>
+
+                                                <!-- Comment counts -->
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Background="#dbeafe" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding OwnerCommentsCount}" 
+                                                                       FontSize="13" 
+                                                                       FontWeight="Bold" 
+                                                                       Foreground="#1e40af"/>
+                                                            <TextBlock Text=" owner comments" 
+                                                                       FontSize="11" 
+                                                                       Foreground="#1e40af" 
+                                                                       Margin="3,0,0,0"/>
+                                                        </StackPanel>
+                                                    </Border>
+
+                                                    <Border Background="#fef3c7" CornerRadius="4" Padding="8,3">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding GuestCommentsCount}" 
+                                                                       FontSize="13" 
+                                                                       FontWeight="Bold" 
+                                                                       Foreground="#d97706"/>
+                                                            <TextBlock Text=" guest comments" 
+                                                                       FontSize="11" 
+                                                                       Foreground="#d97706" 
+                                                                       Margin="3,0,0,0"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </StackPanel>
+                                            </StackPanel>
+
+                                            <!-- Show Button - Right side -->
+                                            <Button Grid.Column="1"
+        Content="Show"
+        Command="{Binding DataContext.ShowCommentsCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+        CommandParameter="{Binding}"
+        Foreground="White"
+        FontSize="14"
+        FontWeight="SemiBold"
+        Padding="20,10"
+        BorderThickness="0"
+        Cursor="Hand"
+        VerticalAlignment="Center">
+
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border CornerRadius="6" Padding="{TemplateBinding Padding}" x:Name="border">
+                                                            <Border.Background>
+                                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                    <GradientStop Color="#1e40af" Offset="0"/>
+                                                                    <GradientStop Color="#3b82f6" Offset="1"/>
+                                                                </LinearGradientBrush>
+                                                            </Border.Background>
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <!-- Hover -->
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="border" Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                            <GradientStop Color="#1d4ed8" Offset="0"/>
+                                                                            <GradientStop Color="#60a5fa" Offset="1"/>
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                            </Trigger>
+                                                            <!-- Focus -->
+                                                            <Trigger Property="IsFocused" Value="True">
+                                                                <Setter TargetName="border" Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                                            <GradientStop Color="#1e293b" Offset="0"/>
+                                                                            <GradientStop Color="#334155" Offset="1"/>
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                                                <Setter TargetName="border" Property="BorderBrush" Value="#3b82f6"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Empty State -->
+                        <Border Background="#f8fafc" 
+                                BorderBrush="#e2e8f0" 
+                                BorderThickness="1" 
+                                CornerRadius="10" 
+                                Padding="40" 
+                                Visibility="{Binding HasNoForums, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="💬" 
+                                           FontSize="32" 
+                                           HorizontalAlignment="Center" 
+                                           Margin="0,0,0,12"/>
+                                <TextBlock Text="No forums found" 
+                                           FontSize="18" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#475569" 
+                                           HorizontalAlignment="Center" 
+                                           Margin="0,0,0,6"/>
+                                <TextBlock Text="Start a discussion about a location!" 
+                                           FontSize="14" 
+                                           Foreground="#64748b" 
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

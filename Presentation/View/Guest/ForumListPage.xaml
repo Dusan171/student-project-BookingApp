@@ -62,12 +62,12 @@
                                         </TextBlock>
 
                                         <Border Background="{DynamicResource UsefulTagBackground}" CornerRadius="10" Padding="8,3" Margin="15,0,0,0" 
-                                                Visibility="{Binding IsVeryUseful, Converter={StaticResource BoolToVisibility}}">
+                                                Visibility="{Binding IsVeryUseful, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Text="{loc:Translate ForumList_TagUseful}" Foreground="{DynamicResource TagForeground}" FontSize="12"/>
                                         </Border>
 
                                         <Border Background="{DynamicResource DangerColor}" CornerRadius="10" Padding="8,3" Margin="15,0,0,0" 
-                                                Visibility="{Binding IsClosed, Converter={StaticResource BoolToVisibility}}">
+                                                Visibility="{Binding IsClosed, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Text="{loc:Translate ForumList_TagClosed}" Foreground="{DynamicResource TagForeground}" FontSize="12"/>
                                         </Border>
                                     </WrapPanel>

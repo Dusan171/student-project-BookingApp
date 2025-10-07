@@ -47,7 +47,7 @@ namespace BookingApp.Repositories
                         GuideLanguage = int.Parse(parts[5]),
                         TourInterest = int.Parse(parts[6]),
                         Comment = parts[7],
-                        ReviewDate = DateTime.ParseExact(parts[8], "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                        ReviewDate = DateTime.Parse(parts[8]),
                         IsValid = bool.Parse(parts[9]),
                         ImagePaths = parts.Length > 10 && !string.IsNullOrWhiteSpace(parts[10])
                             ? parts[10].Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()

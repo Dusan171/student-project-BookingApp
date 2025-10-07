@@ -29,7 +29,6 @@ namespace BookingApp.Repositories
 
         public List<StartTourTime> GetByTourId(int tourId)
         {
-            // Ovde treba filtrirati po TourId ako postoji kolona u CSV
             return _startTimes.Where(st => st.TourId == tourId).ToList();
         }
 

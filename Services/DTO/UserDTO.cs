@@ -13,6 +13,8 @@ namespace BookingApp.Services.DTO
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
+        public string FirstName { get; set; } 
+        public string LastName { get; set; }
 
         public UserDTO() { }
 
@@ -21,7 +23,9 @@ namespace BookingApp.Services.DTO
             Id = user.Id;
             Username = user.Username ?? string.Empty;
             Role = user.Role.ToString();
-            Email = string.Empty; // Set default as User model doesn't have Email
+            Email = string.Empty;
+            FirstName = user.FirstName ?? string.Empty;  
+            LastName = user.LastName ?? string.Empty;
         }
 
         public User ToUser()
@@ -30,8 +34,10 @@ namespace BookingApp.Services.DTO
             {
                 Id = this.Id,
                 Username = this.Username,
-                Role = Enum.TryParse<UserRole>(this.Role, out var role) ? role : UserRole.GUEST
-            };
+                Role = Enum.TryParse<UserRole>(this.Role, out var role) ? role : UserRole.GUEST,
+                FirstName = this.FirstName,
+                LastName = this.LastName
+            }; 
         }
     }
 }

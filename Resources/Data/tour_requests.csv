@@ -1,6 +1,15 @@
-1|4|Beograd|Srbija|Želim obilazak Kalemegdana i Skadarlije|srpski|2|01-09-2025|05-09-2025|20-08-2025 09:00:00|PENDING|||
+1|4|Beograd|Srbija|Želim obilazak Kalemegdana i Skadarlije|srpski|2|01-09-2025|05-09-2025|20-08-2025 09:00:00|ACCEPTED|3|07-10-2025 06:37:23|03-09-2025 17:00:00
 2|5|Novi Sad|Srbija|Obilazak Petrovaradina i centra grada|engleski|3|10-09-2025|12-09-2025|22-08-2025 15:30:00|ACCEPTED|3|25-08-2025 12:00:00|11-09-2025 10:00:00
 3|6|Zlatibor|Srbija|Planinarenje i poseta Stopića pećini|srpski|5|15-09-2025|18-09-2025|23-08-2025 14:00:00|INVALID|||
 4|4|Niš|Srbija|Obilazak Niške tvrđave i Čele kule|engleski|1|01-10-2025|03-10-2025|25-08-2025 16:45:00|PENDING|||
 5|4|Nis|Srbija||System.Windows.Controls.ComboBoxItem: Srpski|1|02-09-2025|09-09-2025|30-08-2025 09:16:58|PENDING|||
-6|4|Beograd|Srbija||System.Windows.Controls.ComboBoxItem: Srpski|1|03-09-2025|05-09-2025|30-08-2025 10:52:50|PENDING|||
+6|4|Beograd|Srbija||Srpski|1|03-09-2025|05-09-2025|30-08-2025 10:52:50|PENDING|||
+7|4|Subotica|Srbija|Gradska tura|Engleski|3|10-03-2024|12-03-2024|01-02-2024 09:00:00|ACCEPTED|5|05-02-2024 13:00:00|10-03-2024 11:00:00
+8|4|Tara|Srbija|Nacionalni park|Srpski|4|15-04-2024|18-04-2024|20-03-2024 10:00:00|PENDING|||
+9|4|Fruška Gora|Srbija|Manastiri|Engleski|2|01-05-2024|03-05-2024|10-04-2024 15:00:00|INVALID|||
+10|4|Beograd|Srbija|Novi Beograd tura|Srpski|3|15-02-2025|17-02-2025|10-01-2025 10:00:00|ACCEPTED|3|12-01-2025 14:00:00|15-02-2025 09:00:00
+11|4|Novi Sad|Srbija|Exit festival tura|Engleski|4|10-07-2025|12-07-2025|15-05-2025 11:00:00|ACCEPTED|4|20-05-2025 10:00:00|10-07-2025 10:00:00
+12|4|Niš|Srbija|Medijana arheološki park|Srpski|2|20-03-2025|22-03-2025|05-02-2025 09:00:00|ACCEPTED|5|10-02-2025 11:00:00|20-03-2025 09:00:00
+13|4|Zlatibor|Srbija|Stopića pećina|Engleski|5|15-08-2025|18-08-2025|20-06-2025 14:00:00|PENDING|||
+14|4|Pariz|Francuska|Ajfelova kula i Luvr|Francuski|2|01-09-2025|05-09-2025|15-07-2025 10:00:00|PENDING|||
+15|4|London|Velika Britanija|British Museum|Engleski|3|10-10-2025|13-10-2025|20-08-2025 11:00:00|INVALID|||

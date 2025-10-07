@@ -1,144 +1,228 @@
-﻿<!-- TourRequestsView.xaml -->
-<UserControl x:Class="BookingApp.Presentation.View.Tourist.TourRequestsView"
+﻿<UserControl x:Class="BookingApp.Presentation.View.Tourist.TourRequestsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:BookingApp.Presentation.ViewModel.Tourist">
 
-    <Grid>
-        <!-- List View -->
-        <Grid x:Name="RequestsListView" Visibility="Visible">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <Style x:Key="ValidationErrorStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#E74C3C"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+
+        
+        <Style x:Key="ValidationTextBoxStyle" TargetType="TextBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BorderBrush" Value="#D5DBDB"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                          Padding="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#3498DB"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="#85C1E9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+       
+        <Style x:Key="ErrorTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource ValidationTextBoxStyle}">
+            <Setter Property="BorderBrush" Value="#E74C3C"/>
+            <Setter Property="Background" Value="#FDEEEE"/>
+        </Style>
+
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E8E8E8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <Style x:Key="TabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" Background="Transparent" BorderThickness="0,0,0,3" 
+                                BorderBrush="Transparent" Padding="20,12" Cursor="Hand">
+                            <TextBlock Text="{TemplateBinding Content}" FontSize="14" 
+                                       FontWeight="SemiBold" Foreground="#7F8C8D" 
+                                       HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#3498DB"/>
+                                <Setter TargetName="border" Property="Background" Value="#F8FBFE"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#F8F9FA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CreateButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#27AE60"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" 
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="+" FontSize="16" FontWeight="Bold" Margin="0,0,8,0"/>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#229954"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+       
+        <Style x:Key="RoundedButtonStyle" TargetType="Button">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+       
+        <Style x:Key="ErrorOverlayStyle" TargetType="Grid">
+            <Setter Property="Background" Value="#88000000"/>
+            <Setter Property="Visibility" Value="Collapsed"/>
+        </Style>
+
+        <Style x:Key="ErrorPanelStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E74C3C"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="25"/>
+            <Setter Property="MaxWidth" Value="500"/>
+        </Style>
+
+        <Style x:Key="SuccessPanelStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#27AE60"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="25"/>
+            <Setter Property="MaxWidth" Value="500"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid x:Name="MainGrid">
+        
+        <Grid x:Name="RequestsListView" Background="#F4F6F7">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Header -->
-            <StackPanel Grid.Row="0" Margin="20,20,20,0">
-                <TextBlock Text="Zahtevi za organizovanje tura" 
-                           FontSize="24" FontWeight="Bold" 
-                           Foreground="#2C3E50"/>
-                <TextBlock Text="Pregled svih vaših zahteva za posebne ture" 
-                           FontSize="14" Foreground="#7F8C8D" 
-                           Margin="0,5,0,0"/>
-            </StackPanel>
+            
+            <Border Grid.Row="0" Background="White" BorderBrush="#E8E8E8" BorderThickness="0,0,0,1">
+                <StackPanel Margin="40,25,40,0">
+                    <Grid Margin="0,0,0,25">
+                        <TextBlock Text="ZAHTEVI ZA TURE" FontSize="26" FontWeight="Bold" 
+                                   Foreground="#2C3E50" VerticalAlignment="Center"/>
+                        <Button Content="Kreiraj zahtev" Style="{StaticResource CreateButtonStyle}"
+                                Click="CreateRequest_Click"
+                                HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
 
-            <!-- Action Buttons -->
-            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="20">
-                <Button Content="+ Kreiraj novi zahtev" 
-                        Command="{Binding CreateRequestCommand}"
-                        Background="#2E86C1" Foreground="White"
-                        Padding="20,10" FontSize="14" FontWeight="SemiBold"
-                        BorderThickness="0" Cursor="Hand"
-                        Margin="0,0,15,0"/>
-
-                <Button Content="Osvezi" 
-                        Command="{Binding RefreshCommand}"
-                        Background="#95A5A6" Foreground="White"
-                        Padding="15,10" FontSize="14"
-                        BorderThickness="0" Cursor="Hand"/>
-            </StackPanel>
-
-            <!-- Requests List -->
-            <Border Grid.Row="2" Background="White" 
-                    BorderBrush="#E0E0E0" BorderThickness="1"
-                    Margin="20,0,20,20">
-                <Grid>
-                    <!-- Empty State -->
-                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <StackPanel.Style>
-                            <Style TargetType="StackPanel">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding TourRequests.Count}" Value="0">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Style>
-
-                        <TextBlock Text="📝" FontSize="64" HorizontalAlignment="Center" 
-                                   Margin="0,0,0,20" Foreground="#BDC3C7"/>
-                        <TextBlock Text="Nemate zahteve za ture" 
-                                   FontSize="18" FontWeight="SemiBold" 
-                                   HorizontalAlignment="Center" 
-                                   Foreground="#7F8C8D" Margin="0,0,0,8"/>
-                        <TextBlock Text="Kreirajte novi zahtev za organizovanje posebne ture" 
-                                   FontSize="14" Foreground="#95A5A6" 
-                                   HorizontalAlignment="Center" TextWrapping="Wrap"
-                                   MaxWidth="350" Margin="0,0,0,20"/>
-                        <Button Content="+ Kreiraj prvi zahtev" 
-                                Command="{Binding CreateRequestCommand}"
-                                Background="#3498DB" Foreground="White"
-                                Padding="20,12" FontSize="14" FontWeight="SemiBold"
-                                BorderThickness="0" Cursor="Hand"/>
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Moji zahtevi" Style="{StaticResource TabButtonStyle}" 
+                                     IsChecked="True" GroupName="Tabs"
+                                     Command="{Binding FilterCommand}" CommandParameter="Moji"/>
+                        <RadioButton Content="Svi zahtevi" Style="{StaticResource TabButtonStyle}" 
+                                     GroupName="Tabs" Margin="5,0,0,0"
+                                     Command="{Binding FilterCommand}" CommandParameter="Svi"/>
                     </StackPanel>
+                </StackPanel>
+            </Border>
 
-                    <!-- Requests List Content -->
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" 
-                                  HorizontalScrollBarVisibility="Disabled"
-                                  Padding="20">
-                        <ScrollViewer.Style>
-                            <Style TargetType="ScrollViewer">
-                                <Setter Property="Visibility" Value="Visible"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding TourRequests.Count}" Value="0">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </ScrollViewer.Style>
+           
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="40,20">
 
-                        <ItemsControl ItemsSource="{Binding TourRequests}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Background="#F8F9FA" 
-                                            Margin="0,0,0,20" Padding="25"
-                                            BorderBrush="#E9ECEF" BorderThickness="1"
-                                            MouseEnter="Border_MouseEnter" 
-                                            MouseLeave="Border_MouseLeave">
-                                        <Grid>
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
+                    
+                    <Border Background="White" BorderBrush="#E8E8E8" BorderThickness="1" 
+                            CornerRadius="10" Padding="50" Margin="0,20,0,0"
+                            Visibility="{Binding HasNoRequests, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel HorizontalAlignment="Center">
+                            <Viewbox Width="64" Height="64" Margin="0,0,0,20">
+                                <Path Data="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zm-3-7c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z" 
+                                      Fill="#BDC3C7"/>
+                            </Viewbox>
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="16" 
+                                       Foreground="#7F8C8D" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
 
-                                            <!-- Header with Status -->
-                                            <Grid Grid.Row="0" Margin="0,0,0,15">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
+                    <ItemsControl ItemsSource="{Binding FilteredRequests}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource CardStyle}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
 
-                                                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                                    <Border Width="6" Height="50" Margin="0,0,15,0">
-                                                        <Border.Style>
-                                                            <Style TargetType="Border">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Status}" Value="PENDING">
-                                                                        <Setter Property="Background" Value="#F39C12"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding Status}" Value="ACCEPTED">
-                                                                        <Setter Property="Background" Value="#27AE60"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding Status}" Value="INVALID">
-                                                                        <Setter Property="Background" Value="#E74C3C"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
-                                                    </Border>
-                                                    <StackPanel>
-                                                        <TextBlock Text="{Binding LocationText}" 
-                                                                   FontSize="20" FontWeight="Bold" 
-                                                                   Foreground="#2C3E50"/>
-                                                        <TextBlock Text="{Binding DateRangeText}" 
-                                                                   FontSize="14" Foreground="#7F8C8D"/>
-                                                    </StackPanel>
-                                                </StackPanel>
-
-                                                <Border Grid.Column="1" Padding="12,6">
+                                        
+                                        <Grid Grid.Row="0" Margin="0,0,0,15">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Border Width="4" Height="50" Margin="0,0,15,0" CornerRadius="2">
                                                     <Border.Style>
                                                         <Style TargetType="Border">
                                                             <Style.Triggers>
@@ -154,209 +238,261 @@
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Border.Style>
-                                                    <TextBlock Text="{Binding StatusText}" 
-                                                               FontSize="12" FontWeight="SemiBold" 
-                                                               Foreground="White"/>
                                                 </Border>
-                                            </Grid>
-
-                                            <!-- Description -->
-                                            <StackPanel Grid.Row="1" Margin="0,0,0,15">
-                                                <TextBlock Text="Opis:" FontSize="14" FontWeight="SemiBold" 
-                                                           Foreground="#34495E" Margin="0,0,0,5"/>
-                                                <TextBlock Text="{Binding Description}" 
-                                                           FontSize="14" Foreground="#5D6D7E" 
-                                                           TextWrapping="Wrap" MaxHeight="60"
-                                                           TextTrimming="WordEllipsis"/>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding LocationText}" FontSize="18" FontWeight="Bold" 
+                                                               Foreground="#2C3E50"/>
+                                                    <TextBlock Text="{Binding DateRangeText}" FontSize="13" Foreground="#7F8C8D" 
+                                                               Margin="0,3,0,0"/>
+                                                </StackPanel>
                                             </StackPanel>
 
-                                            <!-- Details Grid -->
-                                            <Grid Grid.Row="2" Margin="0,0,0,15">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0">
-                                                    <TextBlock Text="Jezik:" FontSize="12" FontWeight="SemiBold" 
-                                                               Foreground="#7F8C8D"/>
-                                                    <TextBlock Text="{Binding Language}" 
-                                                               FontSize="14" Foreground="#2C3E50"/>
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="1">
-                                                    <TextBlock Text="Broj ljudi:" FontSize="12" FontWeight="SemiBold" 
-                                                               Foreground="#7F8C8D"/>
-                                                    <TextBlock Text="{Binding NumberOfPeople}" 
-                                                               FontSize="14" Foreground="#2C3E50"/>
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="2">
-                                                    <TextBlock Text="Kreiran:" FontSize="12" FontWeight="SemiBold" 
-                                                               Foreground="#7F8C8D"/>
-                                                    <TextBlock Text="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" 
-                                                               FontSize="14" Foreground="#2C3E50"/>
-                                                </StackPanel>
-                                            </Grid>
-
-                                            <!-- Accepted Details -->
-                                            <Border Grid.Row="3" Background="#E8F5E8" Padding="15">
+                                            <Border Padding="10,5" CornerRadius="4" HorizontalAlignment="Right">
                                                 <Border.Style>
                                                     <Style TargetType="Border">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsAccepted}" Value="True">
-                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                            <DataTrigger Binding="{Binding Status}" Value="PENDING">
+                                                                <Setter Property="Background" Value="#FEF5E7"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="ACCEPTED">
+                                                                <Setter Property="Background" Value="#E8F5E8"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="INVALID">
+                                                                <Setter Property="Background" Value="#FFEBEE"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </Border.Style>
-                                                <StackPanel>
-                                                    <TextBlock Text="Zahtev je prihvaćen!" 
-                                                               FontSize="14" FontWeight="SemiBold" 
-                                                               Foreground="#27AE60" Margin="0,0,0,8"/>
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <StackPanel Grid.Column="0">
-                                                            <TextBlock Text="Termin:" FontSize="12" 
-                                                                       Foreground="#27AE60" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="{Binding ScheduledDate, StringFormat='dd.MM.yyyy HH:mm'}" 
-                                                                       FontSize="14" Foreground="#2C3E50"/>
-                                                        </StackPanel>
-                                                        <StackPanel Grid.Column="1">
-                                                            <TextBlock Text="Prihvaćeno:" FontSize="12" 
-                                                                       Foreground="#27AE60" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="{Binding AcceptedDate, StringFormat='dd.MM.yyyy'}" 
-                                                                       FontSize="14" Foreground="#2C3E50"/>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </StackPanel>
+                                                <TextBlock Text="{Binding StatusText}" FontSize="12" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="PENDING">
+                                                                    <Setter Property="Foreground" Value="#F39C12"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="ACCEPTED">
+                                                                    <Setter Property="Foreground" Value="#27AE60"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="INVALID">
+                                                                    <Setter Property="Foreground" Value="#E74C3C"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </Border>
                                         </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
-            </Border>
+
+                                     
+                                        <StackPanel Grid.Row="1" Margin="0,0,0,15">
+                                            <TextBlock Text="Opis:" FontSize="12" FontWeight="SemiBold" 
+                                                       Foreground="#7F8C8D" Margin="0,0,0,5"/>
+                                            <TextBlock Text="{Binding Description}" FontSize="14" Foreground="#34495E" 
+                                                       TextWrapping="Wrap" MaxHeight="60" TextTrimming="WordEllipsis"/>
+                                        </StackPanel>
+
+                                       
+                                        <Grid Grid.Row="2" Margin="0,0,0,15">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="Jezik:" FontSize="12" FontWeight="SemiBold" 
+                                                           Foreground="#7F8C8D" Margin="0,0,0,3"/>
+                                                <TextBlock Text="{Binding Language}" FontSize="14" Foreground="#34495E"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="Broj ljudi:" FontSize="12" FontWeight="SemiBold" 
+                                                           Foreground="#7F8C8D" Margin="0,0,0,3"/>
+                                                <TextBlock Text="{Binding NumberOfPeople}" FontSize="14" Foreground="#34495E"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Kreiran:" FontSize="12" FontWeight="SemiBold" 
+                                                           Foreground="#7F8C8D" Margin="0,0,0,3"/>
+                                                <TextBlock Text="{Binding CreatedAt, StringFormat='dd.MM.yyyy'}" FontSize="14" Foreground="#34495E"/>
+                                            </StackPanel>
+                                        </Grid>
+
+                                        
+                                        <Border Grid.Row="3" Background="#E8F5E8" BorderBrush="#27AE60" 
+                                                BorderThickness="1" Padding="15" CornerRadius="6">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsAccepted}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="Zakazani termin:" FontSize="12" FontWeight="SemiBold"
+                                                               Foreground="#27AE60" Margin="0,0,0,3"/>
+                                                    <TextBlock Text="{Binding ScheduledDate, StringFormat='dd.MM.yyyy HH:mm'}" 
+                                                               FontSize="14" Foreground="#2C3E50"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="Prihvaćeno:" FontSize="12" FontWeight="SemiBold"
+                                                               Foreground="#27AE60" Margin="0,0,0,3"/>
+                                                    <TextBlock Text="{Binding AcceptedDate, StringFormat='dd.MM.yyyy'}" 
+                                                               FontSize="14" Foreground="#2C3E50"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
 
-        <!-- Create View -->
-        <Grid x:Name="CreateRequestView" Visibility="Collapsed">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <Grid Margin="30">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+        
+        <Grid x:Name="CreateRequestView" Background="#AA000000" 
+              Visibility="Collapsed">
+            <Border Background="White" MaxWidth="900" MaxHeight="700" 
+                    CornerRadius="10" Margin="50" VerticalAlignment="Center">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="40,30">
+                        
+                        <Grid Margin="0,0,0,30">
+                            <TextBlock Text="KREIRANJE ZAHTEVA ZA TURU" FontSize="24" FontWeight="Bold" 
+                                       Foreground="#2C3E50" VerticalAlignment="Center"/>
+                            <Button Content="×" FontSize="24" FontWeight="Bold"
+                                    Click="CancelCreateRequest_Click"
+                                    Background="Transparent" Foreground="#7F8C8D"
+                                    BorderThickness="0" Cursor="Hand"
+                                    HorizontalAlignment="Right" Width="30" Height="30"/>
+                        </Grid>
 
-                    <!-- Header -->
-                    <StackPanel Grid.Row="0" Margin="0,0,0,30">
-                        <TextBlock Text="Kreiranje zahteva za turu" 
-                                   FontSize="24" FontWeight="Bold" 
-                                   Foreground="#2C3E50"/>
-                        <TextBlock Text="Popunite formu da biste zatražili organizovanje posebne ture" 
-                                   FontSize="14" Foreground="#7F8C8D" 
-                                   Margin="0,5,0,0"/>
-                    </StackPanel>
+                        
+                        <TextBlock Text="Lokacija" FontSize="16" FontWeight="SemiBold" 
+                                   Foreground="#2C3E50" Margin="0,0,0,15"/>
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Grad *" FontSize="13" FontWeight="SemiBold" Foreground="#34495E" Margin="0,0,0,8"/>
+                                <TextBox x:Name="CityTextBox" 
+                                         Text="{Binding NewRequest.City, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource ValidationTextBoxStyle}"
+                                         LostFocus="ValidateField"/>
+                                <TextBlock x:Name="CityError" Style="{StaticResource ValidationErrorStyle}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Država *" FontSize="13" FontWeight="SemiBold" Foreground="#34495E" Margin="0,0,0,8"/>
+                                <TextBox x:Name="CountryTextBox" 
+                                         Text="{Binding NewRequest.Country, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource ValidationTextBoxStyle}"
+                                         LostFocus="ValidateField"/>
+                                <TextBlock x:Name="CountryError" Style="{StaticResource ValidationErrorStyle}"/>
+                            </StackPanel>
+                        </Grid>
 
-                    <!-- Form -->
-                    <Border Grid.Row="1" Background="White" 
-                            BorderBrush="#E0E0E0" BorderThickness="1" 
-                            Padding="30">
-                        <StackPanel>
-                            <!-- Location -->
-                            <TextBlock Text="Lokacija" FontSize="16" FontWeight="SemiBold" 
-                                       Foreground="#2C3E50" Margin="0,0,0,15"/>
+                       
+                        <TextBlock Text="Opis *" FontSize="13" FontWeight="SemiBold" Foreground="#34495E" Margin="0,0,0,8"/>
+                        <TextBox x:Name="DescriptionTextBox" 
+                                 Text="{Binding NewRequest.Description, UpdateSourceTrigger=PropertyChanged}"
+                                 TextWrapping="Wrap" AcceptsReturn="True" Height="80" 
+                                 Style="{StaticResource ValidationTextBoxStyle}"
+                                 LostFocus="ValidateField"/>
+                        <TextBlock x:Name="DescriptionError" Style="{StaticResource ValidationErrorStyle}" Margin="0,0,0,20"/>
 
-                            <Grid Margin="0,0,0,20">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                        
+                        <Grid Margin="0,0,0,20">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Grad" FontSize="14" FontWeight="SemiBold" 
-                                               Foreground="#34495E" Margin="0,0,0,5"/>
-                                    <TextBox Text="{Binding NewRequest.City, UpdateSourceTrigger=PropertyChanged}"
-                                             FontSize="14" Padding="12" 
-                                             BorderBrush="#D5DBDB" BorderThickness="1"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Država" FontSize="14" FontWeight="SemiBold" 
-                                               Foreground="#34495E" Margin="0,0,0,5"/>
-                                    <TextBox Text="{Binding NewRequest.Country, UpdateSourceTrigger=PropertyChanged}"
-                                             FontSize="14" Padding="12" 
-                                             BorderBrush="#D5DBDB" BorderThickness="1"/>
-                                </StackPanel>
-                            </Grid>
-
-                            <!-- Description -->
-                            <TextBlock Text="Opis" FontSize="16" FontWeight="SemiBold" 
-                                       Foreground="#2C3E50" Margin="0,0,0,15"/>
-
-                            <StackPanel Margin="0,0,0,20">
-                                <TextBox Text="{Binding NewRequest.Description, UpdateSourceTrigger=PropertyChanged}"
-                                         TextWrapping="Wrap" AcceptsReturn="True"
-                                         Height="80" FontSize="14" Padding="12"
-                                         BorderBrush="#D5DBDB" BorderThickness="1"/>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Jezik *" FontSize="13" FontWeight="SemiBold" Foreground="#34495E" Margin="0,0,0,8"/>
+                                <ComboBox x:Name="LanguageComboBox" 
+                                          SelectedValuePath="Content" 
+                                          SelectedValue="{Binding NewRequest.Language, UpdateSourceTrigger=PropertyChanged}" 
+                                          FontSize="14" Padding="10"
+                                          SelectionChanged="ValidateComboField">
+                                    <ComboBoxItem Content="Srpski"/>
+                                    <ComboBoxItem Content="Engleski"/>
+                                    <ComboBoxItem Content="Nemački"/>
+                                </ComboBox>
+                                <TextBlock x:Name="LanguageError" Style="{StaticResource ValidationErrorStyle}"/>
                             </StackPanel>
 
-                            <!-- Details -->
-                            <Grid Margin="0,0,0,20">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="20"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Datum od *" FontSize="13" FontWeight="SemiBold" Foreground="#34495E" Margin="0,0,0,8"/>
+                                <DatePicker x:Name="DateFromPicker" 
+                                            SelectedDate="{Binding NewRequest.DateFrom}" 
+                                            FontSize="14" Padding="10"
+                                            SelectedDateChanged="ValidateDateField"/>
+                                <TextBlock x:Name="DateFromError" Style="{StaticResource ValidationErrorStyle}"/>
+                            </StackPanel>
 
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Jezik" FontSize="14" FontWeight="SemiBold" 
-                                               Foreground="#34495E" Margin="0,0,0,5"/>
-                                    <ComboBox SelectedValue="{Binding NewRequest.Language}"
-                                              FontSize="14" Padding="12">
-                                        <ComboBoxItem Content="Srpski"/>
-                                        <ComboBoxItem Content="Engleski"/>
-                                        <ComboBoxItem Content="Nemački"/>
-                                    </ComboBox>
-                                </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Datum do *" FontSize="13" FontWeight="SemiBold" Foreground="#34495E" Margin="0,0,0,8"/>
+                                <DatePicker x:Name="DateToPicker" 
+                                            SelectedDate="{Binding NewRequest.DateTo}" 
+                                            FontSize="14" Padding="10"
+                                            SelectedDateChanged="ValidateDateField"/>
+                                <TextBlock x:Name="DateToError" Style="{StaticResource ValidationErrorStyle}"/>
+                            </StackPanel>
+                        </Grid>
 
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Datum od" FontSize="14" FontWeight="SemiBold" 
-                                               Foreground="#34495E" Margin="0,0,0,5"/>
-                                    <DatePicker SelectedDate="{Binding NewRequest.DateFrom}"
-                                                FontSize="14"/>
-                                </StackPanel>
+                        
+                        <TextBlock Text="Učesnici" FontSize="16" FontWeight="SemiBold" Foreground="#2C3E50" Margin="0,0,0,15"/>
+                        <Border Background="#F8F9FA" BorderBrush="#E8E8E8" BorderThickness="1" 
+                                CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
 
-                                <StackPanel Grid.Column="4">
-                                    <TextBlock Text="Datum do" FontSize="14" FontWeight="SemiBold" 
-                                               Foreground="#34495E" Margin="0,0,0,5"/>
-                                    <DatePicker SelectedDate="{Binding NewRequest.DateTo}"
-                                                FontSize="14"/>
-                                </StackPanel>
-                            </Grid>
+                               
+                                <Grid Grid.Row="0" Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="15"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Ime *" FontSize="12" FontWeight="SemiBold" 
+                                              Foreground="#34495E"/>
+                                    <TextBlock Grid.Column="2" Text="Prezime *" FontSize="12" FontWeight="SemiBold" 
+                                              Foreground="#34495E"/>
+                                    <TextBlock Grid.Column="4" Text="Godine *" FontSize="12" FontWeight="SemiBold" 
+                                              Foreground="#34495E"/>
+                                </Grid>
 
-                            <!-- Participants -->
-                            <TextBlock Text="Učesnici" FontSize="16" FontWeight="SemiBold" 
-                                       Foreground="#2C3E50" Margin="0,0,0,15"/>
+                                
+                                <Grid Grid.Row="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
 
-                            <Border Background="#F8F9FA" Padding="20" Margin="0,0,0,15">
-                                <StackPanel>
-                                    <TextBlock Text="Dodaj novog učesnika:" 
-                                               FontSize="14" FontWeight="SemiBold" 
-                                               Foreground="#34495E" Margin="0,0,0,10"/>
-
-                                    <Grid>
+                                    <Grid Grid.Row="0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="15"/>
@@ -367,83 +503,129 @@
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBox Grid.Column="0"
-                                                 Text="{Binding NewParticipant.FirstName, UpdateSourceTrigger=PropertyChanged}"
-                                                 FontSize="14" Padding="10" 
-                                                 BorderBrush="#D5DBDB" BorderThickness="1"/>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBox x:Name="ParticipantFirstNameTextBox" 
+                                                     Text="{Binding NewParticipant.FirstName, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource ValidationTextBoxStyle}"
+                                                     LostFocus="ValidateParticipantField"/>
+                                            <TextBlock x:Name="ParticipantFirstNameError" Style="{StaticResource ValidationErrorStyle}"/>
+                                        </StackPanel>
 
-                                        <TextBox Grid.Column="2"
-                                                 Text="{Binding NewParticipant.LastName, UpdateSourceTrigger=PropertyChanged}"
-                                                 FontSize="14" Padding="10" 
-                                                 BorderBrush="#D5DBDB" BorderThickness="1"/>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBox x:Name="ParticipantLastNameTextBox" 
+                                                     Text="{Binding NewParticipant.LastName, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource ValidationTextBoxStyle}"
+                                                     LostFocus="ValidateParticipantField"/>
+                                            <TextBlock x:Name="ParticipantLastNameError" Style="{StaticResource ValidationErrorStyle}"/>
+                                        </StackPanel>
 
-                                        <TextBox Grid.Column="4"
-                                                 Text="{Binding NewParticipant.Age, UpdateSourceTrigger=PropertyChanged}"
-                                                 FontSize="14" Padding="10" 
-                                                 BorderBrush="#D5DBDB" BorderThickness="1"/>
+                                        <StackPanel Grid.Column="4">
+                                            <TextBox x:Name="ParticipantAgeTextBox" 
+                                                     Text="{Binding NewParticipant.Age, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource ValidationTextBoxStyle}"
+                                                     LostFocus="ValidateParticipantField"/>
+                                            <TextBlock x:Name="ParticipantAgeError" Style="{StaticResource ValidationErrorStyle}"/>
+                                        </StackPanel>
 
-                                        <Button Grid.Column="6" Content="Dodaj"
-                                                Command="{Binding AddParticipantCommand}"
-                                                Background="#27AE60" Foreground="White"
-                                                Padding="15,8" FontSize="12"
-                                                BorderThickness="0" Cursor="Hand"/>
+                                        <Button Grid.Column="6" Content="Dodaj" 
+                                                Click="AddParticipant_Click"
+                                                Background="#27AE60" Foreground="White" 
+                                                Style="{StaticResource RoundedButtonStyle}"/>
                                     </Grid>
-                                </StackPanel>
-                            </Border>
+                                </Grid>
+                            </Grid>
+                        </Border>
 
-                            <!-- Participants List -->
-                            <Border Background="White" 
-                                    BorderBrush="#E9ECEF" BorderThickness="1"
-                                    MinHeight="120" Margin="0,0,0,20">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="15">
-                                    <ItemsControl ItemsSource="{Binding Participants}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Background="#F1F2F6" Margin="0,0,0,8" Padding="15,10">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                        </Grid.ColumnDefinitions>
+                       
+                        <ItemsControl ItemsSource="{Binding Participants}" Margin="0,0,0,20">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="White" BorderBrush="#E8E8E8" BorderThickness="1" 
+                                            Padding="15,10" Margin="0,0,0,8" CornerRadius="6">
+                                        <Grid>
+                                            <TextBlock Text="{Binding DisplayText}" FontSize="14" 
+                                                       Foreground="#2C3E50" VerticalAlignment="Center"/>
+                                            <Button Content="Ukloni" 
+                                                    Command="{Binding DataContext.RemoveParticipantCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="#E74C3C" Foreground="White" 
+                                                    Style="{StaticResource RoundedButtonStyle}"
+                                                    HorizontalAlignment="Right"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
 
-                                                        <TextBlock Grid.Column="0"
-                                                                   Text="{Binding DisplayText}"
-                                                                   FontSize="14" Foreground="#2C3E50"
-                                                                   VerticalAlignment="Center"/>
-
-                                                        <Button Grid.Column="1" Content="Ukloni"
-                                                                Command="{Binding DataContext.RemoveParticipantCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                CommandParameter="{Binding}"
-                                                                Background="#E74C3C" Foreground="White"
-                                                                Padding="8,4" FontSize="10"
-                                                                BorderThickness="0" Cursor="Hand"/>
-                                                    </Grid>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ScrollViewer>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Action Buttons -->
-                    <StackPanel Grid.Row="2" Orientation="Horizontal" 
-                                HorizontalAlignment="Right" Margin="0,20,0,0">
-                        <Button Content="Otkazi" 
-                                Command="{Binding CancelCreateRequestCommand}"
-                                Background="#95A5A6" Foreground="White"
-                                Padding="20,12" FontSize="14" FontWeight="SemiBold"
-                                Margin="0,0,15,0" BorderThickness="0" Cursor="Hand"/>
-
-                        <Button Content="Sacuvaj zahtev" 
-                                Command="{Binding SaveRequestCommand}"
-                                Background="#2E86C1" Foreground="White"
-                                Padding="20,12" FontSize="14" FontWeight="SemiBold"
-                                BorderThickness="0" Cursor="Hand"/>
+                        <!-- Action Buttons -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="Otkaži" 
+                                    Click="CancelCreateRequest_Click"
+                                    Background="#95A5A6" Foreground="White" 
+                                    FontWeight="SemiBold" Style="{StaticResource RoundedButtonStyle}" 
+                                    Padding="20,12"/>
+                            <Button Grid.Column="2" Content="Sačuvaj zahtev" 
+                                    Click="SaveRequest_Click"
+                                    Background="#3498DB" Foreground="White" 
+                                    FontWeight="Bold" Style="{StaticResource RoundedButtonStyle}"
+                                    Padding="20,12"/>
+                        </Grid>
                     </StackPanel>
-                </Grid>
-            </ScrollViewer>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Success Overlay -->
+        <Grid x:Name="SuccessOverlay" Style="{StaticResource ErrorOverlayStyle}">
+            <Border Style="{StaticResource SuccessPanelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <TextBlock Text="✓" FontSize="24" FontWeight="Bold" Foreground="#27AE60" Margin="0,0,10,0"/>
+                        <TextBlock Text="USPEŠNO KREIRAN" FontWeight="Bold" FontSize="16" Foreground="#27AE60"/>
+                    </StackPanel>
+
+                    <TextBlock x:Name="SuccessMessage" 
+                               Text="Zahtev za turu je uspešno kreiran!" 
+                               FontSize="14" Foreground="#7F8C8D" 
+                               Margin="0,0,0,20" TextWrapping="Wrap"/>
+
+                    <Button Content="ZATVORI" 
+                            Style="{StaticResource RoundedButtonStyle}"
+                            Background="#27AE60" Foreground="White"
+                            Click="CloseSuccessOverlay"
+                            HorizontalAlignment="Right"
+                            MinWidth="100"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Error Overlay -->
+        <Grid x:Name="ErrorOverlay" Style="{StaticResource ErrorOverlayStyle}">
+            <Border Style="{StaticResource ErrorPanelStyle}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                        <TextBlock Text="!" FontSize="24" FontWeight="Bold" Foreground="#E74C3C" Margin="0,0,10,0"/>
+                        <TextBlock Text="GREŠKA VALIDACIJE" FontWeight="Bold" FontSize="16" Foreground="#E74C3C"/>
+                    </StackPanel>
+
+                    <TextBlock x:Name="ErrorMessage" 
+                               Text="Molimo ispravite greške u formi:" 
+                               FontSize="14" Foreground="#7F8C8D" 
+                               Margin="0,0,0,15" TextWrapping="Wrap"/>
+
+                    <Button Content="ZATVORI" 
+                            Style="{StaticResource RoundedButtonStyle}"
+                            Background="#95A5A6" Foreground="White"
+                            Click="CloseErrorOverlay"
+                            HorizontalAlignment="Right"
+                            MinWidth="100"/>
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>
