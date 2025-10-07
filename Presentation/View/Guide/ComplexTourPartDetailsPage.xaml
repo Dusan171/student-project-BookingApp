@@ -5,6 +5,8 @@
       Background="#FFF5F5F5">
 
     <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        
         <Style x:Key="AnimatedButtonStyle" TargetType="Button">
             <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
             <Setter Property="RenderTransform">
@@ -29,6 +31,13 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="DisabledButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#CCCCCC"/>
+            <Setter Property="Foreground" Value="#666666"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+        </Style>
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -38,9 +47,33 @@
                        FontSize="24" 
                        FontWeight="Bold" 
                        TextAlignment="Left"
-                       Margin="0,0,0,16"
+                       Margin="0,0,0,8"
                        Foreground="#333"
                        ToolTip="Details of this part of the tour request"/>
+
+            <!-- Status indicator -->
+            <Border HorizontalAlignment="Center" Margin="0,0,0,16">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsAccepted}" Value="True">
+                                <Setter Property="Background" Value="#4CAF50"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsAccepted}" Value="False">
+                                <Setter Property="Background" Value="#FF9800"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                        <Setter Property="CornerRadius" Value="15"/>
+                        <Setter Property="Padding" Value="12,6"/>
+                    </Style>
+                </Border.Style>
+                
+                <TextBlock Text="{Binding StatusText}" 
+                           Foreground="White" 
+                           FontSize="14" 
+                           FontWeight="Bold"
+                           ToolTip="Current status of this tour part"/>
+            </Border>
 
             <Border CornerRadius="12" Background="White" Padding="12" Margin="0,0,0,16" BorderBrush="#DDD" BorderThickness="1"
                     ToolTip="General details about the requested tour">
@@ -87,13 +120,42 @@
                 </StackPanel>
             </Border>
 
+            <!-- Accepted details - only show when accepted -->
+            <Border CornerRadius="12" Background="#E8F5E8" Padding="12" Margin="0,0,0,16" BorderBrush="#4CAF50" BorderThickness="2"
+                    Visibility="{Binding IsAccepted, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    ToolTip="Details about the accepted tour part">
+                <StackPanel>
+                    <TextBlock Text="Acceptance details" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8" Foreground="#2E7D32"/>
+
+                    <TextBlock Text="{Binding AcceptedByGuide, StringFormat=Accepted by: {0}}" Margin="0,2" ToolTip="Guide who accepted this tour part"/>
+                    <TextBlock Text="{Binding AcceptedDate, StringFormat=Accepted on: {0}}" Margin="0,2" ToolTip="Date when tour part was accepted"/>
+                    <TextBlock Text="{Binding ScheduledDate, StringFormat=Scheduled for: {0}}" Margin="0,2" ToolTip="Scheduled date and time for the tour"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Accept button - only show when can accept -->
             <Button Content="Accept" Width="140" Height="42" HorizontalAlignment="Center"
                     Background="#4CAF50" Foreground="White" FontWeight="Bold"
                     BorderThickness="0"
                     Command="{Binding AcceptCommand}"
                     Margin="0,8,0,0"
                     Style="{StaticResource AnimatedButtonStyle}"
+                    Visibility="{Binding CanAccept, Converter={StaticResource BooleanToVisibilityConverter}}"
                     ToolTip="Accept this tour request"/>
+
+            <!-- Already accepted message - only show when accepted -->
+            <Border CornerRadius="8" Background="#FFF3E0" Padding="12" Margin="0,8,0,0" BorderBrush="#FF9800" BorderThickness="1"
+                    HorizontalAlignment="Center"
+                    Visibility="{Binding IsAccepted, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    ToolTip="This tour part has already been accepted">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="ℹ️" FontSize="16" Margin="0,0,8,0"/>
+                    <TextBlock Text="This tour part has already been accepted" 
+                               FontWeight="Medium" 
+                               Foreground="#E65100"/>
+                </StackPanel>
+            </Border>
+
         </StackPanel>
     </ScrollViewer>
 </Page>
