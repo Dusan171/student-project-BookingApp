@@ -98,9 +98,9 @@ namespace BookingApp.Domain.Model
             Language = values[5] ?? string.Empty;
             NumberOfPeople = int.Parse(values[6]);
 
-            DateFrom = DateTime.Parse(values[7]);
-            DateTo = DateTime.Parse(values[8]);
-            CreatedAt = DateTime.Parse(values[9]);
+            DateFrom = DateTime.ParseExact(values[7], "dd-MM-yyyy", null);
+            DateTo = DateTime.ParseExact(values[8], "dd-MM-yyyy", null);
+            CreatedAt = DateTime.ParseExact(values[9], "dd-MM-yyyy HH:mm:ss", null);
 
             Status = (TourRequestStatus)Enum.Parse(typeof(TourRequestStatus), values[10]);
 
@@ -108,12 +108,13 @@ namespace BookingApp.Domain.Model
                 AcceptedByGuideId = int.Parse(values[11]);
 
             if (values.Length > 12 && !string.IsNullOrEmpty(values[12]))
-                AcceptedDate = DateTime.Parse(values[12]);
+                AcceptedDate = DateTime.ParseExact(values[12], "dd-MM-yyyy HH:mm:ss", null);
 
             if (values.Length > 13 && !string.IsNullOrEmpty(values[13]))
-                ScheduledDate = DateTime.Parse(values[13]);
+                ScheduledDate = DateTime.ParseExact(values[13], "dd-MM-yyyy HH:mm:ss", null);
 
             Participants = new List<TourRequestParticipant>();
         }
+
     }
 }
