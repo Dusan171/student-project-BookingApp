@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using PdfSharp.Fonts;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Presentation.ViewModel.Tourist
 {
@@ -27,8 +28,8 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         private int _acceptedCount;
         private int _notAcceptedCount;
         private double _averagePeopleCount;
-        private ObservableCollection<LanguageStatistic> _languageStatistics;
-        private ObservableCollection<LocationStatistic> _locationStatistics;
+        private ObservableCollection<LanguageStatisticData> _languageStatistics;
+        private ObservableCollection<LocationStatisticData> _locationStatistics;
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -75,13 +76,13 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             set { _averagePeopleCount = value; OnPropertyChanged(); }
         }
 
-        public ObservableCollection<LanguageStatistic> LanguageStatistics
+        public ObservableCollection<LanguageStatisticData> LanguageStatistics
         {
             get => _languageStatistics;
             set { _languageStatistics = value; OnPropertyChanged(); }
         }
 
-        public ObservableCollection<LocationStatistic> LocationStatistics
+        public ObservableCollection<LocationStatisticData> LocationStatistics
         {
             get => _locationStatistics;
             set { _locationStatistics = value; OnPropertyChanged(); }
@@ -98,8 +99,8 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             _statisticsService = statisticsService ?? Services.Injector.CreateInstance<ITourRequestStatisticsService>();
 
             AvailableYears = new ObservableCollection<string>();
-            LanguageStatistics = new ObservableCollection<LanguageStatistic>();
-            LocationStatistics = new ObservableCollection<LocationStatistic>();
+            LanguageStatistics = new ObservableCollection<LanguageStatisticData>();
+            LocationStatistics = new ObservableCollection<LocationStatisticData>();
 
             GenerateReportCommand = new RelayCommand(GenerateReport);
 
@@ -158,12 +159,8 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
             foreach (var item in langData)
             {
-                LanguageStatistics.Add(new LanguageStatistic
-                {
-                    Language = item.Language,
-                    Count = item.Count,
-                    BarWidth = max > 0 ? (item.Count * 300.0 / max) : 0
-                });
+                item.BarWidth = max > 0 ? (item.Count * 300.0 / max) : 0;
+                LanguageStatistics.Add(item);
             }
         }
 
@@ -176,12 +173,8 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
             foreach (var item in locData)
             {
-                LocationStatistics.Add(new LocationStatistic
-                {
-                    Location = item.Location,
-                    Count = item.Count,
-                    BarWidth = max > 0 ? (item.Count * 300.0 / max) : 0
-                });
+                item.BarWidth = max > 0 ? (item.Count * 300.0 / max) : 0;
+                LocationStatistics.Add(item);
             }
         }
 
@@ -300,19 +293,5 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-    }
-
-    public class LanguageStatistic
-    {
-        public string Language { get; set; }
-        public int Count { get; set; }
-        public double BarWidth { get; set; }
-    }
-
-    public class LocationStatistic
-    {
-        public string Location { get; set; }
-        public int Count { get; set; }
-        public double BarWidth { get; set; }
     }
 }
