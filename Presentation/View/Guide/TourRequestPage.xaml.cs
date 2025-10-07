@@ -22,7 +22,7 @@ namespace BookingApp.Presentation.View.Guide
 
             _viewModel.NavigateToComplexParts = (complexTour) =>
             {
-                //NavigationService?.Navigate(new ComplexTourPartsPage(complexTour));
+                NavigationService?.Navigate(new ComplexTourPartsPage(complexTour));
             };
         }
     }
