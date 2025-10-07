@@ -88,6 +88,28 @@ namespace BookingApp.Services
             }
         }
 
+        public void SendTourAcceptanceNotification(int touristId, int tourId, string tourName, string location, DateTime scheduledDate, string guideName)
+        {
+            try
+            {
+                var notification = new TourNotification
+                {
+                    TouristId = touristId,
+                    TourId = tourId,
+                    Title = "Vaš zahtev za turu je prihvaćen!",
+                    Message = $"Vaš zahtev za turu '{tourName}' u {location} je prihvaćen! Tura je zakazana za {scheduledDate:dd.MM.yyyy} u {scheduledDate:HH:mm}. Vodič: {guideName}",
+                    CreatedAt = DateTime.Now,
+                    IsRead = false
+                };
+
+                _notificationRepository.Save(notification);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Greška pri slanju obaveštenja o prihvaćenoj turi: {ex.Message}", ex);
+            }
+        }
+
         public void CreateNotificationsForNewTour(int tourId, string tourName, string location, string language)
         {
             try
