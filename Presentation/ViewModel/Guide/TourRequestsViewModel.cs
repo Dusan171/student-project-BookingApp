@@ -20,16 +20,16 @@ namespace BookingApp.Presentation.View.Guide
         {
             _userRepository = userRepository;
         }
-        /*
+        
         public int Id { get; set; }
-        public ObservableCollection<ComplexTourPartRequest> Parts { get; set; }
+        public ObservableCollection<ComplexTourRequestPart> Parts { get; set; }
 
         public DateTime? DateFrom => Parts?.OrderBy(p => p.DateFrom).FirstOrDefault()?.DateFrom;
         public DateTime? DateTo => Parts?.OrderByDescending(p => p.DateTo).FirstOrDefault()?.DateTo;
 
         public int? TouristId => Parts?.FirstOrDefault()?.TouristId;
 
-        //ovde vidi sto ne radi tourist name
+        
         public string TouristName
         {
             get
@@ -38,7 +38,7 @@ namespace BookingApp.Presentation.View.Guide
                 var user = _userRepository.GetById(TouristId.Value);
                 return (user?.FirstName + " " + user?.LastName) ?? $"Unknown Tourist {TouristId}";
             }
-        }*/
+        }
     }
 
 
@@ -77,7 +77,7 @@ namespace BookingApp.Presentation.View.Guide
         private readonly UserRepository _userRepository;
 
         private readonly ObservableCollection<TourRequest> _allRequests;
-        //private readonly ObservableCollection<ComplexTourPartRequest> _allComplexParts;
+        private readonly ObservableCollection<ComplexTourRequestPart> _allComplexParts;
 
 
 
@@ -89,10 +89,11 @@ namespace BookingApp.Presentation.View.Guide
             Requests = new ObservableCollection<TourRequest>();
             ComplexRequests = new ObservableCollection<ComplexTourRequestViewModel>();
             TourRequestRepository repo = new TourRequestRepository();
+            ComplexTourRequestPartRepository complexPartRepo = new ComplexTourRequestPartRepository();
             _allRequests = new ObservableCollection<TourRequest>(repo.GetAll());
 
-            //_allComplexParts = iz fajla od ane
-            
+            _allComplexParts = new ObservableCollection<ComplexTourRequestPart>(complexPartRepo.GetAll());
+
 
 
 
@@ -110,15 +111,15 @@ namespace BookingApp.Presentation.View.Guide
             Requests.Clear();
             foreach (var r in _allRequests) Requests.Add(r);
 
-            /*ComplexRequests.Clear();
+            ComplexRequests.Clear();
             var grouped = _allComplexParts.GroupBy(p => p.ComplexTourRequestId)
                 .Select(g => new ComplexTourRequestViewModel(_userRepository)
                 {
                     Id = g.Key,
-                    Parts = new ObservableCollection<ComplexTourPartRequest>(g)
+                    Parts = new ObservableCollection<ComplexTourRequestPart>(g)
                 });
 
-            foreach (var cr in grouped) ComplexRequests.Add(cr);*/
+            foreach (var cr in grouped) ComplexRequests.Add(cr);
         }
 
         private void FilterSimpleRequests()
@@ -138,7 +139,7 @@ namespace BookingApp.Presentation.View.Guide
 
         private void FilterComplexRequests()
         {
-            /*var filtered = _allComplexParts
+            var filtered = _allComplexParts
                 .Where(p =>
                     (string.IsNullOrEmpty(City) || p.City.Contains(City, StringComparison.OrdinalIgnoreCase)) &&
                     (string.IsNullOrEmpty(Country) || p.Country.Contains(Country, StringComparison.OrdinalIgnoreCase)) &&
@@ -151,11 +152,11 @@ namespace BookingApp.Presentation.View.Guide
                 .Select(g => new ComplexTourRequestViewModel(_userRepository)
                 {
                     Id = g.Key,
-                    Parts = new ObservableCollection<ComplexTourPartRequest>(g)
+                    Parts = new ObservableCollection<ComplexTourRequestPart>(g)
                 });
 
             ComplexRequests.Clear();
-            foreach (var cr in filtered) ComplexRequests.Add(cr);*/
+            foreach (var cr in filtered) ComplexRequests.Add(cr);
         }
 
         private void ViewDetails(int requestId)
@@ -169,11 +170,11 @@ namespace BookingApp.Presentation.View.Guide
 
         private void ViewComplexParts(int complexRequestId)
         {
-            /*var complexRequest = ComplexRequests.FirstOrDefault(c => c.Id == complexRequestId);
+            var complexRequest = ComplexRequests.FirstOrDefault(c => c.Id == complexRequestId);
             if (complexRequest != null)
             {
                 NavigateToComplexParts?.Invoke(complexRequest);
-            }*/
+            }
         }
     }
 }
