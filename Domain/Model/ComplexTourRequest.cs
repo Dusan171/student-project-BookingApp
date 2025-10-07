@@ -56,13 +56,13 @@ namespace BookingApp.Domain.Model
             Id = int.Parse(values[0]);
             TouristId = int.Parse(values[1]);
 
-           
-            CreatedAt = DateTime.Parse(values[2]);
+
+            var culture = new System.Globalization.CultureInfo("sr-Latn-RS");
+            CreatedAt = DateTime.ParseExact(values[2], "dd-MM-yyyy HH:mm:ss", culture);
 
             Status = (ComplexTourRequestStatus)Enum.Parse(typeof(ComplexTourRequestStatus), values[3]);
-
-   
-            InvalidationDeadline = DateTime.Parse(values[4]);
+            
+            InvalidationDeadline = DateTime.ParseExact(values[4], "dd-MM-yyyy HH:mm:ss", culture);
 
             Parts = new List<ComplexTourRequestPart>();
         }
