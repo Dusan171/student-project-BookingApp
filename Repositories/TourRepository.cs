@@ -11,11 +11,13 @@ namespace BookingApp.Repositories
     {
         private const string FilePath = "../../../Resources/Data/tours.csv";
         private readonly Serializer<Tour> _serializer;
+        private readonly StartTourTimeRepository _startTimeRepository;
         private List<Tour> _tours;
 
         public TourRepository()
         {
             _serializer = new Serializer<Tour>();
+            _startTimeRepository = new StartTourTimeRepository();
             _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
         }
 
@@ -23,7 +25,48 @@ namespace BookingApp.Repositories
 
         private void Reload() => _tours = _serializer.FromCSV(FilePath) ?? new List<Tour>();
 
-        public List<Tour> GetAll() => _tours.ToList();
+        public List<Tour> GetAll()
+        {
+            var tours = _tours.ToList();
+            var allStartTimes = _startTimeRepository.GetAll();
+
+            // Build lookups for start times
+            var startTimesByTourId = allStartTimes
+                .GroupBy(st => st.TourId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+            var startTimesById = allStartTimes.ToDictionary(st => st.Id, st => st);
+
+            foreach (var tour in tours)
+            {
+                // First, try by TourId mapping from start times file
+                if (startTimesByTourId.TryGetValue(tour.Id, out var timesByTour) && timesByTour.Count > 0)
+                {
+                    tour.StartTimes = timesByTour.OrderBy(st => st.Time).ToList();
+                    continue;
+                }
+
+                // Fallback: the tour CSV listed StartTime IDs but startTimes.csv has TourId=0 or missing
+                if (tour.StartTimes != null && tour.StartTimes.Count > 0)
+                {
+                    var resolved = new List<StartTourTime>();
+                    foreach (var st in tour.StartTimes)
+                    {
+                        if (startTimesById.TryGetValue(st.Id, out var real))
+                        {
+                            resolved.Add(real);
+                        }
+                    }
+
+                    tour.StartTimes = resolved.OrderBy(st => st.Time).ToList();
+                }
+                else
+                {
+                    tour.StartTimes = new List<StartTourTime>();
+                }
+            }
+
+            return tours;
+        }
 
         public Tour GetById(int id)
         {
