@@ -60,7 +60,6 @@ namespace BookingApp.Services
             {
                 var request = requestDTO.ToComplexTourRequest();
 
-                // Izračunaj deadline - 48h pre prvog dela
                 if (requestDTO.Parts.Any())
                 {
                     var earliestDate = requestDTO.Parts.Min(p => p.DateFrom);
@@ -69,12 +68,13 @@ namespace BookingApp.Services
 
                 var savedRequest = _requestRepository.Save(request);
 
-                // Sačuvaj delove ture
                 for (int i = 0; i < requestDTO.Parts.Count; i++)
                 {
                     var partDTO = requestDTO.Parts[i];
                     partDTO.ComplexTourRequestId = savedRequest.Id;
                     partDTO.PartIndex = i;
+
+                    partDTO.TouristId = requestDTO.TouristId; 
 
                     var part = partDTO.ToComplexTourRequestPart();
                     var savedPart = _partRepository.Save(part);
@@ -82,7 +82,9 @@ namespace BookingApp.Services
                     // Sačuvaj učesnike za ovaj deo
                     foreach (var participantDTO in partDTO.Participants)
                     {
+
                         participantDTO.ComplexTourRequestPartId = savedPart.Id;
+
                         var participant = participantDTO.ToComplexTourRequestParticipant();
                         _participantRepository.Save(participant);
                     }
@@ -120,17 +122,14 @@ namespace BookingApp.Services
                 var request = _requestRepository.GetById(id);
                 if (request != null)
                 {
-                    // Obriši sve učesnike za sve delove
                     var parts = _partRepository.GetByComplexRequestId(id);
                     foreach (var part in parts)
                     {
                         _participantRepository.DeleteByPartId(part.Id);
                     }
 
-                    // Obriši sve delove
                     _partRepository.DeleteByComplexRequestId(id);
 
-                    // Obriši glavni zahtev
                     _requestRepository.Delete(request);
                 }
             }
@@ -179,13 +178,11 @@ namespace BookingApp.Services
 
                 foreach (var request in pendingRequests)
                 {
-                    // Proveri da li je zahtev stvarno expired
                     if (currentDateTime > request.InvalidationDeadline)
                     {
                         request.Status = ComplexTourRequestStatus.INVALID;
                         _requestRepository.Update(request);
 
-                        // Ažuriraj i sve delove koji su PENDING
                         var parts = _partRepository.GetByComplexRequestId(request.Id);
                         foreach (var part in parts)
                         {
@@ -225,7 +222,6 @@ namespace BookingApp.Services
                 var part = partDTO.ToComplexTourRequestPart();
                 var savedPart = _partRepository.Save(part);
 
-                // Sačuvaj učesnike
                 foreach (var participantDTO in partDTO.Participants)
                 {
                     participantDTO.ComplexTourRequestPartId = savedPart.Id;
@@ -233,7 +229,6 @@ namespace BookingApp.Services
                     _participantRepository.Save(participant);
                 }
 
-                // Ažuriraj deadline
                 UpdateInvalidationDeadline(requestId);
 
                 return ComplexTourRequestPartDTO.FromDomain(savedPart);
@@ -251,13 +246,10 @@ namespace BookingApp.Services
                 var part = _partRepository.GetById(partId);
                 if (part != null)
                 {
-                    // Obriši učesnike
                     _participantRepository.DeleteByPartId(partId);
 
-                    // Obriši deo
                     _partRepository.Delete(part);
 
-                    // Reorganizuj indekse
                     ReorganizePartIndices(part.ComplexTourRequestId);
                 }
             }
