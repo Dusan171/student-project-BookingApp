@@ -24,29 +24,16 @@ namespace BookingApp.Services
             try
             {
                 var accommodation = GetAndValidateAccommodation(reservationDto.AccommodationId);
-                ValidateReservationRules(accommodation, reservationDto.StartDate, reservationDto.EndDate, reservationDto.GuestsNumber);
+                ValidateReservationRules(accommodation, reservationDto);
 
-                if (!IsDateRangeAvailable(accommodation.Id, reservationDto.StartDate, reservationDto.EndDate))
+                if (IsDateRangeAvailable(accommodation.Id, reservationDto.StartDate, reservationDto.EndDate))
                 {
-                    int duration = (reservationDto.EndDate - reservationDto.StartDate).Days;
-                    var suggestions = FindAvailableDateRanges(accommodation.Id, duration, reservationDto.StartDate);
-
-                    return new ReservationAttemptResult
-                    {
-                        IsSuccess = false,
-                        SuggestedRanges = suggestions
-                    };
+                    return HandleSuccessfulReservation(reservationDto);
                 }
-
-                var reservationToSave = reservationDto.ToReservation();
-                var savedReservation = _reservationRepository.Save(reservationToSave);
-                CreateOccupiedDates(savedReservation);
-
-                return new ReservationAttemptResult
+                else
                 {
-                    IsSuccess = true,
-                    CreatedReservation = new ReservationDTO(savedReservation)
-                };
+                    return HandleUnavailableDates(accommodation.Id, reservationDto);
+                }
             }
             catch (Exception ex)
             {
@@ -60,7 +47,6 @@ namespace BookingApp.Services
         }
         private List<DateRange> FindAvailableDateRanges(int accommodationId, int duration, DateTime preferredStartDate)
         {
-           // var suggestions = new List<DateRange>();
             var occupiedDates = GetOccupiedDatesForAccommodation(accommodationId).ToHashSet();
 
             var searchContext = new SuggestionSearchContext
@@ -139,17 +125,14 @@ namespace BookingApp.Services
                 _occupiedDateRepository.Save(occupiedDatesToSave);
             }
         }
-        private void ValidateReservationRules(Accommodation accommodation, DateTime startDate, DateTime endDate, int guestNumber)
+        private void ValidateReservationRules(Accommodation accommodation, ReservationDTO reservationDto)
         {
-            if (guestNumber > accommodation.MaxGuests)
-            {
+            if (reservationDto.GuestsNumber > accommodation.MaxGuests)
                 throw new Exception($"Max allowed guests: {accommodation.MaxGuests}");
-            }
-            int stayLength = (endDate - startDate).Days;
+
+            int stayLength = (reservationDto.EndDate - reservationDto.StartDate).Days;
             if (stayLength < accommodation.MinReservationDays)
-            {
                 throw new Exception($"Minimum stay is {accommodation.MinReservationDays} days.");
-            }
         }
         private Accommodation GetAndValidateAccommodation(int accommodationId)
         {
@@ -160,5 +143,21 @@ namespace BookingApp.Services
             }
             return accommodation;
         }
+        private ReservationAttemptResult HandleSuccessfulReservation(ReservationDTO reservationDto)
+        {
+            var reservationToSave = reservationDto.ToReservation();
+            var savedReservation = _reservationRepository.Save(reservationToSave);
+            CreateOccupiedDates(savedReservation);
+            return new ReservationAttemptResult { IsSuccess = true, CreatedReservation = new ReservationDTO(savedReservation) };
+        }
+
+        // Refactoring: "Extract Method" - Logika za neuspešnu rezervaciju je izdvojena.
+        private ReservationAttemptResult HandleUnavailableDates(int accommodationId, ReservationDTO reservationDto)
+        {
+            int duration = (reservationDto.EndDate - reservationDto.StartDate).Days;
+            var suggestions = FindAvailableDateRanges(accommodationId, duration, reservationDto.StartDate);
+            return new ReservationAttemptResult { IsSuccess = false, SuggestedRanges = suggestions };
+        }
+
     }
 }

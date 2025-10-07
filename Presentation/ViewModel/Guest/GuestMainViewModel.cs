@@ -37,6 +37,7 @@ namespace BookingApp.Presentation.ViewModel.Guest
             AccommodationDetailsViewModel.GoBackToSearchRequested += ShowAccommodations;
             AccommodationDetailsViewModel.ReserveFromDetailsRequested += OnReserveFromDetailsRequested;
             ForumListViewModel.ViewForumRequested += ShowForumDetails;
+            AnywhereAnytimeViewModel.ViewDetailsFromAnywhereRequested += ShowAccommodationDetails;
 
             ShowAccommodations();
         }
@@ -81,6 +82,7 @@ namespace BookingApp.Presentation.ViewModel.Guest
             AccommodationDetailsViewModel.GoBackToSearchRequested -= ShowAccommodations;
             AccommodationDetailsViewModel.ReserveFromDetailsRequested -= OnReserveFromDetailsRequested;
             ForumListViewModel.ViewForumRequested -= ShowForumDetails;
+            AnywhereAnytimeViewModel.ViewDetailsFromAnywhereRequested -= ShowAccommodationDetails;
         }
 
         #endregion

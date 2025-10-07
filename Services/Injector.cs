@@ -158,13 +158,11 @@ namespace BookingApp.Services
              );
             _implementations[typeof(IForumDisplayService)] = new ForumDisplayService(displayServiceDependencies);
 
-            // 2. Forum "Read" Service
             _implementations[typeof(IForumService)] = new ForumService(
                 CreateInstance<IForumRepository>(),
                 CreateInstance<IForumDisplayService>()
             );
 
-            // 3. Forum "Write" Service
             _implementations[typeof(IForumManagementService)] = new ForumManagementService(
                 CreateInstance<IForumRepository>(),
                 CreateInstance<ICommentRepository>(),
@@ -183,6 +181,10 @@ namespace BookingApp.Services
                 CreateInstance<ISystemNotificationRepository>(),
                 CreateInstance<IUserRepository>()
             );
+            _implementations[typeof(IAnywhereSearchService)] = new AnywhereSearchService(
+                  CreateInstance<IAccommodationRepository>(),
+                  CreateInstance<IReservationRepository>()
+                );
         }
 
         public static T CreateInstance<T>()
