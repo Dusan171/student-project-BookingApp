@@ -11,6 +11,7 @@ namespace BookingApp.Services.DTO
     {
         private int _id;
         private int _complexTourRequestId;
+        private int _touristId;
         private int _partIndex;
         private string _city = string.Empty;
         private string _country = string.Empty;
@@ -45,6 +46,12 @@ namespace BookingApp.Services.DTO
         {
             get => _complexTourRequestId;
             set { _complexTourRequestId = value; OnPropertyChanged(); }
+        }
+
+        public int TouristId
+        {
+            get => _touristId;
+            set { _touristId = value; OnPropertyChanged(); }
         }
 
         public int PartIndex
@@ -186,6 +193,7 @@ namespace BookingApp.Services.DTO
 
             Id = part.Id;
             ComplexTourRequestId = part.ComplexTourRequestId;
+            TouristId = part.TouristId;
             PartIndex = part.PartIndex;
             City = part.City;
             Country = part.Country;
@@ -228,7 +236,7 @@ namespace BookingApp.Services.DTO
 
         public ComplexTourRequestPart ToComplexTourRequestPart()
         {
-            var part = new ComplexTourRequestPart(Id, ComplexTourRequestId, PartIndex,
+            /*var part = new ComplexTourRequestPart(Id, ComplexTourRequestId, TouristId, PartIndex,
                                                 City, Country, Description, Language,
                                                 NumberOfPeople, DateFrom, DateTo)
             {
@@ -241,7 +249,8 @@ namespace BookingApp.Services.DTO
             part.Participants = Participants?.Select(p => p.ToComplexTourRequestParticipant()).ToList()
                               ?? new List<ComplexTourRequestParticipant>();
 
-            return part;
+            return part;*/
+            return null;
         }
 
         public static ComplexTourRequestPartDTO FromDomain(ComplexTourRequestPart part)
