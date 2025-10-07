@@ -1,0 +1,99 @@
+﻿<Page x:Class="BookingApp.Presentation.View.Guide.ComplexTourPartDetailsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Tour Part Details"
+      Background="#FFF5F5F5">
+
+    <Page.Resources>
+        <Style x:Key="AnimatedButtonStyle" TargetType="Button">
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="8" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Opacity" Value="0.9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16" HorizontalAlignment="Center" Width="360">
+
+            <TextBlock Text="Tour Request Part Details" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       TextAlignment="Left"
+                       Margin="0,0,0,16"
+                       Foreground="#333"
+                       ToolTip="Details of this part of the tour request"/>
+
+            <Border CornerRadius="12" Background="White" Padding="12" Margin="0,0,0,16" BorderBrush="#DDD" BorderThickness="1"
+                    ToolTip="General details about the requested tour">
+                <StackPanel>
+                    <TextBlock Text="Tour details" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
+
+                    <TextBlock Text="{Binding DateFrom, StringFormat=Date from: {0:dd.MM.yyyy}}" ToolTip="Start date of the tour"/>
+                    <TextBlock Text="{Binding DateTo, StringFormat=Date to: {0:dd.MM.yyyy}}" ToolTip="End date of the tour"/>
+
+                    <TextBlock Text="{Binding Location}" ToolTip="Tour location"/>
+
+                    <TextBlock Text="{Binding Language, StringFormat=Language: {0}}" Margin="0,2" ToolTip="Language of the tour"/>
+
+                    <TextBlock Text="{Binding NumberOfParticipants, StringFormat=Participants: {0}}" Margin="0,2" ToolTip="Number of participants"/>
+
+                    <TextBlock Text="Description:" Margin="0,6,0,2"/>
+                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap" ToolTip="Tour description"/>
+                </StackPanel>
+            </Border>
+
+            <Border CornerRadius="12" Background="White" Padding="12" Margin="0,0,0,16" BorderBrush="#DDD" BorderThickness="1"
+                    ToolTip="Information about the tourist who requested the tour">
+                <StackPanel>
+                    <TextBlock Text="Tourist details" FontWeight="SemiBold" FontSize="16" Margin="0,0,0,8"/>
+
+                    <TextBlock Text="{Binding RequestBy}" Margin="0,2" ToolTip="Tour requested by"/>
+
+                    <TextBlock Text="Participants:" Margin="0,6,0,4"/>
+                    <ItemsControl ItemsSource="{Binding Participants}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock ToolTip="Tour participant">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} {1}, {2} years">
+                                            <Binding Path="FirstName"/>
+                                            <Binding Path="LastName"/>
+                                            <Binding Path="Age"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Button Content="Accept" Width="140" Height="42" HorizontalAlignment="Center"
+                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                    BorderThickness="0"
+                    Command="{Binding AcceptCommand}"
+                    Margin="0,8,0,0"
+                    Style="{StaticResource AnimatedButtonStyle}"
+                    ToolTip="Accept this tour request"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
