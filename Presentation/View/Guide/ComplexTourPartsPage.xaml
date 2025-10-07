@@ -1,0 +1,107 @@
+﻿<Page x:Class="BookingApp.Presentation.View.Guide.ComplexTourPartsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Complex Tour Parts"
+      Background="#FFF5F5F5"
+      x:Name="RootPage">
+
+    <Page.Resources>
+        <Style x:Key="AnimatedButtonStyle" TargetType="Button">
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="8" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="1.05" ScaleY="1.05"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Opacity" Value="0.9"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16" HorizontalAlignment="Center" Width="360">
+
+            <TextBlock Text="{Binding Title}" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       Foreground="#333"
+                       Margin="0,0,0,8"
+                       ToolTip="Title of the complex tour"/>
+
+            <TextBlock Text="{Binding DateRange}" 
+                       FontSize="14" 
+                       Foreground="#555"
+                       Margin="0,0,0,16"
+                       ToolTip="Overall date range of the tour"/>
+
+            <TextBlock Text="Request parts:" 
+                       FontSize="16" 
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,12"
+                       ToolTip="List of all requested tour parts"/>
+
+            <ItemsControl ItemsSource="{Binding Parts}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="12" Background="White" Padding="12" Margin="0,0,0,12" BorderBrush="#DDD" BorderThickness="1"
+                                ToolTip="Single part of the complex tour">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="{Binding City}" 
+                                               FontWeight="Bold" 
+                                               FontSize="16" 
+                                               Foreground="#333"
+                                               ToolTip="City of this tour part"/>
+
+                                    <TextBlock Foreground="#555" Margin="0,2,0,0"
+                                               ToolTip="Date range for this part of the tour">
+                                        <TextBlock.Text>
+                                            <MultiBinding StringFormat="{}{0:dd/MM/yyyy} - {1:dd/MM/yyyy}">
+                                                <Binding Path="DateFrom"/>
+                                                <Binding Path="DateTo"/>
+                                            </MultiBinding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <Button Content="View Details"
+                                        Command="{Binding DataContext.ViewPartDetailsCommand, ElementName=RootPage}"
+                                        CommandParameter="{Binding}"
+                                        Grid.Column="1"
+                                        Margin="8,0,0,0"
+                                        Padding="8,4"
+                                        Background="#007ACC"
+                                        Foreground="White"
+                                        FontWeight="Bold"
+                                        BorderThickness="0"
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource AnimatedButtonStyle}"
+                                        ToolTip="View details of this tour part"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
