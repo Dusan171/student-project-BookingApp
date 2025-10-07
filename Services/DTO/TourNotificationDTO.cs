@@ -15,5 +15,7 @@ namespace BookingApp.Services.DTO
         public DateTime CreatedAt { get; set; }
         public int TourId { get; set; }
         public NotifiedTourDTO Tour { get; set; }
+
+        public bool IsRead { get; set; }
     }
 }

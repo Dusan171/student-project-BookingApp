@@ -236,7 +236,7 @@ namespace BookingApp.Services.DTO
 
         public ComplexTourRequestPart ToComplexTourRequestPart()
         {
-            /*var part = new ComplexTourRequestPart(Id, ComplexTourRequestId, TouristId, PartIndex,
+            var part = new ComplexTourRequestPart(Id, ComplexTourRequestId, TouristId, PartIndex,
                                                 City, Country, Description, Language,
                                                 NumberOfPeople, DateFrom, DateTo)
             {
@@ -249,8 +249,7 @@ namespace BookingApp.Services.DTO
             part.Participants = Participants?.Select(p => p.ToComplexTourRequestParticipant()).ToList()
                               ?? new List<ComplexTourRequestParticipant>();
 
-            return part;*/
-            return null;
+            return part;
         }
 
         public static ComplexTourRequestPartDTO FromDomain(ComplexTourRequestPart part)
