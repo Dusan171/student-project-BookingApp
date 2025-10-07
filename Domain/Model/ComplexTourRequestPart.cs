@@ -8,6 +8,7 @@ namespace BookingApp.Domain.Model
     {
         public int Id { get; set; }
         public int ComplexTourRequestId { get; set; }
+        public int TouristId { get; set; }
         public int PartIndex { get; set; }
         public string City { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
@@ -25,12 +26,13 @@ namespace BookingApp.Domain.Model
 
         public ComplexTourRequestPart() { }
 
-        public ComplexTourRequestPart(int id, int complexTourRequestId, int partIndex,
+        public ComplexTourRequestPart(int id, int complexTourRequestId, int touristId, int partIndex,
                                     string city, string country, string description, string language,
                                     int numberOfPeople, DateTime dateFrom, DateTime dateTo)
         {
             Id = id;
             ComplexTourRequestId = complexTourRequestId;
+            TouristId = touristId;
             PartIndex = partIndex;
             City = city ?? string.Empty;
             Country = country ?? string.Empty;
@@ -49,6 +51,7 @@ namespace BookingApp.Domain.Model
             {
                 Id.ToString(),
                 ComplexTourRequestId.ToString(),
+                TouristId.ToString(),
                 PartIndex.ToString(),
                 City,
                 Country,
@@ -66,32 +69,31 @@ namespace BookingApp.Domain.Model
 
         public void FromCSV(string[] values)
         {
-            if (values == null || values.Length < 11)
+            if (values == null || values.Length < 12)
                 throw new ArgumentException("Invalid CSV data for ComplexTourRequestPart");
 
             Id = int.Parse(values[0]);
             ComplexTourRequestId = int.Parse(values[1]);
-            PartIndex = int.Parse(values[2]);
-            City = values[3] ?? string.Empty;
-            Country = values[4] ?? string.Empty;
-            Description = values[5] ?? string.Empty;
-            Language = values[6] ?? string.Empty;
-            NumberOfPeople = int.Parse(values[7]);
-
-            
-            DateFrom = DateTime.Parse(values[8]);
-            DateTo = DateTime.Parse(values[9]);
-
-            Status = (TourRequestStatus)Enum.Parse(typeof(TourRequestStatus), values[10]);
-
-            if (values.Length > 11 && !string.IsNullOrEmpty(values[11]))
-                AcceptedByGuideId = int.Parse(values[11]);
+            TouristId = int.Parse(values[2]);
+            PartIndex = int.Parse(values[3]);
+            City = values[4] ?? string.Empty;
+            Country = values[5] ?? string.Empty;
+            Description = values[6] ?? string.Empty;
+            Language = values[7] ?? string.Empty;
+            NumberOfPeople = int.Parse(values[8]);
+            var culture = new System.Globalization.CultureInfo("sr-Latn-RS");
+            DateFrom = DateTime.ParseExact(values[9], "dd-MM-yyyy", culture);
+            DateTo = DateTime.ParseExact(values[10], "dd-MM-yyyy", culture);
+            Status = (TourRequestStatus)Enum.Parse(typeof(TourRequestStatus), values[11]);
 
             if (values.Length > 12 && !string.IsNullOrEmpty(values[12]))
-                AcceptedDate = DateTime.Parse(values[12]);
+                AcceptedByGuideId = int.Parse(values[12]);
 
             if (values.Length > 13 && !string.IsNullOrEmpty(values[13]))
-                ScheduledDate = DateTime.Parse(values[13]);
+                AcceptedDate = DateTime.ParseExact(values[13], "dd-MM-yyyy HH:mm:ss", culture);
+
+            if (values.Length > 14 && !string.IsNullOrEmpty(values[14]))
+                ScheduledDate = DateTime.ParseExact(values[14], "dd-MM-yyyy HH:mm:ss", culture);
 
             Participants = new List<ComplexTourRequestParticipant>();
         }
