@@ -457,6 +457,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 {
                     City = NewPart.City,
                     Country = NewPart.Country,
+                    TouristId = Session.CurrentUser.Id,
                     Description = NewPart.Description,
                     Language = NewPart.Language,
                     NumberOfPeople = NewPart.NumberOfPeople,
