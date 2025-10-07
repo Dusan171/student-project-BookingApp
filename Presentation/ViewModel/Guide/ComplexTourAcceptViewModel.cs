@@ -69,6 +69,18 @@ namespace BookingApp.Presentation.ViewModel.Guide
             }
         }
 
+        private string _durationText = "2.0";
+        public string DurationText
+        {
+            get => _durationText;
+            set
+            {
+                _durationText = value;
+                OnPropertyChanged();
+                ResetAvailabilityStatus();
+            }
+        }
+
         private string _availabilityMessage = string.Empty;
         public string AvailabilityMessage
         {
@@ -137,35 +149,52 @@ namespace BookingApp.Presentation.ViewModel.Guide
 
         private void InitializeAvailableOptions()
         {
-            // Populate available dates
             for (var d = DateFrom.Date; d <= DateTo.Date; d = d.AddDays(1))
             {
                 AvailableDates.Add(d.ToString("dd.MM.yyyy"));
             }
             SelectedDate = AvailableDates.FirstOrDefault() ?? string.Empty;
 
-            // Populate available hours
             for (int h = 0; h <= 23; h++)
             {
                 AvailableHours.Add(h.ToString("D2"));
             }
-            SelectedHour = "09"; // Default 09:00
+            SelectedHour = "09"; 
 
-            // Populate available minutes
             for (int m = 0; m < 60; m += 30)
             {
                 AvailableMinutes.Add(m.ToString("D2"));
             }
-            SelectedMinute = "00"; // Default :00
+            SelectedMinute = "00";
+
+            DurationText = "2.0";
         }
 
         private void CheckAvailability()
         {
             try
             {
-                if (string.IsNullOrEmpty(SelectedDate) || string.IsNullOrEmpty(SelectedHour) || string.IsNullOrEmpty(SelectedMinute))
+                if (string.IsNullOrEmpty(SelectedDate) || string.IsNullOrEmpty(SelectedHour) || 
+                    string.IsNullOrEmpty(SelectedMinute) || string.IsNullOrWhiteSpace(DurationText))
                 {
-                    AvailabilityMessage = "Please select date and time.";
+                    AvailabilityMessage = "Please select date, time, and enter duration.";
+                    IsAvailable = false;
+                    HasCheckedAvailability = false;
+                    return;
+                }
+
+                if (!double.TryParse(DurationText.Replace(',', '.'), System.Globalization.NumberStyles.Float, 
+                    System.Globalization.CultureInfo.InvariantCulture, out double duration))
+                {
+                    AvailabilityMessage = "Please enter a valid duration (e.g., 2.0 or 2.5).";
+                    IsAvailable = false;
+                    HasCheckedAvailability = false;
+                    return;
+                }
+
+                if (duration <= 0 || duration > 12)
+                {
+                    AvailabilityMessage = "Duration must be between 0.5 and 12 hours.";
                     IsAvailable = false;
                     HasCheckedAvailability = false;
                     return;
@@ -176,7 +205,15 @@ namespace BookingApp.Presentation.ViewModel.Guide
                 var selectedMinute = int.Parse(SelectedMinute);
 
                 var startTime = selectedDate.Date.AddHours(selectedHour).AddMinutes(selectedMinute);
-                var endTime = startTime.AddHours(2); // Assume 2-hour duration
+                var endTime = startTime.AddHours(duration);
+
+                if (endTime.Date > DateTo.Date)
+                {
+                    AvailabilityMessage = "Tour duration extends beyond the allowed date range.\nPlease select a shorter duration or earlier start time.";
+                    IsAvailable = false;
+                    HasCheckedAvailability = true;
+                    return;
+                }
 
                 bool isGuideAvailable = _guideAvailabilityService.IsAvailable(Session.CurrentUser.Id, startTime, endTime);
                 bool isComplexTourConflictFree = _guideAvailabilityService.IsComplexTourPartConflictFree(_part.ComplexTourRequestId, _part.Id, startTime, endTime);
@@ -185,18 +222,18 @@ namespace BookingApp.Presentation.ViewModel.Guide
 
                 if (isGuideAvailable && isComplexTourConflictFree)
                 {
-                    AvailabilityMessage = "Time slot is available!";
+                    AvailabilityMessage = $"Time slot is available!\nDuration: {duration:F1} hours ({startTime:HH:mm} - {endTime:HH:mm})";
                     IsAvailable = true;
                     ScheduledDateTime = startTime;
                 }
                 else if (!isGuideAvailable)
                 {
-                    AvailabilityMessage = "You already have a tour scheduled during this time.\nPlease select a different time slot.";
+                    AvailabilityMessage = "You already have a tour scheduled during this time.\nPlease select a different time slot or duration.";
                     IsAvailable = false;
                 }
                 else
                 {
-                    AvailabilityMessage = "Another part of this complex tour is already scheduled during this time.\nPlease select a different time slot.";
+                    AvailabilityMessage = "Another part of this complex tour is already scheduled during this time.\nPlease select a different time slot or duration.";
                     IsAvailable = false;
                 }
             }
@@ -225,16 +262,22 @@ namespace BookingApp.Presentation.ViewModel.Guide
 
             try
             {
-                // Update the complex tour part
+                // Update the complex tour part object immediately
                 _part.Status = TourRequestStatus.ACCEPTED;
                 _part.AcceptedByGuideId = Session.CurrentUser.Id;
                 _part.AcceptedDate = DateTime.Now;
                 _part.ScheduledDate = ScheduledDateTime;
 
-                // Save changes to repository
-                // Note: Assuming these repositories exist based on original code
+                // Save changes to repository immediately
                 ComplexTourRequestPartRepository partRepository = new ComplexTourRequestPartRepository();
-                partRepository.Update(_part);
+                var updatedPart = partRepository.Update(_part);
+
+                // Verify the update was successful
+                if (updatedPart == null)
+                {
+                    MessageBox.Show("Failed to update tour part in repository.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
                 DialogResult = true;
                 RequestClose?.Invoke(this, EventArgs.Empty);
