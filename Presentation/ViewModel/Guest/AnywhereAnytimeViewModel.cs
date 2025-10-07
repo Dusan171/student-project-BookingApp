@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
+using System.Windows; 
 using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
-using BookingApp.Services;
+using BookingApp.Services; 
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 
@@ -16,29 +16,51 @@ namespace BookingApp.Presentation.ViewModel.Guest
         public static event Action<AccommodationDetailsDTO> ViewDetailsFromAnywhereRequested;
 
         private readonly IAnywhereSearchService _searchService;
-        private readonly IReservationCreationService _reservationCreationService;
+        private readonly IReservationOrchestratorService _reservationOrchestrator;
 
-        #region Properties & Commands
-        public string GuestsNumber { get; set; }
-        public string StayDuration { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public ObservableCollection<AnywhereSearchResultDTO> SearchResults { get; set; }
+        private string _guestsNumber;
+        public string GuestsNumber
+        {
+            get => _guestsNumber;
+            set => SetProperty(ref _guestsNumber, value);
+        }
+
+        private string _stayDuration;
+        public string StayDuration
+        {
+            get => _stayDuration;
+            set => SetProperty(ref _stayDuration, value);
+        }
+
+        private DateTime? _startDate;
+        public DateTime? StartDate
+        {
+            get => _startDate;
+            set => SetProperty(ref _startDate, value);
+        }
+
+        private DateTime? _endDate;
+        public DateTime? EndDate
+        {
+            get => _endDate;
+            set => SetProperty(ref _endDate, value);
+        }
+
+        public ObservableCollection<AnywhereSearchResultDTO> SearchResults { get; }
+
         public ICommand SearchCommand { get; }
         public ICommand ReserveCommand { get; }
         public ICommand ViewDetailsCommand { get; }
-        #endregion
 
         public AnywhereAnytimeViewModel()
         {
             _searchService = Injector.CreateInstance<IAnywhereSearchService>();
-            _reservationCreationService = Injector.CreateInstance<IReservationCreationService>();
+            _reservationOrchestrator = Injector.CreateInstance<IReservationOrchestratorService>();
 
+            SearchResults = new ObservableCollection<AnywhereSearchResultDTO>();
             SearchCommand = new RelayCommand(Search);
             ReserveCommand = new RelayCommand(Reserve);
             ViewDetailsCommand = new RelayCommand(ViewDetails);
-
-            SearchResults = new ObservableCollection<AnywhereSearchResultDTO>();
         }
 
         #region Command Logic
@@ -54,9 +76,25 @@ namespace BookingApp.Presentation.ViewModel.Guest
         private void Reserve(object parameter)
         {
             if (parameter is not AnywhereSearchResultDTO selectedOffer) return;
-            if (!TryCreateReservationDTO(selectedOffer, out var reservationDto)) return;
 
-            ExecuteReservation(reservationDto, selectedOffer);
+            int currentUserId = Session.CurrentUser.Id;
+
+            var result = _reservationOrchestrator.PrepareAndExecuteReservation(selectedOffer, GuestsNumber, currentUserId);
+
+            if (!string.IsNullOrEmpty(result.Message))
+            {
+                MessageBox.Show(result.Message, "Reservation Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
+            if (result.WasSuccessful)
+            {
+                SearchResults.Clear();
+            }
+            else if (result.NewStartDate.HasValue && result.NewEndDate.HasValue)
+            {
+                StartDate = result.NewStartDate.Value;
+                EndDate = result.NewEndDate.Value;
+            }
         }
 
         private void ViewDetails(object parameter)
@@ -101,62 +139,15 @@ namespace BookingApp.Presentation.ViewModel.Guest
 
             foreach (var result in results)
             {
+                if (result.Accommodation.ImagePaths == null || !result.Accommodation.ImagePaths.Any())
+                {
+                    result.Accommodation.ImagePaths = new List<string>
+                    {
+                        "/Resources/Images/apartman.jpg",
+                        "/Resources/Images/cottage.jpg"
+                    };
+                }
                 SearchResults.Add(result);
-            }
-        }
-
-        // Refactoring: "Extract Method" - Validacija i kreiranje DTO za rezervaciju.
-        private bool TryCreateReservationDTO(AnywhereSearchResultDTO offer, out ReservationDTO reservationDto)
-        {
-            reservationDto = null;
-
-            var dateParts = offer.OfferedDateRange.Split(" - ");
-            string format = "dd.MM.yyyy";
-            var culture = System.Globalization.CultureInfo.InvariantCulture;
-
-            if (dateParts.Length != 2 ||
-                !DateTime.TryParseExact(dateParts[0], format, culture, System.Globalization.DateTimeStyles.None, out var startDate) ||
-                !DateTime.TryParseExact(dateParts[1], format, culture, System.Globalization.DateTimeStyles.None, out var endDate))
-            {
-                MessageBox.Show("An error occurred with the selected date range.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-
-            if (!int.TryParse(GuestsNumber, out int guests))
-            {
-                MessageBox.Show("An error occurred retrieving the number of guests.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-
-            reservationDto = new ReservationDTO
-            {
-                AccommodationId = offer.Accommodation.Id,
-                GuestId = Session.CurrentUser.Id,
-                StartDate = startDate,
-                EndDate = endDate,
-                GuestsNumber = guests
-            };
-            return true;
-        }
-
-        private void ExecuteReservation(ReservationDTO reservationDto, AnywhereSearchResultDTO offer)
-        {
-            try
-            {
-                var result = _reservationCreationService.AttemptReservation(reservationDto);
-                if (result.IsSuccess)
-                {
-                    MessageBox.Show($"Reservation for '{offer.Accommodation.Name}' from {reservationDto.StartDate:dd.MM.yyyy} to {reservationDto.EndDate:dd.MM.yyyy} has been successfully made!", "Reservation Confirmed", MessageBoxButton.OK, MessageBoxImage.Information);
-                    SearchResults.Clear();
-                }
-                else
-                {
-                    MessageBox.Show($"Could not make reservation. Reason: {result.ErrorMessage}", "Reservation Failed", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An unexpected error occurred: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

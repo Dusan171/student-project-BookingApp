@@ -12,12 +12,14 @@ namespace BookingApp.Services
         private readonly IReservationRepository _reservationRepository;
         private readonly IOccupiedDateRepository _occupiedDateRepository;
         private readonly IAccommodationRepository _accommodationRepository;
+        private readonly ISuggestionService _suggestionService;
 
-       public ReservationCreationService( IReservationRepository reservationRepository,IOccupiedDateRepository occupiedDateRepository,IAccommodationRepository accommodationRepository)
+        public ReservationCreationService( IReservationRepository reservationRepository,IOccupiedDateRepository occupiedDateRepository,IAccommodationRepository accommodationRepository, ISuggestionService suggestionService)
         {
             _reservationRepository = reservationRepository;
             _occupiedDateRepository = occupiedDateRepository;
             _accommodationRepository = accommodationRepository;
+            _suggestionService = suggestionService;
         }
         public ReservationAttemptResult AttemptReservation(ReservationDTO reservationDto)
         {
@@ -30,10 +32,8 @@ namespace BookingApp.Services
                 {
                     return HandleSuccessfulReservation(reservationDto);
                 }
-                else
-                {
-                    return HandleUnavailableDates(accommodation.Id, reservationDto);
-                }
+                var suggestions = _suggestionService.FindAvailableDateRanges(accommodation.Id, (reservationDto.EndDate - reservationDto.StartDate).Days, reservationDto.StartDate);
+                return new ReservationAttemptResult { IsSuccess = false, SuggestedRanges = suggestions };
             }
             catch (Exception ex)
             {
@@ -45,59 +45,12 @@ namespace BookingApp.Services
             var occupiedDateObjects = _occupiedDateRepository.GetByAccommodationId(accommodationId);
             return occupiedDateObjects.Select(occupiedDate => occupiedDate.Date).ToList();
         }
-        private List<DateRange> FindAvailableDateRanges(int accommodationId, int duration, DateTime preferredStartDate)
-        {
-            var occupiedDates = GetOccupiedDatesForAccommodation(accommodationId).ToHashSet();
-
-            var searchContext = new SuggestionSearchContext
-            {
-                Suggestions = new List<DateRange>(),
-                OccupiedDates = occupiedDates,
-                Duration = duration,
-                PreferredStartDate = preferredStartDate
-            };
-
-            SearchInDirection(searchContext, -1, 3); // -1 smer unazad
-
-            SearchInDirection(searchContext, 1, 6); // 1 smer unapred
-
-            return searchContext.Suggestions.OrderBy(r => r.StartDate).ToList();
-        }
-        private class SuggestionSearchContext
-        {
-            public List<DateRange> Suggestions { get; set; }
-            public HashSet<DateTime> OccupiedDates { get; set; }
-            public int Duration { get; set; }
-            public DateTime PreferredStartDate { get; set; }
-        }
-        private void SearchInDirection(SuggestionSearchContext context, int direction, int maxSuggestions)
-        {
-            for (int i = 1; i <= 30; i++)
-            {
-                if (context.Suggestions.Count >= maxSuggestions)
-                {
-                    break;
-                }
-
-                var checkStartDate = context.PreferredStartDate.AddDays(direction * i);
-                var checkEndDate = checkStartDate.AddDays(context.Duration);
-
-                if (IsDateRangeAvailable(context.OccupiedDates, checkStartDate, checkEndDate))
-                {
-                    context.Suggestions.Add(new DateRange { StartDate = checkStartDate, EndDate = checkEndDate });
-                }
-            }
-        }
         private bool IsDateRangeAvailable(int accommodationId, DateTime startDate, DateTime endDate)
         {
-            var occupiedDates = GetOccupiedDatesForAccommodation(accommodationId).ToHashSet();
-            return IsDateRangeAvailable(occupiedDates, startDate, endDate);
-        }
-        private bool IsDateRangeAvailable(HashSet<DateTime> occupiedDates, DateTime startDate, DateTime endDate)
-        {
-            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+            var occupiedDates = _occupiedDateRepository.GetByAccommodationId(accommodationId).Select(o => o.Date.Date).ToHashSet();
+            for (DateTime date = startDate.Date; date < endDate.Date; date = date.AddDays(1))
             {
-                if (occupiedDates.Contains(date.Date))
+                if (occupiedDates.Contains(date))
                 {
                     return false;
                 }
@@ -150,14 +103,5 @@ namespace BookingApp.Services
             CreateOccupiedDates(savedReservation);
             return new ReservationAttemptResult { IsSuccess = true, CreatedReservation = new ReservationDTO(savedReservation) };
         }
-
-        // Refactoring: "Extract Method" - Logika za neuspešnu rezervaciju je izdvojena.
-        private ReservationAttemptResult HandleUnavailableDates(int accommodationId, ReservationDTO reservationDto)
-        {
-            int duration = (reservationDto.EndDate - reservationDto.StartDate).Days;
-            var suggestions = FindAvailableDateRanges(accommodationId, duration, reservationDto.StartDate);
-            return new ReservationAttemptResult { IsSuccess = false, SuggestedRanges = suggestions };
-        }
-
     }
 }

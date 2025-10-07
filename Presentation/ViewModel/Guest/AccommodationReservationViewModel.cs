@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
-using BookingApp.Presentation.View.Guest;
 using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
@@ -14,117 +12,66 @@ namespace BookingApp.Presentation.ViewModel.Guest
     public class AccommodationReservationViewModel : ViewModelBase
     {
         private readonly AccommodationDetailsDTO _accommodationDetails;
-        public AccommodationDetailsDTO AccommodationDetails => _accommodationDetails;
-        private readonly IReservationCreationService _reservationCreationService;
+        private readonly IReservationCreationService _reservationCreationService; 
+        private readonly IReservationOrchestratorService _orchestratorService;
 
+        public AccommodationDetailsDTO AccommodationDetails => _accommodationDetails;
         public Action CloseAction { get; set; }
 
-        #region Svojstva za povezivanje (Binding)
-
-
-
+        #region Properties & Commands
         private DateTime? _startDate;
-        public DateTime? StartDate
-        {
-            get => _startDate;
-            set { _startDate = value; OnPropertyChanged(nameof(StayDuration)); }
-        }
+        public DateTime? StartDate { get; set; }
 
         private DateTime? _endDate;
-        public DateTime? EndDate
-        {
-            get => _endDate;
-            set { _endDate = value; OnPropertyChanged(nameof(StayDuration)); }
-        }
+        public DateTime? EndDate { get; set; }
 
         private string _guestsNumber;
-        public string GuestsNumber
-        {
-            get => _guestsNumber;
-            set { _guestsNumber = value; OnPropertyChanged(); }
-        }
-        public int StayDuration
-        {
-            get
-            {
-                if (StartDate.HasValue && EndDate.HasValue && EndDate.Value > StartDate.Value)
-                {
-                    return (EndDate.Value - StartDate.Value).Days;
-                }
-                return 0;
-            }
-        }
+        public string GuestsNumber { get; set; }
 
         public List<DateTime> OccupiedDates { get; private set; }
-
-        #endregion
-
-        #region Komande
         public ICommand ReserveCommand { get; }
         #endregion
 
         public AccommodationReservationViewModel(AccommodationDetailsDTO accommodationDetails)
         {
-            _accommodationDetails = accommodationDetails ?? throw new ArgumentNullException(nameof(accommodationDetails));
-
+            _accommodationDetails = accommodationDetails;
             _reservationCreationService = Injector.CreateInstance<IReservationCreationService>();
+            _orchestratorService = Injector.CreateInstance<IReservationOrchestratorService>();
 
-            ReserveCommand = new RelayCommand(Reserve);
-
+            ReserveCommand = new RelayCommand(Reserve, CanReserve);
             LoadOccupiedDates();
         }
-
-        #region Logika
 
         private void LoadOccupiedDates()
         {
             OccupiedDates = _reservationCreationService.GetOccupiedDatesForAccommodation(_accommodationDetails.Id);
         }
+
+        private bool CanReserve(object obj)
+        {
+            return StartDate.HasValue && EndDate.HasValue && !string.IsNullOrWhiteSpace(GuestsNumber);
+        }
+
         private void Reserve(object obj)
         {
-            if (!IsInputValid(out int guestNumber))
-            {
-                return;
-            }
-            ExecuteReservation(guestNumber);
+            if (!ValidateInput(out int guestNumber)) return;
+
+            var reservationDto = CreateReservationDTO(guestNumber);
+            var result = _orchestratorService.ExecuteReservation(reservationDto);
+
+            HandleOrchestrationResult(result);
         }
-        private bool IsInputValid(out int parsedGuestNumber)
+
+        #region Private Helper Methods
+
+        private bool ValidateInput(out int parsedGuestNumber)
         {
-            parsedGuestNumber = 0;
-
-            if (!AreDatesValid())
-            {
-                return false;
-            }
-
-            if (!IsGuestNumberValid(out parsedGuestNumber))
-            {
-                return false;
-            }
-
-            return true;
-        }
-        private bool AreDatesValid()
-        {
-            if (!StartDate.HasValue)
-            {
-                MessageBox.Show("Please select a start date.");
-                return false;
-            }
-            if (!EndDate.HasValue)
-            {
-                MessageBox.Show("Please select an end date.");
-                return false;
-            }
             if (EndDate.Value <= StartDate.Value)
             {
                 MessageBox.Show("End date must be after the start date.");
+                parsedGuestNumber = 0;
                 return false;
             }
-            return true;
-        }
-        private bool IsGuestNumberValid(out int parsedGuestNumber)
-        {
             if (!int.TryParse(GuestsNumber, out parsedGuestNumber) || parsedGuestNumber <= 0)
             {
                 MessageBox.Show("Please enter a valid number of guests.");
@@ -132,9 +79,10 @@ namespace BookingApp.Presentation.ViewModel.Guest
             }
             return true;
         }
-        private void ExecuteReservation(int guestNumber)
+
+        private ReservationDTO CreateReservationDTO(int guestNumber)
         {
-            var reservationDto = new ReservationDTO
+            return new ReservationDTO
             {
                 AccommodationId = _accommodationDetails.Id,
                 GuestId = Session.CurrentUser.Id,
@@ -142,55 +90,28 @@ namespace BookingApp.Presentation.ViewModel.Guest
                 EndDate = EndDate.Value.Date,
                 GuestsNumber = guestNumber
             };
+        }
 
-            var result = _reservationCreationService.AttemptReservation(reservationDto);
-
-            if (result.IsSuccess)
+        private void HandleOrchestrationResult(ReservationOrchestrationResultDTO result)
+        {
+            if (!string.IsNullOrEmpty(result.Message))
             {
-                HandleReservationSuccess();
+                MessageBox.Show(result.Message);
             }
-            else
+
+            if (result.ShouldCloseView)
             {
-                if (result.SuggestedRanges.Any())
-                {
-                    HandleUnavailableDates(result.SuggestedRanges, guestNumber);
-                }
-                else
-                {
-                    HandleReservationFailure(new Exception(result.ErrorMessage));
-                }
+                CloseAction?.Invoke();
             }
-        }
-        private void HandleReservationSuccess()
-        {
-            MessageBox.Show("Reservation successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            CloseAction?.Invoke();
-        }
-        private void HandleReservationFailure(Exception ex)
-        {
-            MessageBox.Show(ex.Message, "Reservation Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-        private void HandleUnavailableDates(List<DateRange> suggestions, int guestNumber)
-        {
-            var suggestionsWindow = new SuggestedDatesView(suggestions);
-            suggestionsWindow.ShowDialog();
-
-            var suggestionsViewModel = (SuggestedDatesViewModel)suggestionsWindow.DataContext;
-            if (suggestionsViewModel.IsConfirmed)
+            else if (result.NewStartDate.HasValue && result.NewEndDate.HasValue)
             {
-                var chosenRange = suggestionsViewModel.SelectedDateRange;
-
-                this.StartDate = chosenRange.StartDate;
-                this.EndDate = chosenRange.EndDate;
-
-                MessageBox.Show(
-                    $"New dates ({chosenRange.StartDate:dd.MM.yyyy} - {chosenRange.EndDate:dd.MM.yyyy}) have been selected. Please click 'Reserve' again to confirm.",
-                    "Dates Updated",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-
+                this.StartDate = result.NewStartDate;
+                this.EndDate = result.NewEndDate;
+                OnPropertyChanged(nameof(StartDate));
+                OnPropertyChanged(nameof(EndDate));
             }
         }
+
         #endregion
     }
 }

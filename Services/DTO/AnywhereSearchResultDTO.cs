@@ -6,9 +6,7 @@ namespace BookingApp.Services.DTO
     {
         public AccommodationDetailsDTO Accommodation { get; set; }
         public string OfferedDateRange { get; set; }
-
         public AnywhereSearchResultDTO() { }
-
         public AnywhereSearchResultDTO(AccommodationDetailsDTO accommodation) 
         {
             Accommodation = accommodation;

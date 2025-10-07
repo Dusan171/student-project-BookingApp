@@ -230,12 +230,15 @@ namespace BookingApp.Services
                 CreateInstance<IForumCommentRepository>(),
                 CreateInstance<ILocationRepository>()
             );
-
+            _implementations[typeof(ISuggestionService)] = new SuggestionService(
+                CreateInstance<IOccupiedDateRepository>()
+            );
 
             _implementations[typeof(IReservationCreationService)] = new ReservationCreationService(
                 CreateInstance<IReservationRepository>(),
                 CreateInstance<IOccupiedDateRepository>(),
-                CreateInstance<IAccommodationRepository>()
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<ISuggestionService>()
             );
 
             _implementations[typeof(IReservationCancellationService)] = new ReservationCancellationService(
@@ -270,6 +273,14 @@ namespace BookingApp.Services
                 CreateInstance<IComplexTourRequestPartRepository>(),
                 CreateInstance<IComplexTourRequestParticipantRepository>()
             );
+            _implementations[typeof(IAnywhereSearchService)] = new AnywhereSearchService(
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<IReservationRepository>()
+            );
+            _implementations[typeof(IReservationOrchestratorService)] = new ReservationOrchestratorService(
+                CreateInstance<IReservationCreationService>()
+            );
+            _implementations[typeof(IReportGenerationService)] = new ReportGenerationService();
 
         }
 
