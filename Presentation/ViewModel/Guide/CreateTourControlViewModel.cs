@@ -8,6 +8,8 @@ using Microsoft.Win32;
 using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 using BookingApp.Utilities;
+using BookingApp.Domain.Interfaces;
+using BookingApp.Services;
 
 namespace BookingApp.Presentation.ViewModel.Guide
 {
@@ -336,18 +338,50 @@ namespace BookingApp.Presentation.ViewModel.Guide
 
             _tourRepository.Save(newTour);
             _locationRepository.Save(newTour.Location);
+
             foreach (var st in newTour.StartTimes)
             {
                 st.TourId = newTour.Id;
                 _startTimeRepository.Save(st);
             }
-            foreach (var kp in newTour.KeyPoints) _keyPointRepository.Save(kp);
-            foreach (var img in newTour.Images) _imageRepository.Save(img);
+
+            foreach (var kp in newTour.KeyPoints)
+                _keyPointRepository.Save(kp);
+
+            foreach (var img in newTour.Images)
+                _imageRepository.Save(img);
+
+            // PROMENI OVO - direktno kreiraj instance
+            try
+            {
+                var notificationRepo = new TourNotificationRepository();
+                var requestRepo = new TourRequestRepository();
+                var tourRepo = new TourRepository();
+                var userRepo = new UserRepository();
+
+                var tourNotificationService = new TourNotificationService(
+                    notificationRepo,
+                    requestRepo,
+                    tourRepo,
+                    userRepo
+                );
+
+                tourNotificationService.CreateNotificationsForNewTour(
+                    newTour.Id,
+                    newTour.Name,
+                    $"{newTour.Location.City}, {newTour.Location.Country}",
+                    newTour.Language
+                );
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Greška pri kreiranju notifikacija: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
 
             MessageBox.Show("Tour created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             RequestClose?.Invoke(this, EventArgs.Empty);
         }
-
         private void OpenImageViewer(Images img)
         {
             _currentImageIndex = Images.IndexOf(img);
