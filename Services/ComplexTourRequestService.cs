@@ -75,14 +75,15 @@ namespace BookingApp.Services
                     var partDTO = requestDTO.Parts[i];
                     partDTO.ComplexTourRequestId = savedRequest.Id;
                     partDTO.PartIndex = i;
+                    partDTO.TouristId = requestDTO.TouristId; // VAŽNO: Dodajte TouristId
 
                     var part = partDTO.ToComplexTourRequestPart();
                     var savedPart = _partRepository.Save(part);
 
-                    // Sačuvaj učesnike za ovaj deo
+                   
                     foreach (var participantDTO in partDTO.Participants)
                     {
-                        participantDTO.ComplexTourRequestPartId = savedPart.Id;
+                        participantDTO.ComplexTourRequestPartId = savedPart.Id; // Koristi ID iz sačuvanog dela
                         var participant = participantDTO.ToComplexTourRequestParticipant();
                         _participantRepository.Save(participant);
                     }
