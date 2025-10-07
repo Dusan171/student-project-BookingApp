@@ -30,6 +30,21 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+
+        <!-- Status indicator styles -->
+        <Style x:Key="AcceptedIndicatorStyle" TargetType="Border">
+            <Setter Property="Background" Value="#4CAF50"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+        </Style>
+
+        <Style x:Key="PendingIndicatorStyle" TargetType="Border">
+            <Setter Property="Background" Value="#FF9800"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+        </Style>
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -63,6 +78,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel>
@@ -83,10 +99,56 @@
                                     </TextBlock>
                                 </StackPanel>
 
+                                <!-- Status indicator -->
+                                <Border Grid.Column="1" VerticalAlignment="Center">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Status}" Value="ACCEPTED">
+                                                    <Setter Property="Background" Value="#4CAF50"/>
+                                                    <Setter Property="CornerRadius" Value="12"/>
+                                                    <Setter Property="Padding" Value="8,3"/>
+                                                    <Setter Property="Margin" Value="8,0,0,0"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="PENDING">
+                                                    <Setter Property="Background" Value="#FF9800"/>
+                                                    <Setter Property="CornerRadius" Value="12"/>
+                                                    <Setter Property="Padding" Value="8,3"/>
+                                                    <Setter Property="Margin" Value="8,0,0,0"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="INVALID">
+                                                    <Setter Property="Background" Value="#F44336"/>
+                                                    <Setter Property="CornerRadius" Value="12"/>
+                                                    <Setter Property="Padding" Value="8,3"/>
+                                                    <Setter Property="Margin" Value="8,0,0,0"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    
+                                    <TextBlock Foreground="White" FontSize="11" FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="ACCEPTED">
+                                                        <Setter Property="Text" Value="✓ ACCEPTED"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="PENDING">
+                                                        <Setter Property="Text" Value="⏳ PENDING"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="INVALID">
+                                                        <Setter Property="Text" Value="✗ INVALID"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+
                                 <Button Content="View Details"
                                         Command="{Binding DataContext.ViewPartDetailsCommand, ElementName=RootPage}"
                                         CommandParameter="{Binding}"
-                                        Grid.Column="1"
+                                        Grid.Column="2"
                                         Margin="8,0,0,0"
                                         Padding="8,4"
                                         Background="#007ACC"
