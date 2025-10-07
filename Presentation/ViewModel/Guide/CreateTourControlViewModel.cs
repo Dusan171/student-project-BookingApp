@@ -336,7 +336,11 @@ namespace BookingApp.Presentation.ViewModel.Guide
 
             _tourRepository.Save(newTour);
             _locationRepository.Save(newTour.Location);
-            foreach (var st in newTour.StartTimes) _startTimeRepository.Save(st);
+            foreach (var st in newTour.StartTimes)
+            {
+                st.TourId = newTour.Id;
+                _startTimeRepository.Save(st);
+            }
             foreach (var kp in newTour.KeyPoints) _keyPointRepository.Save(kp);
             foreach (var img in newTour.Images) _imageRepository.Save(img);
 
