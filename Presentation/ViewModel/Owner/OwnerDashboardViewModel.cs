@@ -21,11 +21,32 @@ namespace BookingApp.Presentation.ViewModel.Owner
         private readonly INotificationService _notificationService;
         private readonly Action _closeWindowAction;
         private readonly DemoManager _demoManager;
-
+        private readonly IForumNotificationService _forumNotificationService; 
         private bool _isNotificationPopupVisible;
         private object _currentViewModel;
         private string _demoMessage;
+        private string _notificationTitle = "Unrated Guests";
+        private string _notificationMessage = "You have guests waiting for reviews";
 
+public string NotificationTitle
+{
+    get => _notificationTitle;
+    set
+    {
+        _notificationTitle = value;
+        OnPropertyChanged();
+    }
+}
+
+public string NotificationMessage
+{
+    get => _notificationMessage;
+    set
+    {
+        _notificationMessage = value;
+        OnPropertyChanged();
+    }
+}
         public bool IsNotificationPopupVisible
         {
             get => _isNotificationPopupVisible;
@@ -63,12 +84,11 @@ namespace BookingApp.Presentation.ViewModel.Owner
         public ICommand StartDemoCommand { get; }
         public ICommand StopDemoCommand { get; }
 
-        public OwnerDashboardViewModel(Action closeWindowAction, INotificationService notificationService)
+        public OwnerDashboardViewModel(Action closeWindowAction, INotificationService notificationService, IForumNotificationService forumNotificationService)
         {
             _closeWindowAction = closeWindowAction;
             _notificationService = notificationService;
-            
-            // Initialize Demo Manager
+            _forumNotificationService = forumNotificationService;
             _demoManager = new DemoManager(this);
             _demoManager.OnDemoMessage += (message) => 
             {
@@ -139,22 +159,45 @@ namespace BookingApp.Presentation.ViewModel.Owner
         private async void ShowPendingNotifications()
         {
             _notificationService.CheckAndGenerateNotifications();
+            var unreadReservationNotifications = _notificationService.GetAll()
+                .Where(n => !n.IsRead).ToList();
 
-            var unreadNotifications = _notificationService.GetAll().Where(n => !n.IsRead).ToList();
-
-            if (unreadNotifications.Any())
+            if (unreadReservationNotifications.Any())
             {
+                NotificationTitle = "Unrated Guests";
+                NotificationMessage = "You have guests waiting for reviews";
+
                 IsNotificationPopupVisible = true;
-                await Task.Delay(3000);
+                await Task.Delay(8000); 
                 IsNotificationPopupVisible = false;
 
-                foreach (var notification in unreadNotifications)
+                foreach (var notification in unreadReservationNotifications)
                 {
                     _notificationService.MarkAsRead(notification.Id);
                 }
+
+                await Task.Delay(800); 
+            }
+
+           
+            var unreadForumNotifications = _forumNotificationService.GetUnreadForOwner(Session.CurrentUser.Id);
+
+            
+            foreach (var notification in unreadForumNotifications)
+            {
+               
+                NotificationTitle = "New Forum Opened";
+                NotificationMessage = $"{notification.ForumTitle} in {notification.LocationName}";
+
+                IsNotificationPopupVisible = true;
+                await Task.Delay(8000);
+                IsNotificationPopupVisible = false;
+
+              
+                _forumNotificationService.MarkAsRead(notification.Id);
+                await Task.Delay(800);
             }
         }
-
         private void ExecuteNavigate(object parameter)
         {
             if (parameter is string viewName)
