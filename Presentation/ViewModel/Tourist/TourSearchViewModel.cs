@@ -5,6 +5,7 @@ using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
+using System.Collections.Generic;
 
 namespace BookingApp.Presentation.ViewModel.Tourist
 {
@@ -19,6 +20,29 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         private bool _isLoading = false;
         private string _statusMessage = "";
 
+        // Mock podaci za opise i vodiče
+        private static readonly List<string> MockDescriptions = new List<string>
+        {
+            "Istražite najlepše delove ovog grada kroz jedinstveno turistićko iskustvo koje će vam omogućiti da upoznate istoriju, kulturu i tradiciju na autentičan način.",
+            "Otkrijte skrivene bisere i najčuvenija mesta ovog prelepog grada uz ekspertsko vođenje našeg profesionalnog vodiča.",
+            "Uživajte u nezaboravnom putovanju kroz vreme i prostor, gde ćete saznati fascinantne priče i legende ovog mesta.",
+            "Pridružite nam se na putovanju koje će vam pružiti dublje razumevanje kulture, arhitekture i načina života lokalnog stanovništva.",
+            "Doživite autentičan turistički doživljaj uz stručno vođenje i interesantne anegdote o najznačajnijim znamenitostima.",
+            "Prošetajte kroz istoriju i upoznajte se sa bogatim nasleđem kroz oči lokalnih stručnjaka i poznavalaca."
+        };
+
+        private static readonly List<string> MockGuides = new List<string>
+        {
+            "Marko Petrović - Profesionalni turistički vodič",
+            "Ana Stojanović - Istoričar umetnosti",
+            "Stefan Jovanović - Licencirani vodič",
+            "Milica Nikolić - Kulturni antropolog",
+            "Aleksandar Mitrović - Lokalni stručnjak",
+            "Jovana Pavlović - Turistički vodič sa 10+ godina iskustva"
+        };
+
+        private static readonly Random _random = new Random();
+
         public string SearchCity { get => _searchCity; set => SetProperty(ref _searchCity, value); }
         public string SearchCountry { get => _searchCountry; set => SetProperty(ref _searchCountry, value); }
         public string SearchLanguage { get => _searchLanguage; set => SetProperty(ref _searchLanguage, value); }
@@ -28,17 +52,23 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         public string StatusMessage { get => _statusMessage; set => SetProperty(ref _statusMessage, value); }
 
         public ObservableCollection<TourDTO> Tours { get; set; } = new();
-        public ObservableCollection<string> Languages { get; set; } = new() { "srpski", "engleski", "nemački", "francuski", "španski", "italijanski" };
+        public ObservableCollection<string> Languages { get; set; } = new()
+        {
+            "srpski", "engleski", "nemački", "francuski", "španski", "italijanski"
+        };
 
         public ICommand SearchToursCommand { get; private set; }
+        public ICommand ViewTourDetailsCommand { get; private set; }
         public ICommand ReserveTourCommand { get; private set; }
         public ICommand ClearSearchCommand { get; private set; }
 
         public event Action<TourDTO> TourReserveRequested;
+        public event Action<TourDTO> TourDetailsRequested;
 
         public TourSearchViewModel() : this(null)
         {
         }
+
         public TourSearchViewModel(ITourService tourService)
         {
             _tourService = tourService ?? Services.Injector.CreateInstance<ITourService>();
@@ -51,6 +81,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             SearchToursCommand = new RelayCommand(ExecuteSearchTours);
             ReserveTourCommand = new RelayCommand<TourDTO>(ExecuteReserveTour);
             ClearSearchCommand = new RelayCommand(ExecuteClearSearch);
+            ViewTourDetailsCommand = new RelayCommand<TourDTO>(ExecuteViewTourDetails);
         }
 
         private void LoadInitialTours()
@@ -69,7 +100,9 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 {
                     var tourDto = TourDTO.FromDomain(tour);
 
-                    
+                    // Dodajemo mock podatke za opis i vodiča
+                    AddMockDataToTour(tourDto);
+
                     tourDto.RefreshAvailability(reservationService);
 
                     Tours.Add(tourDto);
@@ -80,6 +113,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             catch (Exception ex)
             {
                 StatusMessage = $"Greška pri učitavanju tura: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"LoadInitialTours error: {ex}");
             }
             finally
             {
@@ -107,14 +141,15 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
                 Tours.Clear();
 
-               
                 var reservationService = Services.Injector.CreateInstance<ITourReservationService>();
 
                 foreach (var tour in searchResults)
                 {
                     var tourDto = TourDTO.FromDomain(tour);
 
-                    
+                    // Dodajemo mock podatke za opis i vodiča
+                    AddMockDataToTour(tourDto);
+
                     tourDto.RefreshAvailability(reservationService);
 
                     Tours.Add(tourDto);
@@ -133,10 +168,43 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             {
                 StatusMessage = $"Greška pri pretrazi: {ex.Message}";
                 Tours.Clear();
+                System.Diagnostics.Debug.WriteLine($"ExecuteSearchTours error: {ex}");
             }
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        // Dodaje mock podatke za opis i vodiča
+        private void AddMockDataToTour(TourDTO tour)
+        {
+            try
+            {
+                // Ako opis ne postoji ili je prazan, dodaj mock opis
+                if (string.IsNullOrWhiteSpace(tour.Description))
+                {
+                    tour.Description = MockDescriptions[_random.Next(MockDescriptions.Count)];
+                }
+
+                // Ako vodič ne postoji ili je prazan, dodaj mock vodiča
+                if (string.IsNullOrWhiteSpace(tour.GuideName))
+                {
+                    tour.GuideName = MockGuides[_random.Next(MockGuides.Count)];
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error adding mock data: {ex.Message}");
+                // Fallback vrednosti
+                if (string.IsNullOrWhiteSpace(tour.Description))
+                {
+                    tour.Description = "Istražite najlepše delove ovog grada kroz jedinstveno turistićko iskustvo.";
+                }
+                if (string.IsNullOrWhiteSpace(tour.GuideName))
+                {
+                    tour.GuideName = "Profesionalni turistički vodič";
+                }
             }
         }
 
@@ -146,18 +214,27 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
             try
             {
+                // Proveri da li tura ima dovoljno mesta
+                if (!tour.CanReserve)
+                {
+                    StatusMessage = $"Tura '{tour.Name}' je trenutno popunjena.";
+                    ShowAlternativeTours(tour);
+                    return;
+                }
+
                 var reservationVM = new TourReservationViewModel(tour);
 
-                
+                // Subscribe na događaj kada se rezervacija završi
                 reservationVM.ReservationCompleted += () => {
-                    RefreshTours(); 
+                    RefreshTours();
                 };
-                
+
                 TourReserveRequested?.Invoke(tour);
             }
             catch (Exception ex)
             {
                 StatusMessage = $"Greška pri rezervaciji: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"ExecuteReserveTour error: {ex}");
             }
         }
 
@@ -165,21 +242,23 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         {
             try
             {
-               
                 int requiredSpots = ParseIntValue(SearchPeopleCount) ?? 1;
 
-                
                 var alternatives = _tourService.GetAlternativeTours(originalTour.Id, requiredSpots);
 
                 if (alternatives.Any())
                 {
                     StatusMessage = $"Tura '{originalTour.Name}' je popunjena. Pronađene su {alternatives.Count} alternative na istoj lokaciji:";
 
-                   
                     Tours.Clear();
+                    var reservationService = Services.Injector.CreateInstance<ITourReservationService>();
+
                     foreach (var alternative in alternatives)
                     {
-                        Tours.Add(TourDTO.FromDomain(alternative));
+                        var tourDto = TourDTO.FromDomain(alternative);
+                        AddMockDataToTour(tourDto);
+                        tourDto.RefreshAvailability(reservationService);
+                        Tours.Add(tourDto);
                     }
                 }
                 else
@@ -190,18 +269,47 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             catch (Exception ex)
             {
                 StatusMessage = $"Greška pri traženju alternativnih tura: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"ShowAlternativeTours error: {ex}");
+            }
+        }
+
+        private void ExecuteViewTourDetails(TourDTO tour)
+        {
+            if (tour == null)
+            {
+                StatusMessage = "Greška: Tura nije validna";
+                return;
+            }
+
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"TourSearchViewModel: Zahtev za detalje ture '{tour.Name}' (ID: {tour.Id})");
+                TourDetailsRequested?.Invoke(tour);
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Greška pri prikazivanju detalja: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error in ExecuteViewTourDetails: {ex.Message}");
             }
         }
 
         private void ExecuteClearSearch()
         {
-            SearchCity = "";
-            SearchCountry = "";
-            SearchLanguage = "srpski";
-            SearchDuration = "";
-            SearchPeopleCount = "1";
+            try
+            {
+                SearchCity = "";
+                SearchCountry = "";
+                SearchLanguage = "srpski";
+                SearchDuration = "";
+                SearchPeopleCount = "1";
 
-            LoadInitialTours();
+                LoadInitialTours();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Greška pri brisanju pretrage: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"ExecuteClearSearch error: {ex}");
+            }
         }
 
         private int? ParseIntValue(string value)

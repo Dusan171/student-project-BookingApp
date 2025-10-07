@@ -1,0 +1,233 @@
+﻿<UserControl x:Class="BookingApp.Presentation.View.Tourist.MyReservationsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:BookingApp.Presentation.ViewModel.Tourist">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E8E8E8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000000" ShadowDepth="2" BlurRadius="8" Opacity="0.06"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TabButtonStyle" TargetType="RadioButton">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" Background="Transparent" BorderThickness="0,0,0,3" 
+                                BorderBrush="Transparent" Padding="20,12" Cursor="Hand">
+                            <TextBlock Text="{TemplateBinding Content}" FontSize="14" 
+                                       FontWeight="SemiBold" Foreground="#7F8C8D" 
+                                       HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#3498DB"/>
+                                <Setter TargetName="border" Property="Background" Value="#F8FBFE"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#F8F9FA"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#3498DB"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="6" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2980B9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1F5F8B"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#F4F6F7">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        
+        <Border Grid.Row="0" Background="White" BorderBrush="#E8E8E8" BorderThickness="0,0,0,1">
+            <StackPanel Margin="40,25,40,0">
+                <TextBlock Text="MOJE REZERVACIJE" FontSize="26" FontWeight="Bold" 
+                           Foreground="#2C3E50" Margin="0,0,0,25"/>
+
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Content="Sve" Style="{StaticResource TabButtonStyle}" 
+                                 IsChecked="True" GroupName="Tabs"
+                                 Command="{Binding FilterCommand}" CommandParameter="Sve"/>
+                    <RadioButton Content="Aktivne" Style="{StaticResource TabButtonStyle}" 
+                                 GroupName="Tabs" Margin="5,0,0,0"
+                                 Command="{Binding FilterCommand}" CommandParameter="Aktivne"/>
+                    <RadioButton Content="Završene" Style="{StaticResource TabButtonStyle}" 
+                                 GroupName="Tabs" Margin="5,0,0,0"
+                                 Command="{Binding FilterCommand}" CommandParameter="Završene"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="40,20">
+
+                
+                <Border Background="#E8F4FD" BorderBrush="#3498DB" BorderThickness="1" 
+                        CornerRadius="8" Padding="20" Margin="0,0,0,15"
+                        Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="Učitavam rezervacije..." FontSize="14" 
+                               Foreground="#2C3E50" HorizontalAlignment="Center"/>
+                </Border>
+
+                
+                <Border Background="White" BorderBrush="#E8E8E8" BorderThickness="1" 
+                        CornerRadius="10" Padding="50" Margin="0,20,0,0"
+                        Visibility="{Binding HasNoReservations, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel HorizontalAlignment="Center">
+                        <Viewbox Width="64" Height="64" Margin="0,0,0,20">
+                            <Path Data="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" 
+                                  Fill="#BDC3C7"/>
+                        </Viewbox>
+                        <TextBlock Text="{Binding StatusMessage}" FontSize="16" 
+                                   Foreground="#7F8C8D" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+               
+                <ItemsControl ItemsSource="{Binding FilteredReservations}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CardStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    
+                                    <StackPanel Grid.Column="0">
+                                        
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                            <TextBlock Text="{Binding TourName}" FontSize="18" FontWeight="Bold" 
+                                                       Foreground="#2C3E50" VerticalAlignment="Center"/>
+                                            <Border Padding="10,5" Margin="15,0,0,0" CornerRadius="4">
+                                                <Border.Style>
+                                                    <Style TargetType="Border">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="ACTIVE">
+                                                                <Setter Property="Background" Value="#E8F5E8"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Status}" Value="COMPLETED">
+                                                                <Setter Property="Background" Value="#E3F2FD"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+                                                <TextBlock Text="{Binding StatusText}" FontSize="12" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="ACTIVE">
+                                                                    <Setter Property="Foreground" Value="#4CAF50"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="COMPLETED">
+                                                                    <Setter Property="Foreground" Value="#2196F3"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </Border>
+                                        </StackPanel>
+
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" MinWidth="130"/>
+                                                <ColumnDefinition Width="*" MinWidth="150"/>
+                                                <ColumnDefinition Width="Auto" MinWidth="150"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Text="Vodič:" Grid.Row="0" Grid.Column="0" 
+                                                       FontWeight="SemiBold" Foreground="#7F8C8D" Margin="0,0,10,8"/>
+                                            <TextBlock Text="{Binding GuideName}" Grid.Row="0" Grid.Column="1" 
+                                                       Foreground="#34495E" Margin="0,0,30,8"/>
+
+                                            <TextBlock Text="Datum ture:" Grid.Row="0" Grid.Column="2" 
+                                                       FontWeight="SemiBold" Foreground="#7F8C8D" Margin="0,0,10,8"/>
+                                            <TextBlock Text="{Binding TourDateFormatted}" Grid.Row="0" Grid.Column="3" 
+                                                       Foreground="#34495E" Margin="0,0,0,8"/>
+
+                                            <TextBlock Text="Broj učesnika:" Grid.Row="1" Grid.Column="0" 
+                                                       FontWeight="SemiBold" Foreground="#7F8C8D" Margin="0,0,10,0"/>
+                                            <TextBlock Text="{Binding NumberOfGuests}" Grid.Row="1" Grid.Column="1" 
+                                                       Foreground="#34495E" Margin="0,0,30,0"/>
+
+                                            <TextBlock Text="Datum rezervacije:" Grid.Row="1" Grid.Column="2" 
+                                                       FontWeight="SemiBold" Foreground="#7F8C8D" Margin="0,0,10,0"/>
+                                            <TextBlock Text="{Binding ReservationDate, StringFormat='dd.MM.yyyy'}" Grid.Row="1" Grid.Column="3" 
+                                                       Foreground="#34495E"/>
+                                        </Grid>
+                                    </StackPanel>
+
+                                    
+                                    <Button Grid.Column="1" Content="Oceni turu"
+                                            Command="{Binding DataContext.ReviewTourCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            VerticalAlignment="Center">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="ACTIVE">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -18,12 +18,12 @@ namespace BookingApp.Services
         public TourService(ITourRepository tourRepository,
                           ILocationRepository locationRepository,
                           IUserRepository userRepository,
-                          ITourReservationRepository reservationRepository) 
+                          ITourReservationRepository reservationRepository)
         {
             _tourRepository = tourRepository;
             _locationRepository = locationRepository;
             _userRepository = userRepository;
-            _reservationRepository = reservationRepository; 
+            _reservationRepository = reservationRepository;
         }
 
         // ALTERNATIVNI konstruktor za kompatibilnost
@@ -34,7 +34,7 @@ namespace BookingApp.Services
             _tourRepository = tourRepository;
             _locationRepository = locationRepository;
             _userRepository = userRepository;
-            _reservationRepository = Services.Injector.CreateInstance<ITourReservationRepository>(); 
+            _reservationRepository = Services.Injector.CreateInstance<ITourReservationRepository>();
         }
 
         public List<Tour> GetAvailableTours()
@@ -144,7 +144,7 @@ namespace BookingApp.Services
             var tour = _tourRepository.GetById(tourId);
             if (tour == null) return 0;
 
-            
+
             if (_reservationRepository != null)
             {
                 var activeReservationsCount = _reservationRepository.GetByTourId(tourId)
@@ -164,7 +164,7 @@ namespace BookingApp.Services
             }
             else
             {
-                
+
                 int available = tour.MaxTourists - tour.ReservedSpots;
                 System.Diagnostics.Debug.WriteLine($"TourService.GetAvailableSpots({tourId}) - Fallback:");
                 System.Diagnostics.Debug.WriteLine($"  Available (CSV): {available}");
@@ -182,7 +182,7 @@ namespace BookingApp.Services
 
         private void EnrichTourWithDetails(Tour tour)
         {
-            
+
             if (tour.Location != null && tour.Location.Id > 0)
             {
                 var fullLocation = _locationRepository.GetById(tour.Location.Id);
@@ -192,7 +192,7 @@ namespace BookingApp.Services
                 }
             }
 
-            
+
             if (tour.Guide != null && tour.Guide.Id > 0)
             {
                 var fullGuide = _userRepository.GetById(tour.Guide.Id);
@@ -218,5 +218,7 @@ namespace BookingApp.Services
             EnrichToursWithDetails(tours);
             return tours;
         }
+
+     
     }
 }

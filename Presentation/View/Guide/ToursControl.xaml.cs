@@ -1,273 +1,123 @@
-﻿using BookingApp.Domain.Model;
-using BookingApp.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.IO;
-using BookingApp.Utilities;
-using BookingApp.Presentation.View.Guide;
+using BookingApp.Presentation.ViewModel.Guide;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class ToursControl : UserControl
+    public partial class ToursControl : Page
     {
-        private List<Tour> allTours;
-        private List<TourReservation> allReservations;
-        MainPage mainPage;
-        [DllImport("kernel32.dll")]
-        private static extern bool AllocConsole();
+        private readonly ToursControlViewModel _viewModel;
+        private string _currentPdfPath;
 
-        public ToursControl(MainPage main)
+        public ToursControl()
         {
-            AllocConsole();
             InitializeComponent();
-
-            LoadAllTours();
-            LoadAllReservations();
-            mainPage = main;
-
-            TourFilterComboBox.SelectionChanged += TourFilterComboBox_SelectionChanged;
-
-            DisplayTours(FilterToday());
+            _viewModel = new ToursControlViewModel();
+            DataContext = _viewModel;
+            _viewModel.NavigationRequested += NavigateToPage;
+            _viewModel.PDFGenerated += ShowPDFOverlay;
         }
 
-        private void LoadAllTours()
+        private void NavigateToPage(Page page)
         {
-            var tourRepository = new TourRepository();
-            //ovde si menjala
-            allTours = tourRepository.GetAll();
-            FilterGuideTours();
-            FillTourDetails(allTours);
+            NavigationService?.Navigate(page);
         }
 
-        private void FilterGuideTours()
+        private void GenerateReport_Click(object sender, RoutedEventArgs e)
         {
-            allTours = allTours.Where(t => t.GuideId == Session.CurrentUser.Id).ToList();
-        }
-
-        private void FillTourDetails(List<Tour> tours)
-        {
-            var locationRepo = new LocationRepository();
-            var keyPointRepo = new KeyPointRepository();
-            var startTimeRepo = new StartTourTimeRepository();
-            var imagesRepo = new ImageRepository();
-
-            foreach (var tour in tours)
+            if (!StartDatePicker.SelectedDate.HasValue || !EndDatePicker.SelectedDate.HasValue)
             {
-                if (tour.Location != null)
-                    tour.Location = locationRepo.GetById(tour.Location.Id);
-
-                tour.KeyPoints = tour.KeyPoints
-                    .Select(kp => keyPointRepo.GetById(kp.Id))
-                    .Where(kp => kp != null)
-                    .ToList();
-
-                tour.StartTimes = tour.StartTimes
-                    .Select(st => startTimeRepo.GetById(st.Id))
-                    .Where(st => st != null)
-                    .ToList();
-
-                tour.Images = tour.Images
-                    .Select(img => imagesRepo.GetById(img.Id))
-                    .Where(img => img != null)
-                    .ToList();
+                MessageBox.Show("Molimo odaberite oba datuma za generisanje izveštaja.", "Greška",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-        }
 
-        private void LoadAllReservations()
-        {
-            var reservationRepository = new TourReservationRepository();
-            allReservations = reservationRepository.GetAll();
-        }
+            DateTime startDate = StartDatePicker.SelectedDate.Value;
+            DateTime endDate = EndDatePicker.SelectedDate.Value;
 
-        private bool HasActiveReservation(Tour tour)
-        {
-            return allReservations.Any(r => r.TourId == tour.Id && r.Status == 0);
-        }
-
-        private void TourFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (TourFilterComboBox.SelectedIndex == 0)
-                DisplayTours(FilterToday());
-            else
-                DisplayTours(allTours);
-        }
-
-        private List<Tour> FilterToday()
-        {
-            DateTime today = DateTime.Today;
-            return allTours.Where(t => t.StartTimes.Any(st => st.Time.Date == today)).ToList();
-        }
-
-        private void DisplayTours(List<Tour> tours)
-        {
-            TourListPanel.Items.Clear();
-            bool isToursToday = TourFilterComboBox.SelectedIndex == 0;
-
-            foreach (var tour in tours)
+            if (startDate > endDate)
             {
-                bool hasActiveReservation = HasActiveReservation(tour);
-                bool isCancelled = IsCancelled(tour);
-
-                //foreach (var startTime in tour.StartTimes)
-                //{
-                if (tour.StartTimes != null && tour.StartTimes.Any() && !isCancelled)
-                {
-                    CreateTourCard(tour, tour.StartTimes.First().Time, isToursToday, hasActiveReservation);
-                }
-
-                //}
+                MessageBox.Show("Datum početka mora biti pre datuma kraja.", "Greška",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-        }
-        private bool IsCancelled(Tour tour)
-        {
-            return tour.Status == TourStatus.CANCELLED;
-        }
 
-
-        private bool HasOngoingTour(Tour tour)
-        {
-            return allTours.Any(t => t.Status == TourStatus.ACTIVE && t.Id != tour.Id);
+            var parameters = new object[] { startDate, endDate };
+            _viewModel.GenerateReportCommand.Execute(parameters);
         }
 
-        private bool IsNotFinished(Tour tour)
+        private void ShowPDFOverlay(string pdfPath)
         {
-            var foundTour = allTours.FirstOrDefault(t => t.Id == tour.Id);
-            return foundTour != null && foundTour.Status != TourStatus.FINISHED;
-        }
-
-        private void CreateTourCard(Tour tour, DateTime time, bool isToursToday, bool hasActiveReservation)
-        {
-            Border card = new Border
-            {
-                BorderThickness = new Thickness(1),
-                BorderBrush = Brushes.Gray,
-                Margin = new Thickness(0, 0, 0, 10),
-                Padding = new Thickness(10)
-            };
-
-            StackPanel horizontal = new StackPanel { Orientation = Orientation.Horizontal };
-
-            string imagePath = tour.Images?.FirstOrDefault()?.Path;
-            BitmapImage bitmap;
+            _currentPdfPath = pdfPath;
 
             try
             {
-                bitmap = !string.IsNullOrEmpty(imagePath) && File.Exists(imagePath)
-                    ? new BitmapImage(new Uri(imagePath, UriKind.RelativeOrAbsolute))
-                    : new BitmapImage();
+                // Pokušaj učitavanja PDF-a u WebBrowser
+                if (File.Exists(pdfPath))
+                {
+                    string fileUrl = new Uri(pdfPath).AbsoluteUri + "#zoom=40";
+                    PDFWebBrowser.Navigate(fileUrl);
+                    PDFOverlay.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    MessageBox.Show("PDF fajl nije pronađen.", "Greška",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška prilikom učitavanja PDF-a: {ex.Message}\nPDF će biti otvoren spoljašnje.",
+                    "Upozorenje", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+                try
+                {
+                    Process.Start(new ProcessStartInfo(pdfPath) { UseShellExecute = true });
+                }
+                catch
+                {
+                    MessageBox.Show("Ne mogu da otvorim PDF fajl.", "Greška",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ClosePDFOverlay_Click(object sender, RoutedEventArgs e)
+        {
+            PDFOverlay.Visibility = Visibility.Collapsed;
+
+            try
+            {
+                PDFWebBrowser.Navigate("about:blank");
             }
             catch
             {
-                bitmap = new BitmapImage();
+
             }
-
-            Image image = new Image
-            {
-                Width = 60,
-                Height = 60,
-                Margin = new Thickness(0, 0, 10, 0),
-                Source = bitmap,
-                Stretch = Stretch.UniformToFill
-            };
-
-            StackPanel info = new StackPanel();
-            string date = time.ToString("dd.MM.yyyy, HH:mm");
-            info.Children.Add(new TextBlock { Text = tour.Name, FontWeight = FontWeights.Bold });
-            info.Children.Add(new TextBlock { Text = date });
-            info.Children.Add(new TextBlock { Text = tour.Language });
-            info.Children.Add(new TextBlock { Text = $"Duration: {tour.DurationHours}h" });
-
-            Button startBtn = new Button
-            {
-                Content = "START",
-                Foreground = Brushes.Blue,
-                Margin = new Thickness(20, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                Visibility = isToursToday ? Visibility.Visible : Visibility.Collapsed,
-                IsEnabled = hasActiveReservation && !HasOngoingTour(tour) && IsNotFinished(tour)
-            };
-
-            startBtn.Click += (s, e) =>
-            {
-                if (!hasActiveReservation)
-                {
-                    MessageBox.Show("Tura ne može početi jer nema rezervisanih turista.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                tour.Status = TourStatus.ACTIVE;
-
-                if (LiveTrackingFrame != null)
-                {
-                    var liveTrackingPage = new TourLiveTrackingControl(tour, time, mainPage);
-                    LiveTrackingFrame.Navigate(liveTrackingPage);
-                    LiveTrackingOverlay.Visibility = Visibility.Visible;
-                    TourListPanel.Visibility = Visibility.Collapsed;
-                }
-            };
-            Button cancelBtn = new Button
-            {
-                Content = "CANCEL",
-                Foreground = Brushes.Red,
-                Margin = new Thickness(10, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                Visibility = !isToursToday ? Visibility.Visible : Visibility.Collapsed,
-                IsEnabled = (time - DateTime.Now).TotalHours >= 48 && tour.Status != TourStatus.ACTIVE
-            };
-
-            cancelBtn.Click += (s, e) =>
-            {
-                var result = MessageBox.Show("Da li ste sigurni da želite otkazati ovu turu?", "Potvrda otkazivanja", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                if (result == MessageBoxResult.Yes)
-                {
-                    tour.Status = TourStatus.CANCELLED;
-
-                    var tourRepo = new TourRepository();
-                    tourRepo.Update(tour);
-                    MessageBox.Show("Tura je uspešno otkazana.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    DisplayTours(TourFilterComboBox.SelectedIndex == 0 ? FilterToday() : allTours);
-                }
-            };
-
-            horizontal.Children.Add(image);
-            horizontal.Children.Add(info);
-            horizontal.Children.Add(startBtn);
-            horizontal.Children.Add(cancelBtn);
-
-            card.Child = horizontal;
-
-            TourListPanel.Items.Add(card);
         }
 
-        private void NewTour_Click(object sender, RoutedEventArgs e)
+        private void OpenPDFExternal_Click(object sender, RoutedEventArgs e)
         {
-
-            CreateTourControl form = new CreateTourControl(mainPage);
-            form.TourCreated += (s, e) =>
+            try
             {
-                LoadAllTours();
-                DisplayTours(FilterToday());
-
-            };
-            form.Cancelled += OnCreateTourCancelled;
-            mainPage.ContentFrame.Content = form;
-
-        }
-
-        private void OnCreateTourCancelled(object sender, EventArgs e)
-        {
-            LoadAllTours();
-            DisplayTours(FilterToday());
-            mainPage.ContentFrame.Content = this;
+                if (!string.IsNullOrEmpty(_currentPdfPath) && File.Exists(_currentPdfPath))
+                {
+                    Process.Start(new ProcessStartInfo(_currentPdfPath) { UseShellExecute = true });
+                }
+                else
+                {
+                    MessageBox.Show("PDF fajl nije pronađen.", "Greška",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška prilikom otvaranja PDF-a: {ex.Message}",
+                    "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
-
-

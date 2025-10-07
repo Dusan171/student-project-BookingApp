@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Domain.Model;
 using BookingApp.Serializer;
@@ -34,6 +32,8 @@ namespace BookingApp.Repositories
         public TourRequest Save(TourRequest tourRequest)
         {
             tourRequest.Id = NextId();
+            tourRequest.CreatedAt = DateTime.Now;
+            tourRequest.Status = TourRequestStatus.PENDING;
             _tourRequests.Add(tourRequest);
             _serializer.ToCSV(FilePath, _tourRequests);
             return tourRequest;
@@ -71,24 +71,32 @@ namespace BookingApp.Repositories
 
         public List<TourRequest> GetByTouristId(int touristId)
         {
-            return _tourRequests.Where(tr => tr.TouristId == touristId).ToList();
+            return _tourRequests
+                .Where(tr => tr.TouristId == touristId)
+                .OrderByDescending(tr => tr.CreatedAt)
+                .ToList();
         }
 
         public List<TourRequest> GetPendingRequests()
         {
-            return _tourRequests.Where(tr => tr.Status == TourRequestStatus.PENDING).ToList();
+            return _tourRequests
+                .Where(tr => tr.Status == TourRequestStatus.PENDING)
+                .ToList();
         }
 
         public List<TourRequest> GetRequestsByStatus(TourRequestStatus status)
         {
-            return _tourRequests.Where(tr => tr.Status == status).ToList();
+            return _tourRequests
+                .Where(tr => tr.Status == status)
+                .ToList();
         }
 
         public List<TourRequest> GetExpiredRequests()
         {
             var twoDaysFromNow = DateTime.Now.AddDays(2);
-            return _tourRequests.Where(tr => tr.Status == TourRequestStatus.PENDING &&
-                                           tr.DateFrom <= twoDaysFromNow).ToList();
+            return _tourRequests
+                .Where(tr => tr.Status == TourRequestStatus.PENDING && tr.DateFrom <= twoDaysFromNow)
+                .ToList();
         }
 
         private int NextId()

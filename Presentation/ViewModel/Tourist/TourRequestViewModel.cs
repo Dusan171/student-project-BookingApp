@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Input;
 using BookingApp.Domain.Interfaces;
+using BookingApp.Domain.Model;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
-using System.Windows.Input;
-using BookingApp.Domain.Model;
-using System.Windows;
 
 namespace BookingApp.Presentation.ViewModel.Tourist
 {
@@ -20,12 +17,15 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         private readonly ITourRequestService _requestService;
         private readonly int _currentUserId;
 
-        private ObservableCollection<TourRequestDTO> _tourRequests;
+        private ObservableCollection<TourRequestDTO> _allRequests = new();
+        private ObservableCollection<TourRequestDTO> _filteredRequests = new();
         private ObservableCollection<TourRequestParticipantDTO> _participants;
-        private TourRequestDTO _selectedRequest;
         private TourRequestDTO _newRequest;
         private TourRequestParticipantDTO _newParticipant;
         private bool _isCreatingRequest;
+        private bool _isLoading;
+        private string _statusMessage = "";
+        private string _selectedFilter = "Moji";
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -34,13 +34,14 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public ObservableCollection<TourRequestDTO> TourRequests
+        public ObservableCollection<TourRequestDTO> FilteredRequests
         {
-            get => _tourRequests;
+            get => _filteredRequests;
             set
             {
-                _tourRequests = value;
+                _filteredRequests = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(HasNoRequests));
             }
         }
 
@@ -54,20 +55,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
         }
 
-        public TourRequestDTO SelectedRequest
-        {
-            get => _selectedRequest;
-            set
-            {
-                _selectedRequest = value;
-                OnPropertyChanged();
-                if (_selectedRequest != null)
-                {
-                    LoadParticipantsForRequest(_selectedRequest.Id);
-                }
-            }
-        }
-
         public TourRequestDTO NewRequest
         {
             get => _newRequest;
@@ -75,6 +62,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             {
                 _newRequest = value;
                 OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -83,8 +71,20 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             get => _newParticipant;
             set
             {
+                if (_newParticipant != null)
+                {
+                    _newParticipant.PropertyChanged -= OnParticipantPropertyChanged;
+                }
+
                 _newParticipant = value;
+
+                if (_newParticipant != null)
+                {
+                    _newParticipant.PropertyChanged += OnParticipantPropertyChanged;
+                }
+
                 OnPropertyChanged();
+                CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -98,6 +98,40 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
         }
 
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set
+            {
+                _isLoading = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string StatusMessage
+        {
+            get => _statusMessage;
+            set
+            {
+                _statusMessage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string SelectedFilter
+        {
+            get => _selectedFilter;
+            set
+            {
+                _selectedFilter = value;
+                OnPropertyChanged();
+                ApplyFilter();
+            }
+        }
+
+        public bool HasNoRequests => FilteredRequests.Count == 0 && !IsLoading;
+
+        public ICommand FilterCommand { get; }
         public ICommand CreateRequestCommand { get; }
         public ICommand SaveRequestCommand { get; }
         public ICommand CancelCreateRequestCommand { get; }
@@ -110,18 +144,32 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             _requestService = requestService ?? throw new ArgumentNullException(nameof(requestService));
             _currentUserId = currentUserId;
 
-            TourRequests = new ObservableCollection<TourRequestDTO>();
             Participants = new ObservableCollection<TourRequestParticipantDTO>();
 
+            FilterCommand = new RelayCommand<string>(ExecuteFilter);
             CreateRequestCommand = new RelayCommand(StartCreateRequest);
-            SaveRequestCommand = new RelayCommand(SaveRequest, CanSaveRequest);
+            SaveRequestCommand = new RelayCommand(SaveRequest); 
             CancelCreateRequestCommand = new RelayCommand(CancelCreateRequest);
-            AddParticipantCommand = new RelayCommand(AddParticipant, CanAddParticipant);
+            AddParticipantCommand = new RelayCommand(AddParticipant); 
             RemoveParticipantCommand = new RelayCommand(RemoveParticipant);
             RefreshCommand = new RelayCommand(RefreshRequests);
 
             InitializeNewRequest();
             LoadTourRequests();
+        }
+
+        private void OnParticipantPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void ExecuteFilter(string? filterType)
+        {
+            SelectedFilter = filterType switch
+            {
+                "Svi" => "Svi",
+                _ => "Moji"
+            };
         }
 
         private void InitializeNewRequest()
@@ -142,38 +190,59 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         {
             try
             {
-                var requests = _requestService.GetRequestsByTourist(_currentUserId);
+                IsLoading = true;
+                StatusMessage = "Učitavam zahteve...";
 
-                TourRequests.Clear();
-                foreach (var request in requests)
+                _allRequests.Clear();
+
+                
+                var allRequests = _requestService.GetAllRequests();
+                foreach (var request in allRequests)
                 {
-                    TourRequests.Add(request);
+                    _allRequests.Add(request);
+                }
+
+                
+                ApplyFilter();
+
+                if (FilteredRequests.Count == 0)
+                {
+                    StatusMessage = SelectedFilter == "Moji"
+                        ? "Nemate kreiranih zahteva za ture."
+                        : "Nema dostupnih zahteva.";
+                }
+                else
+                {
+                    StatusMessage = "";
                 }
             }
             catch (Exception ex)
             {
+                StatusMessage = $"Greška pri učitavanju zahteva: {ex.Message}";
                 MessageBox.Show($"Greška pri učitavanju zahteva za ture: {ex.Message}",
                                "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            finally
+            {
+                IsLoading = false;
+                OnPropertyChanged(nameof(HasNoRequests));
+            }
         }
 
-        private void LoadParticipantsForRequest(int requestId)
+        private void ApplyFilter()
         {
-            try
-            {
-                var participants = _requestService.GetParticipantsByRequest(requestId);
+            FilteredRequests.Clear();
 
-                Participants.Clear();
-                foreach (var participant in participants)
-                {
-                    Participants.Add(participant);
-                }
-            }
-            catch (Exception ex)
+            var filtered = SelectedFilter == "Moji"
+                ? _allRequests.Where(r => r.TouristId == _currentUserId)
+                : _allRequests;
+
+            foreach (var request in filtered.OrderByDescending(r => r.CreatedAt))
             {
-                MessageBox.Show($"Greška pri učitavanju učesnika: {ex.Message}",
-                               "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                FilteredRequests.Add(request);
             }
+
+            OnPropertyChanged(nameof(HasNoRequests));
         }
 
         private void StartCreateRequest(object parameter)
@@ -187,70 +256,98 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         {
             try
             {
-                // Validacija
-                if (string.IsNullOrWhiteSpace(NewRequest.City))
+               
+                if (string.IsNullOrWhiteSpace(NewRequest?.City))
                 {
-                    MessageBox.Show("Molimo unesite grad.", "Validacija", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Molimo unesite grad.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(NewRequest.Country))
+                
+                if (string.IsNullOrWhiteSpace(NewRequest?.Country))
                 {
-                    MessageBox.Show("Molimo unesite državu.", "Validacija", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Molimo unesite državu.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(NewRequest.Language))
+                
+                if (string.IsNullOrWhiteSpace(NewRequest?.Description))
                 {
-                    MessageBox.Show("Molimo unesite jezik.", "Validacija", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Molimo unesite opis.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                if (NewRequest.NumberOfPeople <= 0)
+                if (string.IsNullOrWhiteSpace(NewRequest?.Language))
                 {
-                    MessageBox.Show("Broj ljudi mora biti veći od 0.", "Validacija", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Molimo izaberite jezik.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
+                
+                if (NewRequest?.DateFrom == default(DateTime))
+                {
+                    MessageBox.Show("Molimo izaberite datum početka.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                
+                if (NewRequest?.DateTo == default(DateTime))
+                {
+                    MessageBox.Show("Molimo izaberite datum završetka.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+               
                 if (NewRequest.DateFrom <= DateTime.Now.AddDays(2))
                 {
-                    MessageBox.Show("Datum početka mora biti najmanje 3 dana unapred.", "Validacija", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Datum početka mora biti najmanje 3 dana unapred.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
+                
                 if (NewRequest.DateTo <= NewRequest.DateFrom)
                 {
-                    MessageBox.Show("Datum završetka mora biti nakon datuma početka.", "Validacija", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Datum završetka mora biti nakon datuma početka.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Dodeli učesnike
+                
+                if (Participants.Count == 0)
+                {
+                    MessageBox.Show("Dodajte najmanje jednog učesnika.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+               
                 NewRequest.Participants = Participants.ToList();
+                NewRequest.NumberOfPeople = Participants.Count;
 
-                // Sačuvaj zahtev
                 var savedRequest = _requestService.CreateRequest(NewRequest);
-                TourRequests.Add(savedRequest);
+                _allRequests.Add(savedRequest);
 
-                MessageBox.Show("Zahtev za turu je uspešno kreiran!", "Uspeh", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Zahtev za turu je uspešno kreiran!", "Uspeh",
+                               MessageBoxButton.OK, MessageBoxImage.Information);
 
                 IsCreatingRequest = false;
                 InitializeNewRequest();
                 Participants.Clear();
+
+                ApplyFilter();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Greška pri kreiranju zahteva: {ex.Message}",
                                "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private bool CanSaveRequest(object parameter)
-        {
-            return NewRequest != null &&
-                   !string.IsNullOrWhiteSpace(NewRequest.City) &&
-                   !string.IsNullOrWhiteSpace(NewRequest.Country) &&
-                   !string.IsNullOrWhiteSpace(NewRequest.Language) &&
-                   NewRequest.NumberOfPeople > 0;
         }
 
         private void CancelCreateRequest(object parameter)
@@ -264,11 +361,26 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(NewParticipant.FirstName) ||
-                    string.IsNullOrWhiteSpace(NewParticipant.LastName) ||
-                    NewParticipant.Age <= 0)
+               
+                if (string.IsNullOrWhiteSpace(NewParticipant?.FirstName))
                 {
-                    MessageBox.Show("Molimo unesite sva polja za učesnika.", "Validacija",
+                    MessageBox.Show("Molimo unesite ime učesnika.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                
+                if (string.IsNullOrWhiteSpace(NewParticipant?.LastName))
+                {
+                    MessageBox.Show("Molimo unesite prezime učesnika.", "Validacija",
+                                   MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                
+                if (NewParticipant?.Age <= 0 || NewParticipant?.Age > 120)
+                {
+                    MessageBox.Show("Molimo unesite validne godine učesnika (1-120).", "Validacija",
                                    MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -280,25 +392,17 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                     Age = NewParticipant.Age
                 });
 
-                // Ažuriraj broj ljudi
-                NewRequest.NumberOfPeople = Participants.Count;
-
-                // Resetuj formu za novog učesnika
+               
                 NewParticipant = new TourRequestParticipantDTO();
+
+                MessageBox.Show("Učesnik je uspešno dodat!", "Uspeh",
+                               MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Greška pri dodavanju učesnika: {ex.Message}",
                                "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private bool CanAddParticipant(object parameter)
-        {
-            return NewParticipant != null &&
-                   !string.IsNullOrWhiteSpace(NewParticipant.FirstName) &&
-                   !string.IsNullOrWhiteSpace(NewParticipant.LastName) &&
-                   NewParticipant.Age > 0;
         }
 
         private void RemoveParticipant(object parameter)
@@ -309,10 +413,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 {
                     Participants.Remove(participant);
 
-                    // Ažuriraj broj ljudi
-                    NewRequest.NumberOfPeople = Participants.Count;
-
-                    // Ako je učesnik već sačuvan, obriši ga iz baze
+                   
                     if (participant.Id > 0)
                     {
                         _requestService.RemoveParticipant(participant.Id);

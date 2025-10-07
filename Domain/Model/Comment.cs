@@ -1,5 +1,6 @@
 ﻿using BookingApp.Serializer;
 using System;
+using System.Globalization;
 
 namespace BookingApp.Domain.Model
 {
@@ -21,14 +22,22 @@ namespace BookingApp.Domain.Model
 
         public string[] ToCSV()
         {
-            string[] csvValues = { Id.ToString(), CreationTime.ToString(), Text, User.Id.ToString() };
+            string[] csvValues = { Id.ToString(), CreationTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), Text, User.Id.ToString() };
             return csvValues;
         }
 
         public void FromCSV(string[] values)
         {
             Id = Convert.ToInt32(values[0]);
-            CreationTime = Convert.ToDateTime(values[1]);
+            if (!DateTime.TryParse(values[1], CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
+            {
+              
+                parsedDate = DateTime.ParseExact(values[1],
+                    new[] { "M/d/yyyy h:mm:ss tt", "yyyy-MM-dd HH:mm:ss", "dd-MM-yyyy HH:mm:ss" },
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None);
+            }
+            CreationTime = parsedDate;
             Text = values[2];
             User = new User() { Id = Convert.ToInt32(values[3]) };
         }

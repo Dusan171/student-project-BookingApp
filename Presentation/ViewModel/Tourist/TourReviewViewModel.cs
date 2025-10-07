@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Interop;
 using BookingApp.Domain.Model;
 using BookingApp.Repositories;
 using BookingApp.Services.DTO;
@@ -21,11 +20,15 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         private readonly TourRepository _tourRepository = new();
         private readonly UserRepository _userRepository = new();
         private ObservableCollection<string> _selectedImages = new();
+
         public ObservableCollection<string> SelectedImages
         {
             get => _selectedImages;
-            set { _selectedImages = value; 
-            OnPropertyChanged(nameof(SelectedImages)); }
+            set
+            {
+                _selectedImages = value;
+                OnPropertyChanged(nameof(SelectedImages));
+            }
         }
 
         public string ImageCount => $"({SelectedImages.Count} slika)";
@@ -104,33 +107,25 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
         }
 
-        
+        // Web-like notifikacije umesto MessageBox
+        public event Action<string> ShowSuccessMessage;
+        public event Action<string> ShowErrorMessage;
 
         public ICommand AddImageCommand => new RelayCommand(AddImage);
         public ICommand RemoveImageCommand => new RelayCommand<string>(RemoveImage);
         public ICommand ReviewCommand => new RelayCommand<TourReservation>(r => SelectedReservation = r);
+
         public ICommand CancelReviewCommand => new RelayCommand(() =>
         {
-            
-            foreach (var imagePath in SelectedImages.ToList())
-            {
-                try
-                {
-                    string fullPath = Path.GetFullPath(imagePath);
-                    if (File.Exists(fullPath))
-                    {
-                        File.Delete(fullPath);
-                    }
-                }
-                catch { /* Ignoriši greške brisanja */ }
-            }
-
+            // NE brišemo fajlove prilikom otkazivanja - korisnik ih je odabrao
+            // Samo resetuj formu
             SelectedReservation = null;
             ResetRatings();
             ReviewComment = "";
             SelectedImages.Clear();
             OnPropertyChanged(nameof(ImageCount));
         });
+
         public ICommand SubmitReviewCommand => new RelayCommand(SubmitReview);
 
         public ICommand SetGuideKnowledgeRatingCommand => new RelayCommand<object>(param =>
@@ -157,7 +152,9 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         public TourReviewViewModel()
         {
             LoadCompletedTours();
+       
         }
+
 
         public void LoadCompletedTours()
         {
@@ -185,33 +182,46 @@ namespace BookingApp.Presentation.ViewModel.Tourist
         {
             if (SelectedReservation == null) return;
 
-            var review = new TourReview
+            // Validacija
+            if (GuideKnowledgeRating == 0 || GuideLanguageRating == 0 || TourInterestRating == 0)
             {
-                ReservationId = SelectedReservation.Id,
-                TourId = SelectedReservation.TourId,
-                GuideKnowledge = GuideKnowledgeRating,
-                GuideLanguage = GuideLanguageRating,
-                TourInterest = TourInterestRating,
-                Comment = ReviewComment,
-                TouristId = Session.CurrentUser?.Id ?? 0,
-                
-                ReviewDate = DateTime.Now,
-                ImagePaths = SelectedImages.ToList()
-            };
+                ShowErrorMessage?.Invoke("Molimo ocenite sve kategorije (1-5 zvezda)");
+                return;
+            }
 
-            _reviewRepository.AddReview(review);
-            CompletedReservations.Remove(SelectedReservation);
+            try
+            {
+                var review = new TourReview
+                {
+                    ReservationId = SelectedReservation.Id,
+                    TourId = SelectedReservation.TourId,
+                    GuideKnowledge = GuideKnowledgeRating,
+                    GuideLanguage = GuideLanguageRating,
+                    TourInterest = TourInterestRating,
+                    Comment = ReviewComment,
+                    TouristId = Session.CurrentUser?.Id ?? 0,
+                    ReviewDate = DateTime.Now,
+                    ImagePaths = SelectedImages.ToList()
+                };
 
-            MessageBox.Show("Vaša ocena je sačuvana!", "Ocena", MessageBoxButton.OK, MessageBoxImage.Information);
+                _reviewRepository.AddReview(review);
+                CompletedReservations.Remove(SelectedReservation);
 
-            ReviewSubmitted?.Invoke(this, SelectedReservation.Id);
+                ShowSuccessMessage?.Invoke("Vaša ocena je uspešno sačuvana!");
 
-            SelectedReservation = null;
-            ResetRatings();
-            ReviewComment = "";
-            SelectedImages.Clear(); 
-            OnPropertyChanged(nameof(ImageCount)); 
-            LoadCompletedTours();
+                ReviewSubmitted?.Invoke(this, SelectedReservation.Id);
+
+                SelectedReservation = null;
+                ResetRatings();
+                ReviewComment = "";
+                SelectedImages.Clear();
+                OnPropertyChanged(nameof(ImageCount));
+                LoadCompletedTours();
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage?.Invoke($"Greška pri čuvanju ocene: {ex.Message}");
+            }
         }
 
         private void ResetRatings()
@@ -239,8 +249,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
             else
             {
-                MessageBox.Show("Rezervacija nije pronađena ili je već ocenjena.",
-                              "Greška", MessageBoxButton.OK, MessageBoxImage.Warning);
+                ShowErrorMessage?.Invoke("Rezervacija nije pronađena ili je već ocenjena.");
             }
         }
 
@@ -255,11 +264,9 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
             if (openFileDialog.ShowDialog() == true)
             {
-               
                 string imagesFolder = "../../../Resources/Images";
                 string fullImagesPath = Path.GetFullPath(imagesFolder);
 
-                
                 if (!Directory.Exists(fullImagesPath))
                 {
                     Directory.CreateDirectory(fullImagesPath);
@@ -269,7 +276,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                 {
                     try
                     {
-                        
                         string fileName = $"{Guid.NewGuid()}{Path.GetExtension(originalPath)}";
                         string destinationPath = Path.Combine(fullImagesPath, fileName);
 
@@ -287,8 +293,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Greška pri dodavanju slike: {ex.Message}",
-                                      "Greška", MessageBoxButton.OK, MessageBoxImage.Error);
+                        ShowErrorMessage?.Invoke($"Greška pri dodavanju slike: {ex.Message}");
                     }
                 }
             }
@@ -296,29 +301,51 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
         private void RemoveImage(string? imagePath)
         {
-            if (!string.IsNullOrEmpty(imagePath) && SelectedImages.Contains(imagePath))
-            {
-                try
-                {
-                    // Ukloni iz liste
-                    SelectedImages.Remove(imagePath);
-                    OnPropertyChanged(nameof(ImageCount));
+            if (string.IsNullOrEmpty(imagePath) || !SelectedImages.Contains(imagePath))
+                return;
 
-                    
-                    string fullPath = Path.GetFullPath(imagePath);
-                    if (File.Exists(fullPath))
+            try
+            {
+                // Ukloni iz liste PRVO
+                SelectedImages.Remove(imagePath);
+                OnPropertyChanged(nameof(ImageCount));
+
+                // Pokušaj da obrišeš fajl sa dodatnim proverama
+                string fullPath = Path.GetFullPath(imagePath);
+                if (File.Exists(fullPath))
+                {
+                    // Dodaj kratku pauzu da se osiguraš da fajl nije u upotrebi
+                    System.Threading.Thread.Sleep(100);
+
+                    try
                     {
+                        // Ukloni read-only atribut ako postoji
+                        File.SetAttributes(fullPath, FileAttributes.Normal);
                         File.Delete(fullPath);
                     }
+                    catch (UnauthorizedAccessException)
+                    {
+                        // Fajl je možda još uvek u upotrebi, samo ignoriši
+                        System.Diagnostics.Debug.WriteLine($"Cannot delete file {fullPath} - access denied");
+                    }
+                    catch (IOException)
+                    {
+                        // Fajl je u upotrebi, samo ignoriši
+                        System.Diagnostics.Debug.WriteLine($"Cannot delete file {fullPath} - file in use");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Greška pri brisanju slike: {ex.Message}",
-                                  "Greška", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
+            }
+            catch (Exception ex)
+            {
+                // Samo loguј greške, ne prikazuj korisniku
+                System.Diagnostics.Debug.WriteLine($"Error removing image: {ex.Message}");
+
+                // Ako je slika već uklonjena iz liste, ne vraćaj je
+                // Korisnik nije svestan greške sa fajl sistemom
             }
         }
 
-        protected void OnPropertyChanged(string? name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected void OnPropertyChanged(string? name) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

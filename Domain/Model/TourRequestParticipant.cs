@@ -14,16 +14,18 @@ namespace BookingApp.Domain.Model
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public int Age { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         public TourRequestParticipant() { }
 
-        public TourRequestParticipant(int id, int tourRequestId, string firstName, string lastName, int age)
+        public TourRequestParticipant(int id, int tourRequestId, string firstName, string lastName, int age, string email = "")
         {
             Id = id;
             TourRequestId = tourRequestId;
             FirstName = firstName ?? string.Empty;
             LastName = lastName ?? string.Empty;
             Age = age;
+            Email = email ?? string.Empty;
         }
 
         public string[] ToCSV()
@@ -34,7 +36,8 @@ namespace BookingApp.Domain.Model
                 TourRequestId.ToString(),
                 FirstName,
                 LastName,
-                Age.ToString()
+                Age.ToString(),
+                Email
             };
         }
 
@@ -48,6 +51,7 @@ namespace BookingApp.Domain.Model
             FirstName = values[2] ?? string.Empty;
             LastName = values[3] ?? string.Empty;
             Age = int.Parse(values[4]);
+            Email = values.Length > 5 ? (values[5] ?? string.Empty) : string.Empty;
         }
 
         public override string ToString()

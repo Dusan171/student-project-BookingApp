@@ -1,66 +1,92 @@
-﻿<UserControl x:Class="BookingApp.Presentation.View.Guide.TourLiveTrackingControl"
+﻿<Page x:Class="BookingApp.Presentation.View.Guide.TourLiveTrackingControl"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Width="430" Height="750" Background="White">
+      xmlns:vm="clr-namespace:BookingApp.Presentation.ViewModel.Guide"
+      Background="#FAFAFA"
+      Width="430" Height="750">
 
-    <DockPanel>
-<!--
-        <Border Background="#2C3E50" Height="40" DockPanel.Dock="Top">
-            <Grid>
-                <Button Content="←" Width="30" Height="30" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5"
-                        Click="BackButton_Click"/>
-                <TextBlock Text="BookingApp"
-                           Foreground="White"
-                           FontSize="18"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"/>
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Margin="0,0,10,0">
-                    <Button Content="?" Width="30" Margin="0,0,5,0" Click="HelpButton_Click"/>
-                    <Button Content="Logout" Width="60" Click="LogoutButton_Click"/>
-                </StackPanel>
-            </Grid>
-        </Border>-->
+    <Page.Resources>
+        <Style x:Key="HoverButtonStyle" TargetType="Button">
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="1.08" ScaleY="1.08"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
 
-        <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
+    <Grid>
+        <StackPanel>
+            <TextBlock Text="Live Tracking"
+                       FontSize="25"
+                       FontWeight="SemiBold"
+                       Margin="10,10,0,0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"/>
+        </StackPanel>
+
+        <ScrollViewer Margin="0,56,0,0">
             <StackPanel Margin="15" VerticalAlignment="Top">
+                <Border Background="White" CornerRadius="12" Padding="15">
+                    <StackPanel>
+                        <TextBlock Text="{Binding TourName}" FontSize="18" FontWeight="Bold" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding TourDateTime}" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding TourLanguage}" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding TourLocation}" Margin="0,5,0,0"/>
+                        <TextBlock Text="{Binding TourDuration}" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </Border>
 
-                <TextBlock Text="Live Tracking" FontSize="22" FontWeight="Bold" Margin="0,20,0,15" HorizontalAlignment="Center"/>
+                <TextBlock Text="Key Points" FontSize="16" FontWeight="Bold" Margin="0,10,0,5"/>
+                <ItemsControl ItemsSource="{Binding KeyPoints}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox Content="{Binding Name}" 
+                                      IsChecked="{Binding IsChecked, Mode=TwoWay}" 
+                                      Command="{Binding DataContext.KeyPointCheckedCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                      CommandParameter="{Binding}" 
+                                      Margin="0,5,0,5"
+                                      ToolTip="Mark this point as visited"
+                                      Cursor="Hand"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
 
-                <StackPanel Margin="10" Background="#eee" >
-                    <TextBlock x:Name="TourNameTextBlock" FontSize="18" FontWeight="Bold" TextWrapping="Wrap"/>
-                    <TextBlock x:Name="TourDateTimeTextBlock" Margin="0,5,0,0"/>
-                    <TextBlock x:Name="TourLanguageTextBlock" Margin="0,5,0,0"/>
-                    <TextBlock x:Name="TourLocationTextBlock" Margin="0,5,0,0"/>
-                    <TextBlock x:Name="TourDurationTextBlock" Margin="0,5,0,0"/>
-                </StackPanel>
-
-                <TextBlock Text="Key Points" FontSize="16" FontWeight="Bold" Margin="0,20,0,10"/>
-
-                <StackPanel x:Name="KeyPointsPanel" />
-
-                <Button Name="TouristButton" Content="Check Tourists"
-                        Width="150"
-                        Height="40"
-                        Margin="0,20,0,0"
-                        Background="Blue"
+                <Button Content="Check Tourists"
+                        Width="180"
+                        Height="50"
+                        Margin="0,10,0,20"
+                        Background="#007ACC"
                         Foreground="White"
                         FontWeight="Bold"
+                        Cursor="Hand"
+                        ToolTip="Open the list of reserved tourists"
                         HorizontalAlignment="Center"
-                        Click="TouristsButton_Click"/>
+                        Command="{Binding OpenTouristsWindowCommand}"
+                        Style="{StaticResource HoverButtonStyle}"/>
+
+                <Button Content="Stop Tour"
+                        Width="180"
+                        Height="50"
+                        Background="Red"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        ToolTip="End the tour"
+                        HorizontalAlignment="Center"
+                        Command="{Binding StopTourCommand}"
+                        Style="{StaticResource HoverButtonStyle}"/>
             </StackPanel>
-            
         </ScrollViewer>
-        <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,20" HorizontalAlignment="Center">
-            <Button Content="Stop Tour"
-                    Width="150"
-                    Height="40"
-                    Background="Red"
-                    Foreground="White"
-                    FontWeight="Bold"
-                    Click="StopTourButton_Click"/>
-        </StackPanel>
-    </DockPanel>
-</UserControl>
+    </Grid>
+</Page>

@@ -1,0 +1,147 @@
+<Window x:Class="BookingApp.Presentation.View.Guide.ComplexTourAcceptWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Accept Complex Tour Part"
+        Width="400"
+        Height="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="White">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="DarkBlue"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+
+        <Style x:Key="InfoTextStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style x:Key="LabelTextStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,6,0,2"/>
+        </Style>
+
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+        </Style>
+
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="12,0"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20" VerticalAlignment="Center">
+                
+                <TextBlock Text="Accept Complex Tour Part" Style="{StaticResource HeaderTextStyle}"/>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
+                    <Border Background="Orange" CornerRadius="12" Padding="8,3">
+                        <TextBlock Text="PENDING" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                    </Border>
+                </StackPanel>
+
+                <Border CornerRadius="8" Background="#F8F9FA" Padding="15" Margin="0,0,0,20" BorderBrush="#DEE2E6" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Tour Information" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" Foreground="#495057"/>
+                        
+                        <TextBlock Text="{Binding Location, StringFormat=Location: {0}}" Style="{StaticResource InfoTextStyle}"/>
+                        <TextBlock Text="{Binding Language, StringFormat=Language: {0}}" Style="{StaticResource InfoTextStyle}"/>
+                        <TextBlock Text="{Binding NumberOfParticipants, StringFormat=Participants: {0}}" Style="{StaticResource InfoTextStyle}"/>
+                        <TextBlock Text="{Binding DateFrom, StringFormat=Available from: {0:dd.MM.yyyy}}" Style="{StaticResource InfoTextStyle}"/>
+                        <TextBlock Text="{Binding DateTo, StringFormat=Available to: {0:dd.MM.yyyy}}" Style="{StaticResource InfoTextStyle}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border CornerRadius="8" Background="White" Padding="15" Margin="0,0,0,15" BorderBrush="#DEE2E6" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock Text="Select Date and Time" FontWeight="Bold" FontSize="16" Margin="0,0,0,15" Foreground="#495057"/>
+
+                        <TextBlock Text="Date:" Style="{StaticResource LabelTextStyle}"/>
+                        <ComboBox ItemsSource="{Binding AvailableDates}" 
+                                  SelectedItem="{Binding SelectedDate}" 
+                                  Style="{StaticResource ComboBoxStyle}"/>
+
+                        <TextBlock Text="Time:" Style="{StaticResource LabelTextStyle}"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <ComboBox ItemsSource="{Binding AvailableHours}" 
+                                      SelectedItem="{Binding SelectedHour}" 
+                                      Width="60" 
+                                      Margin="0,0,4,0"
+                                      Style="{StaticResource ComboBoxStyle}"/>
+                            
+                            <TextBlock Text=":" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                            
+                            <ComboBox ItemsSource="{Binding AvailableMinutes}" 
+                                      SelectedItem="{Binding SelectedMinute}" 
+                                      Width="60"
+                                      Style="{StaticResource ComboBoxStyle}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border CornerRadius="8" Background="#FFF3CD" Padding="12" Margin="0,0,0,15" 
+                        BorderBrush="#FFEAA7" BorderThickness="1"
+                        Visibility="{Binding HasCheckedAvailability, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="{Binding AvailabilityMessage}" 
+                               TextWrapping="Wrap" 
+                               HorizontalAlignment="Center"
+                               FontWeight="Medium">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsAvailable}" Value="True">
+                                        <Setter Property="Foreground" Value="Green"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsAvailable}" Value="False">
+                                        <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    
+                    <Button Content="Check Availability" 
+                            Command="{Binding CheckAvailabilityCommand}"
+                            Background="Green" 
+                            Foreground="White"
+                            Style="{StaticResource ButtonStyle}"/>
+                    
+                    <Button Content="Confirm" 
+                            Command="{Binding ConfirmCommand}"
+                            Background="Purple" 
+                            Foreground="White"
+                            Style="{StaticResource ButtonStyle}"
+                            IsEnabled="{Binding CanConfirm}"/>
+                    
+                    <Button Content="Cancel" 
+                            Command="{Binding CancelCommand}"
+                            Background="Gray" 
+                            Foreground="White"
+                            Style="{StaticResource ButtonStyle}"/>
+                    
+                </StackPanel>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

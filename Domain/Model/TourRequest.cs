@@ -35,7 +35,9 @@ namespace BookingApp.Domain.Model
         public List<TourRequestParticipant> Participants { get; set; } = new List<TourRequestParticipant>();
         public User Tourist { get; set; }
         public User AcceptedGuide { get; set; }
-
+        public string TouristName => Tourist != null
+            ? Tourist.FirstName + " " + Tourist.LastName
+            : $"Unknown Tourist {TouristId}";
         public bool IsValid => Status != TourRequestStatus.INVALID && DateFrom > DateTime.Now.AddDays(2);
 
         public TourRequest()
@@ -95,9 +97,11 @@ namespace BookingApp.Domain.Model
             Description = values[4] ?? string.Empty;
             Language = values[5] ?? string.Empty;
             NumberOfPeople = int.Parse(values[6]);
+
             DateFrom = DateTime.ParseExact(values[7], "dd-MM-yyyy", null);
             DateTo = DateTime.ParseExact(values[8], "dd-MM-yyyy", null);
             CreatedAt = DateTime.ParseExact(values[9], "dd-MM-yyyy HH:mm:ss", null);
+
             Status = (TourRequestStatus)Enum.Parse(typeof(TourRequestStatus), values[10]);
 
             if (values.Length > 11 && !string.IsNullOrEmpty(values[11]))
@@ -111,5 +115,6 @@ namespace BookingApp.Domain.Model
 
             Participants = new List<TourRequestParticipant>();
         }
+
     }
 }

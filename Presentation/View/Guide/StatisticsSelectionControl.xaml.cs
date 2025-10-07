@@ -1,30 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using BookingApp.Domain.Model; 
-using BookingApp.Repositories;
-using BookingApp.Presentation.View.Guide;
+﻿using System.Windows.Controls;
+using BookingApp.Presentation.ViewModel.Guide;
 
 namespace BookingApp.Presentation.View.Guide
 {
-    public partial class StatisticsSelectionControl : UserControl
+    public partial class StatisticsSelectionControl : Page
     {
-        MainPage mainPage; 
-        public StatisticsSelectionControl(MainPage main)
+        private readonly StatisticsViewModel _viewModel;
+        public StatisticsSelectionControl()
         {
             InitializeComponent();
-            mainPage = main;
+            _viewModel = new StatisticsViewModel();
+            DataContext = _viewModel;
+
+            _viewModel.TourDetailsRequested += NavigateToTourDetails;
+            _viewModel.CreateTourRequested += OpenCreateTourForm;
         }
-        private void ShowTourStatistics_Click(object sender, RoutedEventArgs e)
+
+        private void NavigateToTourDetails(Tour tour)
         {
-            //mainPage.ContentFrame.Content = new TourStatisticsControl(mainPage);
-            mainPage.ContentFrame.Navigate(new Page { Content = new TourStatisticsControl(mainPage) });
+            NavigationService?.Navigate(new TourDetailsControl(tour));
         }
-        private void ShowRequestStatistics_Click(object sender, RoutedEventArgs e)
+        private void OpenCreateTourForm(Tour suggestedTour)
         {
+            NavigationService?.Navigate(new CreateTourControl(suggestedTour));
         }
     }
 }
