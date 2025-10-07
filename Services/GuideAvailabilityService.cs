@@ -28,6 +28,8 @@ namespace BookingApp.Services
 
             foreach (var tour in guideTours)
             {
+                if(tour.Status != TourStatus.NONE )
+                    continue;
                 if (tour.StartTimes == null || !tour.StartTimes.Any())
                     continue;
 
