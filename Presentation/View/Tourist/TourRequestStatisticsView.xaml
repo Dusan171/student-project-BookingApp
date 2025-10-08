@@ -84,80 +84,42 @@
 
                
                 <Border Style="{StaticResource CardStyle}">
-                    <StackPanel>
-                        <TextBlock Text="Opšte statistike" FontSize="18" FontWeight="Bold"
-                                   Foreground="#2C3E50" Margin="0,0,0,20"/>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Procenat uspešnih zahteva" FontSize="14" FontWeight="SemiBold"
+               Foreground="#34495E" Margin="0,0,0,15" HorizontalAlignment="Center"/>
 
-                        <Grid>
+                        <!-- Veliki procenat -->
+                        <Border Background="#E8F8F5" BorderBrush="#27AE60" BorderThickness="3"
+            CornerRadius="100" Width="180" Height="180" HorizontalAlignment="Center">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding AcceptanceRate, StringFormat='{}{0:F0}%'}"
+                       FontSize="42" FontWeight="Bold" Foreground="#27AE60" HorizontalAlignment="Center"/>
+                                <TextBlock Text="prihvaćeno" FontSize="14" Foreground="#27AE60" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Legenda -->
+                        <Grid Margin="0,20,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Procenat uspešnih zahteva" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="#34495E" Margin="0,0,0,15" HorizontalAlignment="Center"/>
+                            <!-- Prihvaćeni -->
+                            <Border Grid.Column="0" Background="#27AE60" CornerRadius="8" Padding="15,10" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="Prihvaćeni" FontSize="11" Foreground="White" HorizontalAlignment="Center" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding AcceptedCount}" FontSize="18" Foreground="White" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </Border>
 
-                                
-                                <Grid Width="200" Height="200" HorizontalAlignment="Center">
-                                    <Ellipse Fill="#27AE60" Width="200" Height="200"/>
-                                    <Ellipse Fill="#E74C3C" Width="200" Height="200">
-                                        <Ellipse.Clip>
-                                            <PathGeometry>
-                                                <PathFigure StartPoint="100,100">
-                                                    <LineSegment Point="100,0"/>
-                                                    <ArcSegment Point="170,170" Size="100,100"
-                                                                SweepDirection="Clockwise" IsLargeArc="False"/>
-                                                    <LineSegment Point="100,100"/>
-                                                </PathFigure>
-                                            </PathGeometry>
-                                        </Ellipse.Clip>
-                                    </Ellipse>
-                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding AcceptanceRate, StringFormat='{}{0:F0}%'}"
-                                                   FontSize="24" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="prihvaćeno" FontSize="12" Foreground="White" HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                </Grid>
-
-                                <Grid Margin="0,15,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Rectangle Fill="#27AE60" Width="15" Height="15" Margin="0,0,5,0"/>
-                                            <TextBlock Text="Prihvaćeni: " FontSize="12"/>
-                                            <TextBlock Text="{Binding AcceptedCount}" FontSize="12" FontWeight="Bold"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Rectangle Fill="#E74C3C" Width="15" Height="15" Margin="0,0,5,0"/>
-                                            <TextBlock Text="Neprihvaćeni: " FontSize="12"/>
-                                            <TextBlock Text="{Binding NotAcceptedCount}" FontSize="12" FontWeight="Bold"/>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-                            </StackPanel>
-
-                           
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Prosečan broj ljudi u prihvaćenim zahtevima" FontSize="14" FontWeight="SemiBold"
-                                           Foreground="#34495E" Margin="0,0,0,15" HorizontalAlignment="Center"/>
-
-                                <Border Background="#E8F4FD" BorderBrush="#3498DB" BorderThickness="2"
-                                        CornerRadius="10" Padding="30" HorizontalAlignment="Center">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="{Binding AveragePeopleCount, StringFormat='{}{0:F1}'}"
-                                                   FontSize="48" FontWeight="Bold" Foreground="#3498DB" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="osoba u proseku" FontSize="14" Foreground="#34495E" HorizontalAlignment="Center"/>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
+                            <!-- Neprihvaćeni -->
+                            <Border Grid.Column="1" Background="#E74C3C" CornerRadius="8" Padding="15,10" Margin="5,0">
+                                <StackPanel>
+                                    <TextBlock Text="Neprihvaćeni" FontSize="11" Foreground="White" HorizontalAlignment="Center" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding NotAcceptedCount}" FontSize="18" Foreground="White" HorizontalAlignment="Center" FontWeight="Bold" Margin="0,5,0,0"/>
+                                </StackPanel>
+                            </Border>
                         </Grid>
                     </StackPanel>
                 </Border>
