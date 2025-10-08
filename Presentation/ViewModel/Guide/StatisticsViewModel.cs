@@ -23,7 +23,14 @@ namespace BookingApp.Presentation.ViewModel.Guide
         public bool IsExpanded
         {
             get => _isExpanded;
-            set { _isExpanded = value; OnPropertyChanged(); }
+            set 
+            { 
+                if (_isExpanded != value) 
+                {
+                    _isExpanded = value; 
+                    OnPropertyChanged(); 
+                }
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -44,23 +51,51 @@ namespace BookingApp.Presentation.ViewModel.Guide
             get => _filterByLocation;
             set
             {
-                _filterByLocation = value;
-                OnPropertyChanged();
+                if (_filterByLocation != value) 
+                {
+                    _filterByLocation = value;
+                    OnPropertyChanged();
 
-                if (_filterByLocation)
-                    SelectedLanguage = null;
-                else
-                    SelectedLocation = null;
+                    if (_filterByLocation)
+                        SelectedLanguage = null;
+                    else
+                        SelectedLocation = null;
 
-                ApplyRequestFilter(); 
+                    ApplyRequestFilter(); 
+                }
             }
         }
         public ObservableCollection<string> AvailableLocations { get; set; } = new();
         public ObservableCollection<string> AvailableLanguages { get; set; } = new();
         private List<TourRequest> TourRequests;
 
-        public string SelectedLocation { get; set; }
-        public string SelectedLanguage { get; set; }
+        private string _selectedLocation;
+        public string SelectedLocation 
+        { 
+            get => _selectedLocation;
+            set
+            {
+                if (_selectedLocation != value)
+                {
+                    _selectedLocation = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string _selectedLanguage;
+        public string SelectedLanguage 
+        { 
+            get => _selectedLanguage;
+            set
+            {
+                if (_selectedLanguage != value)
+                {
+                    _selectedLanguage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public ICommand ApplyRequestFilterCommand { get; }
         public ICommand RefreshRequestStatsCommand { get; }
@@ -75,7 +110,14 @@ namespace BookingApp.Presentation.ViewModel.Guide
         public Tour MostVisitedTour
         {
             get => _mostVisitedTour;
-            set { _mostVisitedTour = value; OnPropertyChanged(); }
+            set 
+            { 
+                if (_mostVisitedTour != value) 
+                {
+                    _mostVisitedTour = value; 
+                    OnPropertyChanged(); 
+                }
+            }
         }
 
         public string SelectedYear
@@ -83,9 +125,12 @@ namespace BookingApp.Presentation.ViewModel.Guide
             get => _selectedYear;
             set
             {
-                _selectedYear = value;
-                OnPropertyChanged();
-                UpdateStatistics();
+                if (_selectedYear != value) 
+                {
+                    _selectedYear = value;
+                    OnPropertyChanged();
+                    UpdateStatistics();
+                }
             }
         }
 
@@ -108,22 +153,9 @@ namespace BookingApp.Presentation.ViewModel.Guide
             ToggleYearExpansionCommand = new RelayCommand(ToggleYearExpansion);
             RefreshRequestStatsCommand = new RelayCommand(RefreshRequestStats);
             CreateTourSuggestionCommand = new RelayCommand(CreateTourBySuggestion);
-
-            TourRequests = new List<TourRequest>
-            {
-                new TourRequest { CreatedAt = new DateTime(2025, 1, 1), Language = "English", City = "Novi Sad" },
-                new TourRequest { CreatedAt = new DateTime(2025, 2, 2), Language = "French", City = "Belgrade" },
-                new TourRequest { CreatedAt = new DateTime(2025, 3, 3), Language = "German", City = "Niš" },
-                new TourRequest { CreatedAt = new DateTime(2025, 4, 4), Language = "English", City = "Novi Sad" },
-                new TourRequest { CreatedAt = new DateTime(2025, 5, 5), Language = "Spanish", City = "Kragujevac" },
-                new TourRequest { CreatedAt = new DateTime(2025, 6, 6), Language = "German", City = "Niš" },
-                new TourRequest { CreatedAt = new DateTime(2025, 7, 7), Language = "French", City = "Belgrade" },
-                new TourRequest { CreatedAt = new DateTime(2025, 8, 8), Language = "English", City = "Novi Sad" },
-                new TourRequest { CreatedAt = new DateTime(2025, 9, 9), Language = "German", City = "Niš" },
-                new TourRequest { CreatedAt = new DateTime(2025, 10, 10), Language = "English", City = "Novi Sad" },
-                new TourRequest { CreatedAt = new DateTime(2025, 11, 11), Language = "French", City = "Belgrade" },
-                new TourRequest { CreatedAt = new DateTime(2025, 12, 12), Language = "English", City = "Novi Sad" },
-            };
+            TourRequestRepository tourRequestRepository = new TourRequestRepository();
+            var allRequests = tourRequestRepository.GetAll().ToList();
+            TourRequests = allRequests;
             ApplyRequestFilterCommand = new RelayCommand(ApplyRequestFilter);
 
             YearlyRequestStatsList = new ObservableCollection<YearlyRequestStats>();

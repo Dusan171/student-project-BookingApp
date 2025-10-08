@@ -50,7 +50,17 @@ namespace BookingApp.Presentation.View.Guide
 
             RequestedBy = request.TouristName;
             
-            Participants = request.Participants;
+            if (request.Participants == null || request.Participants.Count == 0)
+            {
+                var participantRepository = new TourRequestParticipantRepository();
+                Participants = participantRepository.GetByTourRequestId(request.Id);
+
+                request.Participants = Participants;
+            }
+            else
+            {
+                Participants = request.Participants;
+            }
 
             AcceptCommand = new RelayCommand(OnAccept);
         }
@@ -214,19 +224,18 @@ namespace BookingApp.Presentation.View.Guide
                 var duration = (int)durationCombo.SelectedItem;
 
                 var startTime = selectedDate.Date.AddHours(selectedHour).AddMinutes(selectedMinute);
-                MessageBox.Show($"Checking availability for {startTime:dd.MM.yyyy HH:mm} (Duration: {duration} hours)",
-                    "Checking Availability", MessageBoxButton.OK, MessageBoxImage.Information);
+                
                 var endTime = startTime.AddHours(duration);
 
                 if (guideAvailabilityService.IsAvailable(Session.CurrentUser.Id, startTime, endTime))
                 {
-                    availabilityText.Text = "✓ Time slot is available!";
+                    availabilityText.Text = "Time slot is available!";
                     availabilityText.Foreground = System.Windows.Media.Brushes.Green;
                     confirmButton.IsEnabled = true;
                 }
                 else
                 {
-                    availabilityText.Text = "✗ You already have a tour scheduled during this time.";
+                    availabilityText.Text = "You already have a tour scheduled during this time.";
                     availabilityText.Foreground = System.Windows.Media.Brushes.Red;
                     confirmButton.IsEnabled = false;
                 }

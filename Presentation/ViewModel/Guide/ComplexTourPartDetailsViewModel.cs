@@ -18,6 +18,14 @@ namespace BookingApp.Presentation.ViewModel.Guide
 {
     public class ComplexTourPartDetailsViewModel : BaseViewModel
     {
+        private ComplexTourRequestPart _part;
+        private bool _isAccepted;
+        private bool _canAccept;
+        private string _statusText = string.Empty;
+        private string _acceptedByGuide = string.Empty;
+        private string _acceptedDate = string.Empty;
+        private string _scheduledDate = string.Empty;
+
         public string Name { get; }
         public string Location { get; }
         public DateTime DateFrom { get; }
@@ -26,20 +34,59 @@ namespace BookingApp.Presentation.ViewModel.Guide
         public int NumberOfParticipants { get; }
         public string Description { get; }
         public string RequestBy { get; }
-        public bool IsAccepted { get; }
-        public bool CanAccept { get; }
-        public string StatusText { get; }
-        public string AcceptedByGuide { get; }
-        public string AcceptedDate { get; }
-        public string ScheduledDate { get; }
+        
+        public bool IsAccepted
+        {
+            get => _isAccepted;
+            private set => SetProperty(ref _isAccepted, value);
+        }
+        
+        public bool CanAccept
+        {
+            get => _canAccept;
+            private set => SetProperty(ref _canAccept, value);
+        }
+        
+        public string StatusText
+        {
+            get => _statusText;
+            private set => SetProperty(ref _statusText, value);
+        }
+        
+        public string AcceptedByGuide
+        {
+            get => _acceptedByGuide;
+            private set => SetProperty(ref _acceptedByGuide, value);
+        }
+        
+        public string AcceptedDate
+        {
+            get => _acceptedDate;
+            private set => SetProperty(ref _acceptedDate, value);
+        }
+        
+        public string ScheduledDate
+        {
+            get => _scheduledDate;
+            private set => SetProperty(ref _scheduledDate, value);
+        }
+
         public ICommand AcceptCommand { get; }
         public event Action<ComplexTourRequest>? TourAccepted;
+        public event Action<ComplexTourRequestPart>? PartUpdated; 
         public ObservableCollection<ComplexTourRequestParticipant> Participants { get; }
-        private ComplexTourRequestPart _part;
 
         public ComplexTourPartDetailsViewModel(ComplexTourRequestPart part)
         {
             _part = part;
+            
+            // Load participants from repository if they're not already loaded
+            if (part.Participants == null || part.Participants.Count == 0)
+            {
+                var participantRepository = new ComplexTourRequestParticipantRepository();
+                part.Participants = participantRepository.GetByPartId(part.Id);
+            }
+            
             Name = part.City;
             Location = $"{part.City}, {part.Country}";
             DateFrom = part.DateFrom;
@@ -47,11 +94,20 @@ namespace BookingApp.Presentation.ViewModel.Guide
             Language = part.Language;
             NumberOfParticipants = part.Participants.Count;
             Description = part.Description;
-            IsAccepted = part.Status == TourRequestStatus.ACCEPTED;
-            CanAccept = part.Status == TourRequestStatus.PENDING;
+            RequestBy = GetTouristName(part.TouristId);
+            Participants = new ObservableCollection<ComplexTourRequestParticipant>(part.Participants);
+
+            AcceptCommand = new RelayCommand(OnAccept);
             
-            // Set status text based on current status
-            StatusText = part.Status switch
+            RefreshStatus();
+        }
+
+        private void RefreshStatus()
+        {
+            IsAccepted = _part.Status == TourRequestStatus.ACCEPTED;
+            CanAccept = _part.Status == TourRequestStatus.PENDING;
+            
+            StatusText = _part.Status switch
             {
                 TourRequestStatus.ACCEPTED => "ACCEPTED",
                 TourRequestStatus.PENDING => "PENDING",
@@ -59,16 +115,11 @@ namespace BookingApp.Presentation.ViewModel.Guide
                 _ => "UNKNOWN"
             };
 
-            AcceptCommand = new RelayCommand(OnAccept);
-            RequestBy = GetTouristName(part.TouristId);
-            Participants = new ObservableCollection<ComplexTourRequestParticipant>(part.Participants);
-
-            // If accepted, show guide and scheduling information
-            if (IsAccepted && part.AcceptedByGuideId.HasValue)
+            if (IsAccepted && _part.AcceptedByGuideId.HasValue)
             {
-                AcceptedByGuide = GetGuideName(part.AcceptedByGuideId.Value);
-                AcceptedDate = part.AcceptedDate?.ToString("dd.MM.yyyy HH:mm") ?? "Unknown";
-                ScheduledDate = part.ScheduledDate?.ToString("dd.MM.yyyy HH:mm") ?? "Not scheduled";
+                AcceptedByGuide = GetGuideName(_part.AcceptedByGuideId.Value);
+                AcceptedDate = _part.AcceptedDate?.ToString("dd.MM.yyyy HH:mm") ?? "Unknown";
+                ScheduledDate = _part.ScheduledDate?.ToString("dd.MM.yyyy HH:mm") ?? "Not scheduled";
             }
             else
             {
@@ -86,7 +137,7 @@ namespace BookingApp.Presentation.ViewModel.Guide
             {
                 return $"{user.FirstName} {user.LastName}";
             }
-            return $"Unknown Tourist {id}";
+            return $"Unknown Tourist {id}!";
         }
 
         private string GetGuideName(int id)
@@ -118,24 +169,48 @@ namespace BookingApp.Presentation.ViewModel.Guide
             {
                 var scheduledTime = acceptWindow.ViewModel.ScheduledDateTime;
                 
-                // Save to repository
                 try 
                 {
-                    // Note: Assuming these repositories exist based on original code
-                    // ComplexTourRequestPartRepository partRepository = new ComplexTourRequestPartRepository();
-                    // partRepository.Update(_part);
+                    ComplexTourRequestPartRepository partRepository = new ComplexTourRequestPartRepository();
+                    var updatedPart = partRepository.GetById(_part.Id);
+                    
+                    if (updatedPart != null)
+                    {
+                        ComplexTourRequestParticipantRepository participantRepository = new ComplexTourRequestParticipantRepository();
+                        updatedPart.Participants = participantRepository.GetByPartId(updatedPart.Id);
+                        
+                        _part = updatedPart;
+                        
+                        Participants.Clear();
+                        foreach (var participant in _part.Participants)
+                        {
+                            Participants.Add(participant);
+                        }
+                    }
+                    
+                    RefreshStatus();
+                    
+                    PartUpdated?.Invoke(_part);
                     
                     MessageBox.Show($"Complex tour part successfully accepted!\n\nScheduled for: {scheduledTime:dd.MM.yyyy} at {scheduledTime:HH:mm}\nLocation: {Location}\nParticipants: {NumberOfParticipants}",
                         "Tour Part Accepted", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    // Notify parent that tour was accepted
-                    // ComplexTourRequestRepository complexRepository = new ComplexTourRequestRepository();
-                    // var complexRequest = complexRepository.GetById(_part.ComplexTourRequestId);
-                    // TourAccepted?.Invoke(complexRequest);
+                    ComplexTourRequestRepository complexRepository = new ComplexTourRequestRepository();
+                    var complexRequest = complexRepository.GetById(_part.ComplexTourRequestId);
+
+                    ComplexTourRequestPartRepository complexPartRepo = new ComplexTourRequestPartRepository();
+                    var allParts = complexPartRepo.GetAll().Where(p => p.ComplexTourRequestId == _part.ComplexTourRequestId).ToList();
+                    if (complexRequest != null && allParts.All(p => p.Status == TourRequestStatus.ACCEPTED))
+                    {
+                        complexRequest.Status = ComplexTourRequestStatus.ACCEPTED;
+                        complexRepository.Update(complexRequest);
+                    }
+
+                    TourAccepted?.Invoke(complexRequest);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error saving tour acceptance: {ex.Message}", 
+                    MessageBox.Show($"Error refreshing tour part data: {ex.Message}", 
                         "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }

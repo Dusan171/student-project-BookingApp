@@ -3,12 +3,94 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
-             
              xmlns:loc="clr-namespace:BookingApp.Utilities"
-             
-             d:DesignHeight="600" d:DesignWidth="1000"
-             d:Background="{DynamicResource PrimaryBackgroundColor}">
+             xmlns:utilities="clr-namespace:BookingApp.Utilities"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Background="{DynamicResource PrimaryBackgroundColor}">
+
+    <UserControl.Resources>
+        <utilities:StringToVisibilityConverter x:Key="StringToVisibility"/>
+
+        <DataTemplate x:Key="AnywhereResultCardTemplate">
+            <Border Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="8" Width="380"
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Margin="10" Padding="15">
+                <StackPanel>
+                    <!-- Deo za sliku (sa placeholderom) -->
+                    <Grid Height="180" Margin="0,0,0,10">
+                        <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}" ClipToBounds="True">
+                            <Image Stretch="UniformToFill">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Source" Value="{Binding Accommodation.ImagePaths[0]}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Accommodation.ImagePaths.Count}" Value="0">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+                        </Border>
+                        <Border Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="5">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Accommodation.ImagePaths.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{loc:Translate AccomCard_ImagePlaceholder}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextColor}"/>
+                        </Border>
+                    </Grid>
+
+                    <TextBlock Text="{Binding Accommodation.Name}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}"/>
+                    <TextBlock FontSize="16" Foreground="{DynamicResource SecondaryTextColor}">
+                        <Run Text="{Binding Accommodation.GeoLocation.City}"/>, <Run Text="{Binding Accommodation.GeoLocation.Country}"/>
+                    </TextBlock>
+                    <TextBlock Text="{Binding Accommodation.Type}" FontStyle="Italic" Foreground="{DynamicResource SecondaryTextColor}" Margin="0,5,0,10"/>
+                    <Separator Margin="0,5" Style="{StaticResource GuestSeparatorStyle}"/>
+                    <Grid Margin="0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="👥" FontSize="18" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource SecondaryTextColor}"/>
+                            <TextBlock Text="{loc:Translate AccomCard_MaxGuests}" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextColor}" FontSize="16"/>
+                            <TextBlock Text="{Binding Accommodation.MaxGuests}" FontWeight="Bold" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="📅" FontSize="18" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource PrimaryTextColor}"/>
+                            <TextBlock Text="{loc:Translate AccomCard_MinDays}" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextColor}" FontSize="16"/>
+                            <TextBlock Text="{Binding Accommodation.MinReservationDays}" FontWeight="Bold" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="5" Padding="12" Margin="0,10,0,0"
+                            Visibility="{Binding OfferedDateRange, Converter={StaticResource StringToVisibility}}">
+                        <TextBlock FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{DynamicResource AccentPrimaryColor}" FontSize="16">
+                            <Run Text="{loc:Translate Anywhere_CardAvailableLabel}"/>
+                            <Run Text="{Binding OfferedDateRange}"/>
+                        </TextBlock>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                        <Button Content="{loc:Translate AccomCard_ViewDetails}" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"
+                                Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                CommandParameter="{Binding}"/>
+                        <Button Content="{loc:Translate AccomCard_Reserve}" 
+                                Style="{StaticResource PrimaryButton}"
+                                Command="{Binding DataContext.ReserveCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                CommandParameter="{Binding}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -56,83 +138,14 @@
         <!-- === REZULTATI === -->
         <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Margin="10,0,10,10">
             <ListView ItemsSource="{Binding SearchResults}" 
+                      ItemTemplate="{StaticResource AnywhereResultCardTemplate}"
                       BorderThickness="0" Background="Transparent"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
-
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <Border Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="8" Width="380"
-                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1" Margin="10" Padding="15">
-                            <StackPanel>
-                                <Grid Height="180" Margin="0,0,0,10">
-                                    <Border CornerRadius="5" Background="{DynamicResource SecondaryBackgroundColor}" ClipToBounds="True">
-                                        <Image Stretch="UniformToFill">
-                                            <Image.Style>
-                                                <Style TargetType="Image">
-                                                    <Setter Property="Source" Value="{Binding ImagePaths[0]}"/>
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding ImagePaths.Count}" Value="0">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Image.Style>
-                                        </Image>
-                                    </Border>
-                                    <Border Background="{DynamicResource PrimaryBackgroundColor}" CornerRadius="5">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ImagePaths.Count}" Value="0">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <TextBlock Text="{loc:Translate AccomCard_ImagePlaceholder}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextColor}"/>
-                                    </Border>
-                                </Grid>
-
-                                <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}"/>
-                                <TextBlock FontSize="16" Foreground="{DynamicResource SecondaryTextColor}">
-                                    <Run Text="{Binding GeoLocation.City}"/>, <Run Text="{Binding GeoLocation.Country}"/>
-                                </TextBlock>
-                                <TextBlock Text="{Binding Type}" FontStyle="Italic" Foreground="{DynamicResource SecondaryTextColor}" Margin="0,5,0,10"/>
-                                <Separator Margin="0,5" Style="{StaticResource GuestSeparatorStyle}"/>
-                                <Grid Margin="0,15">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                        <TextBlock Text="👥" FontSize="18" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource SecondaryTextColor}"/>
-                                        <TextBlock Text="{loc:Translate AccomCard_MaxGuests}" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextColor}" FontSize="16"/>
-                                        <TextBlock Text="{Binding MaxGuests}" FontWeight="Bold" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16"/>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                                        <TextBlock Text="📅" FontSize="18" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource PrimaryTextColor}"/>
-                                        <TextBlock Text="{loc:Translate AccomCard_MinDays}" VerticalAlignment="Center" Foreground="{DynamicResource SecondaryTextColor}" FontSize="16"/>
-                                        <TextBlock Text="{Binding MinReservationDays}" FontWeight="Bold" Margin="5,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16"/>
-                                    </StackPanel>
-                                </Grid>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                                    <Button Content="{loc:Translate AccomCard_ViewDetails}" Style="{StaticResource SecondaryButton}" Margin="0,0,10,0"/>
-                                    <Button Content="{loc:Translate AccomCard_Reserve}" 
-                                            Style="{StaticResource PrimaryButton}"
-                                            Command="{Binding DataContext.ReserveCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
-                                            CommandParameter="{Binding}"/>
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
             </ListView>
         </ScrollViewer>
     </Grid>

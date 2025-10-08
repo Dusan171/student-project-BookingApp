@@ -45,6 +45,7 @@ namespace BookingApp.Services
                             Message = notification.Message,
                             CreatedAt = notification.CreatedAt,
                             TourId = notification.TourId,
+                            IsRead = notification.IsRead,
                             Tour = CreateNotifiedTourDTO(tour)
                         });
                     }
@@ -62,8 +63,8 @@ namespace BookingApp.Services
         {
             try
             {
-                var notifications = _notificationRepository.GetByTouristId(touristId);
-                var latest = notifications.FirstOrDefault();
+                var unreadNotifications = _notificationRepository.GetUnreadByTouristId(touristId);
+                var latest = unreadNotifications.FirstOrDefault();
 
                 if (latest == null)
                     return null;
@@ -79,12 +80,81 @@ namespace BookingApp.Services
                     Message = latest.Message,
                     CreatedAt = latest.CreatedAt,
                     TourId = latest.TourId,
+                    IsRead = latest.IsRead,
                     Tour = CreateNotifiedTourDTO(tour)
                 };
             }
             catch (Exception ex)
             {
                 throw new ApplicationException($"Greška pri preuzimanju poslednje notifikacije: {ex.Message}", ex);
+            }
+        }
+
+        public void CreateNotificationsForNewTour(int tourId, string tourName, string location, string language)
+        {
+            try
+            {
+                var tour = _tourRepository.GetById(tourId);
+                if (tour == null)
+                    return;
+
+                var allRequests = _tourRequestRepository.GetAll();
+
+                var neverFulfilledRequests = allRequests
+                    .Where(r => r.Status == TourRequestStatus.PENDING || r.Status == TourRequestStatus.INVALID)
+                    .ToList();
+
+                if (neverFulfilledRequests.Count == 0)
+                    return;
+
+                var matchingRequests = new List<TourRequest>();
+
+                foreach (var request in neverFulfilledRequests)
+                {
+                    bool matches = false;
+
+                    if (MatchesLocation(location, request.City, request.Country))
+                    {
+                        matches = true;
+                    }
+
+                    if (MatchesLanguage(language, request.Language))
+                    {
+                        matches = true;
+                    }
+
+                    if (matches)
+                    {
+                        matchingRequests.Add(request);
+                    }
+                }
+
+                if (matchingRequests.Count == 0)
+                    return;
+
+                var uniqueTourists = matchingRequests
+                    .GroupBy(r => r.TouristId)
+                    .Select(g => g.First())
+                    .ToList();
+
+                foreach (var request in uniqueTourists)
+                {
+                    var notification = new TourNotification
+                    {
+                        TouristId = request.TouristId,
+                        TourId = tourId,
+                        Title = "Nova tura kreirana za vaš zahtev!",
+                        Message = $"Kreirana je nova tura '{tourName}' koja odgovara vašem zahtevu za ture na {language} jeziku u lokaciji {location}.",
+                        CreatedAt = DateTime.Now,
+                        IsRead = false
+                    };
+
+                    _notificationRepository.Save(notification);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Greška pri kreiranju notifikacija: {ex.Message}", ex);
             }
         }
 
@@ -110,46 +180,6 @@ namespace BookingApp.Services
             }
         }
 
-        public void CreateNotificationsForNewTour(int tourId, string tourName, string location, string language)
-        {
-            try
-            {
-                var tour = _tourRepository.GetById(tourId);
-                if (tour == null)
-                    return;
-
-                // Pronađi sve neispunjene zahteve koji se poklapaju sa ovom turom
-                var allRequests = _tourRequestRepository.GetAll();
-                var matchingRequests = allRequests
-                    .Where(r => r.Status == TourRequestStatus.PENDING || r.Status == TourRequestStatus.INVALID)
-                    .Where(r =>
-                        r.Language.Equals(language, StringComparison.OrdinalIgnoreCase) ||
-                        $"{r.City}, {r.Country}".Equals(location, StringComparison.OrdinalIgnoreCase))
-                    .GroupBy(r => r.TouristId)
-                    .Select(g => g.First())
-                    .ToList();
-
-                foreach (var request in matchingRequests)
-                {
-                    var notification = new TourNotification
-                    {
-                        TouristId = request.TouristId,
-                        TourId = tourId,
-                        Title = "Nova tura kreirana za vaš zahtev!",
-                        Message = $"Kreirana je nova tura '{tourName}' koja odgovara vašem zahtevu za ture na {language} jeziku u lokaciji {location}.",
-                        CreatedAt = DateTime.Now,
-                        IsRead = false
-                    };
-
-                    _notificationRepository.Save(notification);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException($"Greška pri kreiranju notifikacija: {ex.Message}", ex);
-            }
-        }
-
         public void MarkAsRead(int notificationId)
         {
             try
@@ -167,6 +197,63 @@ namespace BookingApp.Services
             }
         }
 
+        private bool MatchesLocation(string tourLocation, string requestCity, string requestCountry)
+        {
+            if (string.IsNullOrWhiteSpace(tourLocation))
+                return false;
+
+            string requestLocation = $"{requestCity}, {requestCountry}".Trim();
+
+            if (string.IsNullOrWhiteSpace(requestLocation) || requestLocation == ", ")
+                return false;
+
+            bool exactMatch = tourLocation.Equals(requestLocation, StringComparison.OrdinalIgnoreCase);
+
+            bool cityMatch = !string.IsNullOrWhiteSpace(requestCity) &&
+                             tourLocation.Contains(requestCity, StringComparison.OrdinalIgnoreCase);
+
+            return exactMatch || cityMatch;
+        }
+
+        private bool MatchesLanguage(string tourLanguage, string requestLanguage)
+        {
+            if (string.IsNullOrWhiteSpace(tourLanguage) || string.IsNullOrWhiteSpace(requestLanguage))
+                return false;
+
+            string normalizedTourLanguage = NormalizeLanguage(tourLanguage);
+            string normalizedRequestLanguage = NormalizeLanguage(requestLanguage);
+
+            return normalizedTourLanguage.Equals(normalizedRequestLanguage, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private string NormalizeLanguage(string language)
+        {
+            if (string.IsNullOrWhiteSpace(language))
+                return string.Empty;
+
+            string normalized = language.Replace("System.Windows.Controls.ComboBoxItem:", "").Trim().ToLower();
+
+            var languageMap = new Dictionary<string, string>
+            {
+                { "srpski", "srpski" },
+                { "serbian", "srpski" },
+                { "engleski", "engleski" },
+                { "english", "engleski" },
+                { "francuski", "francuski" },
+                { "french", "francuski" },
+                { "nemacki", "nemacki" },
+                { "nemački", "nemacki" },
+                { "german", "nemacki" },
+                { "ceski", "ceski" },
+                { "češki", "ceski" },
+                { "czech", "ceski" },
+                { "hrvatski", "hrvatski" },
+                { "croatian", "hrvatski" }
+            };
+
+            return languageMap.ContainsKey(normalized) ? languageMap[normalized] : normalized;
+        }
+
         private NotifiedTourDTO CreateNotifiedTourDTO(Tour tour)
         {
             var guide = _userRepository.GetById(tour.GuideId);
@@ -175,9 +262,7 @@ namespace BookingApp.Services
             {
                 Id = tour.Id,
                 Name = tour.Name,
-                Location = tour.Location != null
-                    ? $"{tour.Location.City}, {tour.Location.Country}"
-                    : "N/A",
+                Location = tour.Location != null ? $"{tour.Location.City}, {tour.Location.Country}" : "N/A",
                 Language = tour.Language,
                 Date = tour.StartTimes?.FirstOrDefault()?.Time ?? DateTime.Now,
                 GuideName = guide != null ? $"{guide.FirstName} {guide.LastName}" : "N/A",
