@@ -77,14 +77,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
 
                 if (filteredReviews.Any())
                 {
-                    var rating = new AccommodationRatingDTO
-                    {
-                        AccommodationName = accommodation.Name,
-                        Location = _accommodationService.GetLocationString(accommodation.GeoLocation.Id),
-                        AverageCleanlinessRating = filteredReviews.Average(r => r.CleanlinessRating),
-                        AverageOwnerRating = filteredReviews.Average(r => r.OwnerRating),
-                        NumberOfReviews = filteredReviews.Count()
-                    };
+                    var rating = new AccommodationRatingDTO{ AccommodationName = accommodation.Name, Location = _accommodationService.GetLocationString(accommodation.GeoLocation.Id),AverageCleanlinessRating = filteredReviews.Average(r => r.CleanlinessRating), AverageOwnerRating = filteredReviews.Average(r => r.OwnerRating),NumberOfReviews = filteredReviews.Count() };
                     ratings.Add(rating);
                 }
             }

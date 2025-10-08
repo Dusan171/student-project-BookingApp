@@ -115,12 +115,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
         {
             if (accommodation != null)
             {
-                var result = MessageBox.Show(
-                    $"Are you sure you want to permanently delete {accommodation.AccommodationName}?\n\nThis action cannot be undone.",
-                    "Delete Property",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-
+                var result = MessageBox.Show($"Are you sure you want to permanently delete {accommodation.AccommodationName}?\n\nThis action cannot be undone.","Delete Property",MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes)
                 {
                     try

@@ -86,49 +86,43 @@ namespace BookingApp.Services
         }
         public GuestRatingDetailsDTO GetRatingDetailsForReservation(int reservationId)
         {
-            try
+            var reservation = _reservationService.GetById(reservationId);
+
+            if (reservation == null)
             {
-                var reservation = _reservationService.GetById(reservationId);
-                if (reservation == null)
-                {
-                    throw new Exception($"Reservation with ID {reservationId} not found.");
-                }
-
-                var guest = _userService.GetUserById(reservation.GuestId);
-                var accommodation = _accommodationService.GetAccommodationById(reservation.AccommodationId);
-
-                var guestName = "Unknown Guest";
-                if (guest != null)
-                {
-                    guestName = $"{guest.FirstName} {guest.LastName}".Trim();
-                    if (string.IsNullOrWhiteSpace(guestName))
-                    {
-                        guestName = guest.Username ?? "Guest";
-                    }
-                }
-
-                return new GuestRatingDetailsDTO
-                {
-                    ReservationId = reservationId,
-                    StartDate = reservation.StartDate,
-                    EndDate = reservation.EndDate,
-                    GuestName = guestName,
-                    AccommodationName = accommodation?.Name ?? "Unknown Property",
-                    Review = new GuestReviewDTO { ReservationId = reservationId }
-                };
+                throw new KeyNotFoundException($"Reservation with ID {reservationId} not found.");
             }
-            catch (Exception ex)
-            {
-                return new GuestRatingDetailsDTO
-                {
-                    ReservationId = reservationId,
-                    StartDate = DateTime.Now.AddDays(-7),
-                    EndDate = DateTime.Now,
-                    GuestName = "Guest",
-                    AccommodationName = "Property",
-                    Review = new GuestReviewDTO { ReservationId = reservationId }
-                };
-            }
+            var guest = _userService.GetUserById(reservation.GuestId);
+            var accommodation = _accommodationService.GetAccommodationById(reservation.AccommodationId);
+            return MapToRatingDetailsDTO(reservation.ToReservation(), guest.ToUser(),accommodation.ToAccommodation() );
         }
+        private string FormatGuestName(User guest)
+        {
+            if (guest == null)
+            {
+                return "Unknown Guest";
+            }
+            var fullName = $"{guest.FirstName} {guest.LastName}".Trim();
+
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                return guest.Username ?? "Guest";
+            }
+
+            return fullName;
+        }
+        private GuestRatingDetailsDTO MapToRatingDetailsDTO(Reservation reservation, User guest, Accommodation accommodation)
+        {
+            return new GuestRatingDetailsDTO
+            {
+                ReservationId = reservation.Id,
+                StartDate = reservation.StartDate,
+                EndDate = reservation.EndDate,
+                GuestName = FormatGuestName(guest),
+                AccommodationName = accommodation?.Name ?? "Unknown Property",
+                Review = new GuestReviewDTO { ReservationId = reservation.Id }
+            };
+        }
+
     }
 }

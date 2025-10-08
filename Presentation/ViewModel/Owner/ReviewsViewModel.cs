@@ -25,19 +25,12 @@ namespace BookingApp.Presentation.ViewModel.Owner
         private readonly IReservationService _reservationService;
         private readonly IAccommodationService _accommodationService;
         private readonly IUserService _userService;
-
-        // Original collections
         private List<GuestReviewDTO> _allHostReviews;
         private List<AccommodationReviewDTO> _allGuestReviews;
-
-        // Display collections
         private ObservableCollection<ReviewDisplayDTO> _hostToGuestDisplay;
         private ObservableCollection<ReviewDisplayDTO> _guestToHostDisplay;
-
-        // Search/Sort properties
         private string _searchText;
         private string _selectedSortOption;
-
         public ObservableCollection<string> SortOptions { get; set; }
 
         public string SearchText
@@ -50,7 +43,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 ApplyFilters();
             }
         }
-
         public string SelectedSortOption
         {
             get => _selectedSortOption;
@@ -61,7 +53,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 ApplyFilters();
             }
         }
-
         public ObservableCollection<ReviewDisplayDTO> HostToGuestDisplay
         {
             get => _hostToGuestDisplay;
@@ -71,7 +62,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 OnPropertyChanged();
             }
         }
-
         public ObservableCollection<ReviewDisplayDTO> GuestToHostDisplay
         {
             get => _guestToHostDisplay;
@@ -81,14 +71,12 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 OnPropertyChanged();
             }
         }
-
         public ICommand OpenImageGalleryCommand { get; }
         public ICommand ClearSearchCommand { get; }
         public ICommand CloseGalleryCommand { get; }
         public ICommand PreviousImageCommand { get; }
         public ICommand NextImageCommand { get; }
         public event Action<List<string>> OpenImageGalleryRequested;
-
         public ReviewsViewModel(
             IGuestReviewService guestReviewService,
             IAccommodationReviewService accommodationReviewService,
@@ -101,8 +89,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
             _reservationService = reservationService;
             _accommodationService = accommodationService;
             _userService = userService;
-
-            // Initialize collections to prevent null reference
             _allHostReviews = new List<GuestReviewDTO>();
             _allGuestReviews = new List<AccommodationReviewDTO>();
 
@@ -113,15 +99,8 @@ namespace BookingApp.Presentation.ViewModel.Owner
             NextImageCommand = new RelayCommand(_ => { });
 
             SortOptions = new ObservableCollection<string>
-            {
-                "Newest First",
-                "Oldest First",
-                "Highest Rating",
-                "Lowest Rating"
-            };
-
+            { "Newest First","Oldest First","Highest Rating","Lowest Rating"};
             _selectedSortOption = "Newest First";
-
             LoadReviews();
         }
 
@@ -141,8 +120,6 @@ namespace BookingApp.Presentation.ViewModel.Owner
         {
             var allGuestReviews = _accommodationReviewService.GetAll() ?? new List<AccommodationReviewDTO>();
             var allHostReviews = _guestReviewService.GetAllReviews() ?? new List<GuestReviewDTO>();
-
-            // Filter only reviews where owner also rated the guest
             _allGuestReviews = allGuestReviews
                 .Where(gr => allHostReviews.Any(hr => hr.ReservationId == gr.ReservationId))
                 .ToList();
@@ -152,13 +129,8 @@ namespace BookingApp.Presentation.ViewModel.Owner
 
         private void ApplyFilters()
         {
-            // Process Host → Guest
-            var hostDisplayItems = _allHostReviews
-                .Select(CreateHostToGuestDisplayItem)
-                .Where(item => item != null)
-                .ToList();
+            var hostDisplayItems = _allHostReviews.Select(CreateHostToGuestDisplayItem).Where(item => item != null).ToList();
 
-            // Apply search
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 hostDisplayItems = hostDisplayItems
@@ -166,18 +138,14 @@ namespace BookingApp.Presentation.ViewModel.Owner
                                    item.AccommodationName.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
-
-            // Apply sort
             hostDisplayItems = ApplySort(hostDisplayItems);
             HostToGuestDisplay = new ObservableCollection<ReviewDisplayDTO>(hostDisplayItems);
 
-            // Process Guest → Host
             var guestDisplayItems = _allGuestReviews
                 .Select(CreateGuestToHostDisplayItem)
                 .Where(item => item != null)
                 .ToList();
 
-            // Apply search
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 guestDisplayItems = guestDisplayItems
@@ -185,12 +153,9 @@ namespace BookingApp.Presentation.ViewModel.Owner
                                    item.AccommodationName.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
-
-            // Apply sort
             guestDisplayItems = ApplySort(guestDisplayItems);
             GuestToHostDisplay = new ObservableCollection<ReviewDisplayDTO>(guestDisplayItems);
         }
-
         private List<ReviewDisplayDTO> ApplySort(List<ReviewDisplayDTO> items)
         {
             return SelectedSortOption switch
@@ -209,24 +174,9 @@ namespace BookingApp.Presentation.ViewModel.Owner
             {
                 var reservation = _reservationService.GetById(review.ReservationId);
                 if (reservation == null) return null;
-
                 var guest = _userService.GetUserById(reservation.GuestId);
                 var accommodation = _accommodationService.GetAccommodationById(reservation.AccommodationId);
-
-                return new ReviewDisplayDTO
-                {
-                    ReservationId = review.ReservationId,
-                    GuestName = guest != null ? $"{guest.FirstName} {guest.LastName}".Trim() : "Guest",
-                    AccommodationName = accommodation?.Name ?? "Property",
-                    CheckInDate = reservation.StartDate,
-                    CheckOutDate = reservation.EndDate,
-                    CleanlinessRating = review.CleanlinessRating,
-                    RuleRespectingRating = review.RuleRespectingRating,
-                    Comment = review.Comment ?? "",
-                    ImagePaths = null,
-                    ImageCount = 0,
-                    FirstImagePath = null
-                };
+                return new ReviewDisplayDTO{ ReservationId = review.ReservationId, GuestName = guest != null ? $"{guest.FirstName} {guest.LastName}".Trim() : "Guest",AccommodationName = accommodation?.Name ?? "Property",CheckInDate = reservation.StartDate,CheckOutDate = reservation.EndDate,CleanlinessRating = review.CleanlinessRating,RuleRespectingRating = review.RuleRespectingRating,Comment = review.Comment ?? "",ImagePaths = null, ImageCount = 0,FirstImagePath = null };
             }
             catch
             {
@@ -244,11 +194,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 var guest = _userService.GetUserById(reservation.GuestId);
                 var accommodation = _accommodationService.GetAccommodationById(reservation.AccommodationId);
 
-                var images = review.ImagePaths?
-                    .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(p => p.Trim())
-                    .Where(p => !string.IsNullOrEmpty(p))
-                    .ToList();
+                var images = review.ImagePaths?.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).Where(p => !string.IsNullOrEmpty(p)).ToList();
 
                 return new ReviewDisplayDTO
                 {
@@ -266,9 +212,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 };
             }
             catch
-            {
-                return null;
-            }
+            { return null;}
         }
 
         private void ExecuteOpenImageGallery(object parameter)

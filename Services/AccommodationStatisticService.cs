@@ -1,4 +1,5 @@
 ﻿using BookingApp.Domain.Interfaces;
+using BookingApp.Domain.Interfaces.ServiceInterfaces;
 using BookingApp.Domain.Model;
 using BookingApp.Services.DTO;
 using System;
@@ -27,53 +28,36 @@ namespace BookingApp.Services
             if (!reservations.Any())
                 return new List<YearlyStatisticDTO>();
 
-            // Get all years that have reservations
             var years = reservations
-                .SelectMany(r => new[] { r.StartDate.Year, r.EndDate.Year })
-                .Distinct()
-                .OrderBy(y => y)
-                .ToList();
-
+                .SelectMany(r => new[] { r.StartDate.Year, r.EndDate.Year }).Distinct().OrderBy(y => y).ToList();
             var yearlyStats = new List<YearlyStatisticDTO>();
-
             foreach (var year in years)
             {
-                var yearReservations = reservations
-                    .Where(r => r.StartDate.Year == year || r.EndDate.Year == year)
-                    .ToList();
-
+                var yearReservations = reservations.Where(r => r.StartDate.Year == year || r.EndDate.Year == year).ToList();
                 var reschedules = GetReschedulesForReservations(yearReservations);
-
-                var stats = new YearlyStatisticDTO
-                {
-                    Year = year,
-                    ReservationCount = yearReservations.Count,
-                    CancellationCount = yearReservations.Count(r => r.Status == ReservationStatus.Cancelled),
-                    RescheduleCount = reschedules.Count,
-                    OccupancyRate = CalculateYearlyOccupancyRate(yearReservations, year)
-                };
-
-                yearlyStats.Add(stats);
+                var stats = new YearlyStatisticDTO{Year = year,ReservationCount = yearReservations.Count,CancellationCount = yearReservations.Count(r => r.Status == ReservationStatus.Cancelled),RescheduleCount = reschedules.Count,
+                OccupancyRate = CalculateYearlyOccupancyRate(yearReservations, year) }; yearlyStats.Add(stats);
             }
-
             return yearlyStats;
         }
-
+        private bool DoesReservationOverlapMonth(Reservation r, int year, int month)
+        {
+            var monthStart = new DateTime(year, month, 1);
+            var monthEnd = new DateTime(year, month, DateTime.DaysInMonth(year, month));
+            return (r.StartDate.Year == year && r.StartDate.Month == month) ||
+                   (r.EndDate.Year == year && r.EndDate.Month == month) ||
+                   (r.StartDate <= monthStart && r.EndDate >= monthEnd);
+            
+        }
         public List<MonthlyStatisticDTO> GetMonthlyStatistics(int accommodationId, int year)
         {
             var reservations = _reservationRepository.GetByAccommodationId(accommodationId);
             var monthlyStats = new List<MonthlyStatisticDTO>();
-
             for (int month = 1; month <= 12; month++)
             {
                 var monthReservations = reservations
-                    .Where(r =>
-                        (r.StartDate.Year == year && r.StartDate.Month == month) ||
-                        (r.EndDate.Year == year && r.EndDate.Month == month) ||
-                        (r.StartDate <= new DateTime(year, month, 1) &&
-                         r.EndDate >= new DateTime(year, month, DateTime.DaysInMonth(year, month))))
-                    .ToList();
-
+            .Where(r => DoesReservationOverlapMonth(r, year, month))
+            .ToList();
                 var reschedules = GetReschedulesForReservations(monthReservations);
 
                 var stats = new MonthlyStatisticDTO
@@ -92,80 +76,6 @@ namespace BookingApp.Services
 
             return monthlyStats;
         }
-
-        public AccommodationStatisticsSummaryDTO GetStatisticsSummary(int accommodationId)
-        {
-            var yearlyStats = GetYearlyStatistics(accommodationId);
-
-            if (!yearlyStats.Any())
-            {
-                return new AccommodationStatisticsSummaryDTO();
-            }
-
-            var totalReservations = yearlyStats.Sum(s => s.ReservationCount);
-            var totalCancellations = yearlyStats.Sum(s => s.CancellationCount);
-            var totalReschedules = yearlyStats.Sum(s => s.RescheduleCount);
-
-            var bestYear = GetBestPerformingYear(accommodationId);
-            string bestPeriodDescription = "No data available";
-            double bestPeriodOccupancy = 0;
-
-            if (bestYear != null)
-            {
-                // Check if there's an even better month in that year
-                var bestMonth = GetBestPerformingMonth(accommodationId, bestYear.Year);
-                if (bestMonth != null && bestMonth.OccupancyRate > bestYear.OccupancyRate)
-                {
-                    bestPeriodDescription = $"{bestMonth.MonthName} {bestMonth.Year}";
-                    bestPeriodOccupancy = bestMonth.OccupancyRate;
-                }
-                else
-                {
-                    bestPeriodDescription = bestYear.Year.ToString();
-                    bestPeriodOccupancy = bestYear.OccupancyRate;
-                }
-            }
-
-            return new AccommodationStatisticsSummaryDTO
-            {
-                TotalReservations = totalReservations,
-                TotalCancellations = totalCancellations,
-                TotalReschedules = totalReschedules,
-                BestYear = bestYear?.Year ?? 0,
-                BestPeriodDescription = bestPeriodDescription,
-                BestPeriodOccupancy = bestPeriodOccupancy
-            };
-        }
-
-        public List<int> GetAvailableYears(int accommodationId)
-        {
-            var reservations = _reservationRepository.GetByAccommodationId(accommodationId);
-
-            if (!reservations.Any())
-                return new List<int>();
-
-            return reservations
-                .SelectMany(r => new[] { r.StartDate.Year, r.EndDate.Year })
-                .Distinct()
-                .OrderBy(y => y)
-                .ToList();
-        }
-
-        public YearlyStatisticDTO GetBestPerformingYear(int accommodationId)
-        {
-            var yearlyStats = GetYearlyStatistics(accommodationId);
-            return yearlyStats.OrderByDescending(s => s.OccupancyRate).FirstOrDefault();
-        }
-
-        public MonthlyStatisticDTO GetBestPerformingMonth(int accommodationId, int year)
-        {
-            var monthlyStats = GetMonthlyStatistics(accommodationId, year);
-            return monthlyStats
-                .Where(s => s.ReservationCount > 0) // Only months with actual reservations
-                .OrderByDescending(s => s.OccupancyRate)
-                .FirstOrDefault();
-        }
-
         private List<RescheduleRequest> GetReschedulesForReservations(List<Reservation> reservations)
         {
             var reservationIds = reservations.Select(r => r.Id).ToList();
@@ -217,4 +127,104 @@ namespace BookingApp.Services
             return Math.Round((double)occupiedDates.Count / totalDaysInMonth * 100, 2);
         }
     }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public class AccommodationSummaryService: IAccommodationSummaryService
+    {
+        private readonly IReservationRepository _reservationRepository;
+        private readonly IAccommodationStatisticsService _statisticsService;
+        public AccommodationSummaryService(
+            IReservationRepository reservationRepository,
+            IAccommodationStatisticsService statisticsService)
+        {
+            _reservationRepository = reservationRepository;
+            _statisticsService = statisticsService;
+        }
+
+        public AccommodationStatisticsSummaryDTO GetStatisticsSummary(int accommodationId)
+        {
+            var yearlyStats = _statisticsService.GetYearlyStatistics(accommodationId);
+
+            if (!yearlyStats.Any()) { return new AccommodationStatisticsSummaryDTO(); }
+
+            var totalReservations = yearlyStats.Sum(s => s.ReservationCount);
+            var totalCancellations = yearlyStats.Sum(s => s.CancellationCount);
+            var totalReschedules = yearlyStats.Sum(s => s.RescheduleCount);
+
+            var bestYear = GetBestPerformingYear(accommodationId);
+            string bestPeriodDescription = "No data available";
+            double bestPeriodOccupancy = 0;
+
+            if (bestYear != null)
+            {
+                var bestMonth = GetBestPerformingMonth(accommodationId, bestYear.Year);
+                if (bestMonth != null && bestMonth.OccupancyRate > bestYear.OccupancyRate)
+                {
+                    bestPeriodDescription = $"{bestMonth.MonthName} {bestMonth.Year}";
+                    bestPeriodOccupancy = bestMonth.OccupancyRate;
+                }
+                else
+                {
+                    bestPeriodDescription = bestYear.Year.ToString();
+                    bestPeriodOccupancy = bestYear.OccupancyRate;
+                }
+            }
+            return new AccommodationStatisticsSummaryDTO { TotalReservations = totalReservations, TotalCancellations = totalCancellations, TotalReschedules = totalReschedules, BestYear = bestYear?.Year ?? 0, BestPeriodDescription = bestPeriodDescription, BestPeriodOccupancy = bestPeriodOccupancy };
+        }
+
+        public List<int> GetAvailableYears(int accommodationId)
+        {
+            var reservations = _reservationRepository.GetByAccommodationId(accommodationId);
+
+            if (!reservations.Any())
+                return new List<int>();
+
+            return reservations
+                .SelectMany(r => new[] { r.StartDate.Year, r.EndDate.Year })
+                .Distinct()
+                .OrderBy(y => y)
+                .ToList();
+        }
+
+        public YearlyStatisticDTO GetBestPerformingYear(int accommodationId)
+        {
+            var yearlyStats = _statisticsService.GetYearlyStatistics(accommodationId);
+            return yearlyStats.OrderByDescending(s => s.OccupancyRate).FirstOrDefault();
+        }
+
+        public MonthlyStatisticDTO GetBestPerformingMonth(int accommodationId, int year)
+        {
+            var monthlyStats = _statisticsService.GetMonthlyStatistics(accommodationId, year);
+            return monthlyStats
+                .Where(s => s.ReservationCount > 0)
+                .OrderByDescending(s => s.OccupancyRate)
+                .FirstOrDefault();
+        }
+    }
+    }
