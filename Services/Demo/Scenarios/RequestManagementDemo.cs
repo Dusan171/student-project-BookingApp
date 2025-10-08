@@ -94,30 +94,9 @@ namespace BookingApp.Services.Demo.Scenarios
 
                         var demoRequests = new[]
                         {
-                            new RescheduleRequestDTO
-                            {
-                                Id = 1,
-                                AccommodationName = "Luxury Downtown Apartment",
-                                OriginalStartDate = new DateTime(2024, 12, 15),
-                                OriginalEndDate = new DateTime(2024, 12, 20),
-                                NewStartDate = new DateTime(2024, 12, 22),
-                                NewEndDate = new DateTime(2024, 12, 27),
-                                AvailabilityStatus = "Available",
-                                Status = RequestStatus.Pending
-                            },
-                            new RescheduleRequestDTO
-                            {
-                                Id = 2,
-                                AccommodationName = "Mountain Retreat Cottage",
-                                OriginalStartDate = new DateTime(2025, 1, 1),
-                                OriginalEndDate = new DateTime(2025, 1, 5),
-                                NewStartDate = new DateTime(2025, 1, 10),
-                                NewEndDate = new DateTime(2025, 1, 14),
-                                AvailabilityStatus = "Not available",
-                                Status = RequestStatus.Pending
-                            }
+                            new RescheduleRequestDTO{ Id = 1,AccommodationName = "Luxury Downtown Apartment",OriginalStartDate = new DateTime(2024, 12, 15), OriginalEndDate = new DateTime(2024, 12, 20),NewStartDate = new DateTime(2024, 12, 22),NewEndDate = new DateTime(2024, 12, 27),AvailabilityStatus = "Available", Status = RequestStatus.Pending},
+                            new RescheduleRequestDTO { Id = 2, AccommodationName = "Mountain Retreat Cottage",OriginalStartDate = new DateTime(2025, 1, 1), OriginalEndDate = new DateTime(2025, 1, 5), NewStartDate = new DateTime(2025, 1, 10), NewEndDate = new DateTime(2025, 1, 14), AvailabilityStatus = "Not available", Status = RequestStatus.Pending}
                         };
-
                         foreach (var request in demoRequests)
                         {
                             requestsViewModel.Requests.Add(request);
@@ -166,21 +145,8 @@ namespace BookingApp.Services.Demo.Scenarios
                 {
                     if (requestsViewModel?.Requests != null)
                     {
-                        // Clear previous requests and add the second one
                         requestsViewModel.Requests.Clear();
-
-                        var unavailableRequest = new RescheduleRequestDTO
-                        {
-                            Id = 2,
-                            AccommodationName = "Mountain Retreat Cottage",
-                            OriginalStartDate = new DateTime(2025, 1, 1),
-                            OriginalEndDate = new DateTime(2025, 1, 5),
-                            NewStartDate = new DateTime(2025, 1, 10),
-                            NewEndDate = new DateTime(2025, 1, 14),
-                            AvailabilityStatus = "Not available",
-                            Status = RequestStatus.Pending
-                        };
-
+                        var unavailableRequest = new RescheduleRequestDTO{ Id = 2,AccommodationName = "Mountain Retreat Cottage", OriginalStartDate = new DateTime(2025, 1, 1),OriginalEndDate = new DateTime(2025, 1, 5), NewStartDate = new DateTime(2025, 1, 10), NewEndDate = new DateTime(2025, 1, 14),AvailabilityStatus = "Not available", Status = RequestStatus.Pending};
                         requestsViewModel.Requests.Add(unavailableRequest);
                     }
                 });

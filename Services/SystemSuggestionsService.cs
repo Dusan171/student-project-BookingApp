@@ -25,48 +25,113 @@ namespace BookingApp.Services
             _reservationRepository = reservationRepository;
             _locationRepository = locationRepository;
         }
-
         public List<HighDemandLocationDTO> GetHighDemandLocations(int ownerId)
         {
             var ownerAccommodations = _accommodationRepository.GetByOwnerId(ownerId).ToList();
-
             if (!ownerAccommodations.Any())
                 return new List<HighDemandLocationDTO>();
-
             var cutoffDate = DateTime.Now.Date.AddDays(-ANALYSIS_PERIOD_DAYS);
+            var locationStats = AggregateLocationStatistics(ownerAccommodations, cutoffDate);
+            return SelectTopLocations(locationStats);
+        }
+        private List<Reservation> GetRelevantReservations(int accommodationId, DateTime cutoffDate)
+        {
+            return _reservationRepository.GetByAccommodationId(accommodationId)
+                .Where(r => r.Status != ReservationStatus.Cancelled &&
+                            r.StartDate >= cutoffDate)
+                .ToList();
+        }
+
+        private Dictionary<int, LocationStatistics> AggregateLocationStatistics(List<Accommodation> accommodations, DateTime cutoffDate)
+        {
             var locationStats = new Dictionary<int, LocationStatistics>();
 
-            foreach (var accommodation in ownerAccommodations)
+            foreach (var accommodation in accommodations)
             {
-                var reservations = _reservationRepository.GetByAccommodationId(accommodation.Id)
-                    .Where(r => r.Status != ReservationStatus.Cancelled &&
-                               r.StartDate >= cutoffDate)
-                    .ToList();
+                var reservations = GetRelevantReservations(accommodation.Id, cutoffDate);
 
                 if (!reservations.Any())
                     continue;
 
-                if (!locationStats.ContainsKey(accommodation.GeoLocation.Id))
+                int locationId = accommodation.GeoLocation.Id;
+
+                if (!locationStats.ContainsKey(locationId))
                 {
-                    locationStats[accommodation.GeoLocation.Id] = new LocationStatistics
+                    locationStats[locationId] = new LocationStatistics
                     {
-                        LocationId = accommodation.GeoLocation.Id,
+                        LocationId = locationId,
                         ReservationCount = 0,
                         TotalOccupancyRate = 0,
                         AccommodationCount = 0
                     };
                 }
 
-                var stats = locationStats[accommodation.GeoLocation.Id];
+                var stats = locationStats[locationId];
                 stats.ReservationCount += reservations.Count;
-
-                // Računamo prosečnu zauzetost za ovaj smeštaj
-                var avgOccupancy = CalculateAverageOccupancy(reservations,(int)accommodation.MaxGuests);
+                var avgOccupancy = CalculateAverageOccupancy(reservations, (int)accommodation.MaxGuests);
                 stats.TotalOccupancyRate += avgOccupancy;
                 stats.AccommodationCount++;
             }
 
-            // Sortiramo lokacije po kombinaciji broja rezervacija i prosečne zauzetosti
+            return locationStats;
+        }
+
+        // POMOĆNA METODA 1: Kreira listu statistika za sve smeštaje
+        private List<AccommodationStatistic> AggregateAccommodationStatistics(List<Accommodation> accommodations, DateTime cutoffDate)
+        {
+            var accommodationStats = new List<AccommodationStatistic>();
+
+            foreach (var accommodation in accommodations)
+            {
+                // Koristimo DRY princip - pozivamo već postojeću metodu
+                var reservations = GetRelevantReservations(accommodation.Id, cutoffDate);
+
+                var reservationCount = reservations.Count;
+
+                // MNOC (poređenje) je izolovano ovde
+                var avgOccupancy = reservations.Any()
+                    ? CalculateAverageOccupancy(reservations, (int)accommodation.MaxGuests)
+                    : 0;
+
+                accommodationStats.Add(new AccommodationStatistic
+                {
+                    Accommodation = accommodation,
+                    ReservationCount = reservationCount,
+                    OccupancyRate = avgOccupancy,
+                    // Kalkulacija bodova
+                    Score = reservationCount * 0.5 + avgOccupancy * 0.5
+                });
+            }
+
+            return accommodationStats;
+        }
+        private List<LowDemandAccommodationDTO> SelectBottomAccommodations(List<AccommodationStatistic> accommodationStats)
+        {
+            var sortedAccommodations = accommodationStats
+                .OrderBy(a => a.Score)
+                .ToList();
+            int bottomCount = Math.Max(3, (int)Math.Ceiling(sortedAccommodations.Count * 0.3));
+            var lowDemandAccommodations = new List<LowDemandAccommodationDTO>();
+
+            foreach (var stat in sortedAccommodations.Take(bottomCount))
+            {
+                var location = _locationRepository.GetById(stat.Accommodation.GeoLocation.Id);
+
+                lowDemandAccommodations.Add(new LowDemandAccommodationDTO
+                {
+                    AccommodationId = stat.Accommodation.Id,
+                    AccommodationName = stat.Accommodation.Name,
+                    City = location?.City ?? "Unknown",
+                    Country = location?.Country ?? "Unknown",
+                    ReservationCount = stat.ReservationCount,
+                    OccupancyRate = Math.Round(stat.OccupancyRate, 1)
+                });
+            }
+            return lowDemandAccommodations;
+        }
+
+        private List<HighDemandLocationDTO> SelectTopLocations(Dictionary<int, LocationStatistics> locationStats)
+        {
             var sortedLocations = locationStats.Values
                 .Select(s => new
                 {
@@ -77,7 +142,6 @@ namespace BookingApp.Services
                 .OrderByDescending(x => x.Score)
                 .ToList();
 
-            // Uzimamo top lokacije (npr. top 30% ili minimum top 3)
             int topCount = Math.Max(3, (int)Math.Ceiling(sortedLocations.Count * 0.3));
             var highDemandLocations = new List<HighDemandLocationDTO>();
 
@@ -97,63 +161,14 @@ namespace BookingApp.Services
 
             return highDemandLocations;
         }
-
         public List<LowDemandAccommodationDTO> GetLowDemandAccommodations(int ownerId)
         {
             var ownerAccommodations = _accommodationRepository.GetByOwnerId(ownerId).ToList();
-
             if (!ownerAccommodations.Any())
                 return new List<LowDemandAccommodationDTO>();
-
             var cutoffDate = DateTime.Now.Date.AddDays(-ANALYSIS_PERIOD_DAYS);
-            var accommodationStats = new List<AccommodationStatistic>();
-
-            foreach (var accommodation in ownerAccommodations)
-            {
-                var reservations = _reservationRepository.GetByAccommodationId(accommodation.Id)
-                    .Where(r => r.Status != ReservationStatus.Cancelled &&
-                               r.StartDate >= cutoffDate)
-                    .ToList();
-
-                var reservationCount = reservations.Count;
-                var avgOccupancy = reservations.Any()
-                    ? CalculateAverageOccupancy(reservations, (int)accommodation.MaxGuests)
-                    : 0;
-
-                accommodationStats.Add(new AccommodationStatistic
-                {
-                    Accommodation = accommodation,
-                    ReservationCount = reservationCount,
-                    OccupancyRate = avgOccupancy,
-                    Score = reservationCount * 0.5 + avgOccupancy * 0.5
-                });
-            }
-
-            // Sortiramo od najgorih prema najboljim
-            var sortedAccommodations = accommodationStats
-                .OrderBy(a => a.Score)
-                .ToList();
-
-            // Uzimamo najgore (bottom 30% ili minimum bottom 3)
-            int bottomCount = Math.Max(3, (int)Math.Ceiling(sortedAccommodations.Count * 0.3));
-            var lowDemandAccommodations = new List<LowDemandAccommodationDTO>();
-
-            foreach (var stat in sortedAccommodations.Take(bottomCount))
-            {
-                var location = _locationRepository.GetById(stat.Accommodation.GeoLocation.Id);
-
-                lowDemandAccommodations.Add(new LowDemandAccommodationDTO
-                {
-                    AccommodationId = stat.Accommodation.Id,
-                    AccommodationName = stat.Accommodation.Name,
-                    City = location?.City ?? "Unknown",
-                    Country = location?.Country ?? "Unknown",
-                    ReservationCount = stat.ReservationCount,
-                    OccupancyRate = Math.Round(stat.OccupancyRate, 1)
-                });
-            }
-
-            return lowDemandAccommodations;
+            var accommodationStats = AggregateAccommodationStatistics(ownerAccommodations, cutoffDate);
+            return SelectBottomAccommodations(accommodationStats);
         }
 
         private double CalculateAverageOccupancy(List<Reservation> reservations, int maxGuests)

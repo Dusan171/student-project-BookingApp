@@ -212,58 +212,28 @@ namespace BookingApp.Presentation.ViewModel.Owner
         {
             if (parameter is CommentDTO comment)
             {
-                // Vlasnik ne može da prijavi komentare drugih vlasnika
-                if (comment.IsOwnerComment)
-                {
-                    MessageBox.Show("You cannot report comments from property owners.",
-                        "Report Denied", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
+                if (comment.IsOwnerComment){ MessageBox.Show("You cannot report comments from property owners.","Report Denied", MessageBoxButton.OK, MessageBoxImage.Information);return;}
                 if (comment.HasVerifiedStay)
                 {
-                    MessageBox.Show(
-                        "This guest has a verified stay at this location and cannot be reported.",
-                        "Cannot Report Verified Guest",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
+                    MessageBox.Show("This guest has a verified stay at this location and cannot be reported.","Cannot Report Verified Guest",MessageBoxButton.OK,MessageBoxImage.Information);
                     return;
                 }
-                // Proveri da li je već prijavio
                 if (_reportService.HasUserReported(comment.Id, Session.CurrentUser.Id))
                 {
-                    MessageBox.Show("You have already reported this comment.",
-                        "Already Reported", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("You have already reported this comment.","Already Reported", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
-                var result = MessageBox.Show(
-                    $"Are you sure you want to report this comment?\n\n\"{comment.CommentText}\"",
-                    "Report Comment",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
+                var result = MessageBox.Show( $"Are you sure you want to report this comment?\n\n\"{comment.CommentText}\"","Report Comment",MessageBoxButton.YesNo,MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
                     bool success = _reportService.ReportComment(comment.Id, Session.CurrentUser.Id);
-
                     if (success)
                     {
-                        // Refresh forum da dobiješ ažurirane reports count
                         LoadForum(SelectedForum.Id);
-
-                        MessageBox.Show(
-                            "Comment has been reported. Thank you for helping maintain forum quality.",
-                            "Report Submitted",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
-                    }
-                    else
-                    {
-                        MessageBox.Show(
-                            "Failed to report comment. Please try again.",
-                            "Error",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Error);
+                        MessageBox.Show( "Comment has been reported. Thank you for helping maintain forum quality.","Report Submitted",MessageBoxButton.OK, MessageBoxImage.Information);
+                    }else{
+                        MessageBox.Show( "Failed to report comment. Please try again.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }

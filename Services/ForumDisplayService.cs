@@ -71,33 +71,36 @@ namespace BookingApp.Services
             var dto = new CommentDTO(context.Comment);
             dto.IsFromVisitor = IsUserVisitor(context);
             dto.IsFromOwner = context.Comment.User.Role == UserRole.OWNER;
-
-            // Owner ne može da reportuje svoje komentare ili komentare drugih ownera
             dto.CanReport = Session.CurrentUser.Role == UserRole.OWNER && !dto.IsFromOwner;
-
             dto.ReportsCount = _reportService.GetReportsCount(context.Comment.Id);
+            dto.StayDatesText = GetStayDatesText(context, dto.IsFromOwner, dto.IsFromVisitor);
+            return dto;
+        }
+        
+        private Reservation GetRelevantReservation(CommentStatusContext context)
+        {
+            return context.AllReservations
+                .Where(r => r.GuestId == context.Comment.User.Id)
+                .Where(r => context.AllAccommodations.Any(a =>
+                    a.Id == r.AccommodationId &&
+                    a.GeoLocation.Id == context.Location.Id))
+                .OrderByDescending(r => r.EndDate)
+                .FirstOrDefault();
+        }
+        private string GetStayDatesText(CommentStatusContext context, bool isFromVisitor, bool isFromOwner)
+        {
+            if (isFromOwner){return "Property owner";}
 
-            if (dto.IsFromVisitor)
+            if (isFromVisitor) 
             {
-                var reservation = context.AllReservations
-                    .Where(r => r.GuestId == context.Comment.User.Id)
-                    .Where(r => context.AllAccommodations.Any(a =>
-                        a.Id == r.AccommodationId &&
-                        a.GeoLocation.Id == context.Location.Id))
-                    .OrderByDescending(r => r.EndDate)
-                    .FirstOrDefault();
-
-                if (reservation != null)
+                var reservation = GetRelevantReservation(context);
+                if (reservation != null) 
                 {
-                    dto.StayDatesText = $"{reservation.StartDate:dd-MM-yyyy} - {reservation.EndDate:dd-MM-yyyy}";
+                    return $"{reservation.StartDate:dd-MM-yyyy} - {reservation.EndDate:dd-MM-yyyy}";
                 }
             }
-            else if (dto.IsFromOwner)
-            {
-                dto.StayDatesText = "Property owner";
-            }
 
-            return dto;
+            return null;
         }
         private bool IsUserVisitor(CommentStatusContext context)
         {

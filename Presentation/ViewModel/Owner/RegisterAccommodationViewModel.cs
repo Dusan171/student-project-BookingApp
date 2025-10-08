@@ -84,22 +84,13 @@ namespace BookingApp.Presentation.ViewModel.Owner
                     try
                     {
                         string relativePath = CopyImageToResources(filePath);
-
                         if (!ImagePaths.Any(img => img.Path == relativePath))
                         {
-                            ImagePaths.Add(new AccommodationImageDTO
-                            {
-                                Path = relativePath,
-                                AccommodationId = 0
-                            });
+                            ImagePaths.Add(new AccommodationImageDTO { Path = relativePath, AccommodationId = 0 });
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        ShowMessage($"Error adding image: {ex.Message}", "Error");
-                    }
+                    catch (Exception ex) { ShowMessage($"Error adding image: {ex.Message}", "Error");}
                 }
-
                 OnPropertyChanged(nameof(ImagePaths));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -109,16 +100,9 @@ namespace BookingApp.Presentation.ViewModel.Owner
         {
             try
             {
-                string baseDir = Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "..", "..", "..", "Resources", "Images"
-                );
+                string baseDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"..", "..", "..", "Resources", "Images");
                 baseDir = Path.GetFullPath(baseDir);
-
-                if (!Directory.Exists(baseDir))
-                {
-                    Directory.CreateDirectory(baseDir);
-                }
+                if (!Directory.Exists(baseDir)){Directory.CreateDirectory(baseDir);}
 
                 string fileName = Path.GetFileName(sourcePath);
                 string destPath = Path.Combine(baseDir, fileName);
@@ -203,8 +187,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
         private bool ValidateAccommodation()
         {
             if (string.IsNullOrWhiteSpace(Accommodation.Name))
-            {
-                ShowMessage("Please enter a property name.", "Validation Error");
+            {   ShowMessage("Please enter a property name.", "Validation Error");
                 return false;
             }
 
@@ -216,31 +199,10 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(Accommodation.Type))
-            {
-                ShowMessage("Please select a property type.", "Validation Error");
-                return false;
-            }
-
-            if (!Accommodation.MaxGuests.HasValue || Accommodation.MaxGuests < 1)
-            {
-                ShowMessage("Maximum guests must be at least 1.", "Validation Error");
-                return false;
-            }
-
-            if (!Accommodation.MinReservationDays.HasValue || Accommodation.MinReservationDays < 1)
-            {
-                ShowMessage("Minimum reservation days must be at least 1.", "Validation Error");
-                return false;
-            }
-
-            if (Accommodation.CancellationDeadlineDays < 1)
-            {
-                ShowMessage("Cancellation deadline must be at least 1 day.", "Validation Error");
-                return false;
-            }
-
-
+            if (string.IsNullOrWhiteSpace(Accommodation.Type)){ ShowMessage("Please select a property type.", "Validation Error");return false;}
+            if (!Accommodation.MaxGuests.HasValue || Accommodation.MaxGuests < 1){ ShowMessage("Maximum guests must be at least 1.", "Validation Error");return false;}
+            if (!Accommodation.MinReservationDays.HasValue || Accommodation.MinReservationDays < 1){ ShowMessage("Minimum reservation days must be at least 1.", "Validation Error"); return false; }
+            if (Accommodation.CancellationDeadlineDays < 1) { ShowMessage("Cancellation deadline must be at least 1 day.", "Validation Error");  return false;}
             return true;
         }
 

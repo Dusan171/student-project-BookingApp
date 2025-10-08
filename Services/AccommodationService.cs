@@ -110,7 +110,6 @@ namespace BookingApp.Services
         }
         public List<Accommodation> GetByOwnerId(int ownerId)
         {
-            // Implementacija
             return _accommodationRepository.GetByOwnerId(ownerId);
         }
 
