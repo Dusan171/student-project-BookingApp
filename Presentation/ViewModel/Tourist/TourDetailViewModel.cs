@@ -10,6 +10,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
     public class TourDetailViewModel : ViewModelBase
     {
         private TourDTO _selectedTour;
+        private bool _showReserveButton = true;
 
         public TourDTO SelectedTour
         {
@@ -21,11 +22,21 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
         }
 
+
+        public bool ShowReserveButton
+        {
+            get => _showReserveButton;
+            set => SetProperty(ref _showReserveButton, value);
+        }
+
+
         public ObservableCollection<KeyPointDTO> KeyPoints { get; set; } = new();
         public ObservableCollection<Images> Images { get; set; } = new();
 
         public bool HasKeyPoints => true;
-        public bool HasImages => true; 
+        public bool HasImages => true;
+
+       
 
         public ICommand ReserveTourCommand { get; private set; }
         public ICommand BackCommand { get; private set; }
@@ -60,9 +71,10 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             Images.Add(new Images { Id = 6, Path = "/Resources/Images/slika5.jpg" });
         }
 
-        public void SetTour(TourDTO tour)
+        public void SetTour(TourDTO tour, bool isFromNotification = false)
         {
             SelectedTour = tour;
+  
         }
     }
 }

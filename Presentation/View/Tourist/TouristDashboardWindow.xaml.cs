@@ -309,11 +309,15 @@ namespace BookingApp.Presentation.View.Tourist
                 _tourNotificationsInitialized = true;
             }
 
-            // DODAJ OVO:
+            // Pretplatite se na oba eventa
             if (TourNotificationsContent?.ViewModel != null)
             {
                 TourNotificationsContent.ViewModel.ReservationRequested -= OnNotificationReservationRequested;
                 TourNotificationsContent.ViewModel.ReservationRequested += OnNotificationReservationRequested;
+
+                // DODAJ OVO - za prikaz detalja
+                TourNotificationsContent.ViewModel.ShowDetailsRequested -= OnNotificationShowDetailsRequested;
+                TourNotificationsContent.ViewModel.ShowDetailsRequested += OnNotificationShowDetailsRequested;
             }
 
             HideAllViews();
@@ -490,7 +494,60 @@ namespace BookingApp.Presentation.View.Tourist
             {
                 TourNotificationsContent.ViewModel.ReservationRequested -= OnNotificationReservationRequested;
             }
+
+            if (TourNotificationsContent?.ViewModel != null)
+            {
+                TourNotificationsContent.ViewModel.ReservationRequested -= OnNotificationReservationRequested;
+                TourNotificationsContent.ViewModel.ShowDetailsRequested -= OnNotificationShowDetailsRequested; // DODAJ
+            }
         }
+
+        private void OnNotificationShowDetailsRequested(object sender, TourNotificationDTO notification)
+        {
+            try
+            {
+                if (notification?.Tour == null)
+                {
+                    MessageBox.Show("Nema dostupnih detalja za ovu turu.",
+                                  "Greška",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Warning);
+                    return;
+                }
+
+                
+                var tourService = Injector.CreateInstance<ITourService>();
+                var fullTour = tourService.GetTourById(notification.Tour.Id);
+
+                if (fullTour != null)
+                {
+                    
+                    var tourDTO = TourDTO.FromDomain(fullTour);
+
+                    
+                    ShowSearchToursView();
+                    SetActiveTab(SearchToursTab);
+
+                    
+                    OnTourDetailsRequested(tourDTO);
+                }
+                else
+                {
+                    MessageBox.Show("Tura nije pronađena u sistemu.",
+                                  "Greška",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Greška pri prikazivanju detalja: {ex.Message}",
+                               "Greška",
+                               MessageBoxButton.OK,
+                               MessageBoxImage.Error);
+            }
+        }
+        
 
         public void RefreshCurrentView()
         {

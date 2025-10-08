@@ -23,6 +23,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
         public event PropertyChangedEventHandler PropertyChanged;
         public event EventHandler<NotifiedTourDTO> ReservationRequested;
+        public event EventHandler<TourNotificationDTO> ShowDetailsRequested;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -41,11 +42,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             set { _hasLatestNotification = value; OnPropertyChanged(); }
         }
 
-        public bool ShowTourDetails
-        {
-            get => _showTourDetails;
-            set { _showTourDetails = value; OnPropertyChanged(); }
-        }
 
         public NotifiedTourDTO SelectedTour
         {
@@ -73,7 +69,8 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
         public ICommand ViewTourDetailsCommand { get; }
         public ICommand ReserveTourCommand { get; }
-        public ICommand CloseTourDetailsCommand { get; }
+       
+
 
         public TourNotificationsViewModel(int currentUserId, ITourNotificationService notificationService = null)
         {
@@ -84,7 +81,7 @@ namespace BookingApp.Presentation.ViewModel.Tourist
 
             ViewTourDetailsCommand = new RelayCommand<TourNotificationDTO>(ViewTourDetails);
             ReserveTourCommand = new RelayCommand<NotifiedTourDTO>(ReserveTour);
-            CloseTourDetailsCommand = new RelayCommand(CloseTourDetails);
+          
 
             LoadNotifications();
         }
@@ -147,30 +144,6 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
         }
 
-        private void ViewTourDetails(TourNotificationDTO notification)
-        {
-            try
-            {
-                if (notification?.Tour != null)
-                {
-                    SelectedTour = notification.Tour;
-                    ShowTourDetails = true;
-
-                    // Označi kao pročitano
-                    _notificationService.MarkAsRead(notification.Id);
-
-                    StatusMessage = "";
-                }
-                else
-                {
-                    StatusMessage = "Nema dostupnih detalja za ovu turu.";
-                }
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Greška pri prikazivanju detalja ture: {ex.Message}";
-            }
-        }
 
         private void ReserveTour(NotifiedTourDTO tour)
         {
@@ -192,11 +165,31 @@ namespace BookingApp.Presentation.ViewModel.Tourist
             }
         }
 
-        private void CloseTourDetails()
+        private void ViewTourDetails(TourNotificationDTO notification)
         {
-            ShowTourDetails = false;
-            SelectedTour = null;
-            StatusMessage = "";
+            try
+            {
+                if (notification?.Tour != null)
+                {
+                    
+                    _notificationService.MarkAsRead(notification.Id);
+
+                  
+                    ShowDetailsRequested?.Invoke(this, notification);
+
+                    StatusMessage = "";
+                }
+                else
+                {
+                    StatusMessage = "Nema dostupnih detalja za ovu turu.";
+                }
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Greška pri prikazivanju detalja ture: {ex.Message}";
+            }
         }
+
+     
     }
 }
