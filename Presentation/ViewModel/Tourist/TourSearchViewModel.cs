@@ -345,6 +345,14 @@ namespace BookingApp.Presentation.ViewModel.Tourist
                    (!string.IsNullOrWhiteSpace(SearchPeopleCount) && SearchPeopleCount != "1");
         }
 
+        public void ShowTourDetailsFromNotification(TourDTO tour)
+        {
+            if (tour != null)
+            {
+                TourDetailsRequested?.Invoke(tour);
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)

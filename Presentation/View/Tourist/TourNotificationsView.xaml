@@ -174,74 +174,9 @@
                     </StackPanel>
                 </Border>
 
-                
-                <Border Style="{StaticResource CardStyle}"
-                        Visibility="{Binding ShowTourDetails, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel>
-                        <TextBlock Text="Detalji nove ture" FontSize="18" FontWeight="Bold" 
-                                   Foreground="#2C3E50" Margin="0,0,0,20"/>
 
-                        <Grid Margin="0,0,0,15">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" MinWidth="100"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Naziv:" FontWeight="SemiBold" 
-                                       Foreground="#34495E" Margin="0,0,15,10"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SelectedTour.Name}" 
-                                       Foreground="#2C3E50" FontWeight="Bold" Margin="0,0,0,10"/>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Lokacija:" FontWeight="SemiBold" 
-                                       Foreground="#34495E" Margin="0,0,15,10"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedTour.Location}" 
-                                       Foreground="#2C3E50" Margin="0,0,0,10"/>
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Jezik:" FontWeight="SemiBold" 
-                                       Foreground="#34495E" Margin="0,0,15,10"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding SelectedTour.Language}" 
-                                       Foreground="#2C3E50" Margin="0,0,0,10"/>
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Datum:" FontWeight="SemiBold" 
-                                       Foreground="#34495E" Margin="0,0,15,10"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SelectedTour.Date, StringFormat='dd.MM.yyyy HH:mm'}" 
-                                       Foreground="#2C3E50" Margin="0,0,0,10"/>
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Vodič:" FontWeight="SemiBold" 
-                                       Foreground="#34495E" Margin="0,0,15,0"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding SelectedTour.GuideName}" 
-                                       Foreground="#2C3E50"/>
-                        </Grid>
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="15"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Button Grid.Column="0" Content="Rezerviši turu" 
-                                    Command="{Binding ReserveTourCommand}"
-                                    CommandParameter="{Binding SelectedTour}"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    HorizontalAlignment="Stretch"/>
-
-                            <Button Grid.Column="2" Content="Zatvori detalje" 
-                                    Command="{Binding CloseTourDetailsCommand}"
-                                    Style="{StaticResource GrayButtonStyle}"
-                                    HorizontalAlignment="Stretch"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>
-
-               
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>
                         <TextBlock Text="Istorija obaveštenja" FontSize="18" FontWeight="Bold" 
