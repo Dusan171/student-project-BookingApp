@@ -227,6 +227,4 @@ namespace BookingApp.Services
                 .FirstOrDefault();
         }
     }
-
-
     }

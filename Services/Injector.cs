@@ -12,6 +12,7 @@ using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.Presentation.ViewModel;
 using static BookingApp.Services.PDFAccommodationReportService;
+using GalaSoft.MvvmLight.Views;
 
 namespace BookingApp.Services
 {
@@ -129,7 +130,7 @@ namespace BookingApp.Services
                     CreateInstance<IReservationRepository>(),
                     CreateInstance<IAccommodationStatisticsService>() // <--- OVA LINIJA JE KLJUČNA IZMENA
             );
-            _implementations[typeof(INavigationService)] = new NavigationService();
+            _implementations[typeof(BookingApp.Domain.Interfaces.INavigationService)] = new NavigationService();
 
             _implementations[typeof(INotificationService)] = new NotificationService((INotificationRepository)_implementations[typeof(INotificationRepository)], (IReservationService)_implementations[typeof(IReservationService)]);
 
@@ -149,6 +150,11 @@ namespace BookingApp.Services
                 CreateInstance<IForumNotificationRepository>(),
                 CreateInstance<IAccommodationRepository>()
             );
+
+            _implementations[typeof(IImageFileHandler)] = new ImageFileHandler();
+
+            _implementations[typeof(IAccommodationValidationService)] = new AccommodationValidationService();
+
             // NOVI - Tour Presence Notification Service (registrovati PRE TourPresenceService)
             _implementations[typeof(ITourPresenceNotificationService)] = new TourPresenceNotificationService(
                 CreateInstance<ITourPresenceNotificationRepository>()
@@ -320,7 +326,10 @@ namespace BookingApp.Services
         public static RegisterAccommodationViewModel CreateRegisterAccommodationViewModel(Action navigateBack = null)
         {
             var accommodationService = CreateInstance<IAccommodationService>();
-            return new RegisterAccommodationViewModel(accommodationService, navigateBack);
+            var imageFileHandler = CreateInstance<IImageFileHandler>();
+            var validationService = CreateInstance<IAccommodationValidationService>();
+
+            return new RegisterAccommodationViewModel(accommodationService, imageFileHandler,validationService, navigateBack);
         }
 
         public static ReviewsViewModel CreateReviewsViewModel()
