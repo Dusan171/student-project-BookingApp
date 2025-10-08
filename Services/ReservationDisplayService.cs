@@ -40,48 +40,53 @@ namespace BookingApp.Services
         {
             var accommodation = allAccommodations.FirstOrDefault(a => a.Id == reservation.AccommodationId);
             var request = _rescheduleRequestRepository.GetByReservationId(reservation.Id);
-
             bool hasGuestRated = _accommodationReviewService.HasGuestRated(reservation.Id);
 
-            bool isCancellationEnabled = reservation.StartDate > DateTime.Now;
-
-            return new ReservationDetailsDTO
+            var dto = new ReservationDetailsDTO
             {
                 ReservationId = reservation.Id,
                 StartDate = reservation.StartDate,
                 EndDate = reservation.EndDate,
                 GuestsNumber = reservation.GuestsNumber,
                 AccommodationName = accommodation?.Name ?? "N/A",
-                RequestStatusText = request?.Status.ToString() ?? "Not requested",
+                RequestStatusText = GetRequestStatusText(request),
                 OwnerComment = request?.OwnerComment ?? "",
-                OriginalReservation = reservation,
-
-                IsRescheduleEnabled = CalculateIsRescheduleEnabled(reservation, request),
-                IsRatingEnabled = CalculateIsRatingEnabled(reservation, hasGuestRated),
-                IsGuestReviewVisible = CalculateIsGuestReviewVisible(reservation, hasGuestRated),
-                IsCancellationEnabled = isCancellationEnabled
+                OriginalReservation = reservation
             };
-        }
 
-        private bool CalculateIsRescheduleEnabled(Reservation reservation, RescheduleRequest request)
+            dto.IsCancellationEnabled = IsCancellationPossible(reservation);
+            dto.IsRescheduleEnabled = IsReschedulePossible(reservation, request);
+            dto.IsRatingEnabled = IsRatingPossible(reservation, hasGuestRated);
+            dto.IsGuestReviewVisible = IsGuestReviewVisible(reservation.Id, hasGuestRated);
+
+            return dto;
+        }
+        private string GetRequestStatusText(RescheduleRequest request)
+        {
+            return request?.Status.ToString() ?? "Not requested";
+        }
+        private bool IsCancellationPossible(Reservation reservation)
+        {
+            return reservation.StartDate > DateTime.Now.Date;
+        }
+        private bool IsReschedulePossible(Reservation reservation, RescheduleRequest request)
         {
             bool hasPendingRequest = (request != null && request.Status == RequestStatus.Pending);
-            return reservation.StartDate > DateTime.Now && !hasPendingRequest;
+            return reservation.StartDate > DateTime.Now.Date && !hasPendingRequest;
         }
 
-        private bool CalculateIsRatingEnabled(Reservation reservation, bool hasGuestAlreadyRated)
+        private bool IsRatingPossible(Reservation reservation, bool hasGuestAlreadyRated)
         {
             bool isFinished = reservation.EndDate < DateTime.Now;
             bool isWithinReviewPeriod = (DateTime.Now - reservation.EndDate).TotalDays <= 5;
             return isFinished && isWithinReviewPeriod && !hasGuestAlreadyRated;
         }
-
-        private bool CalculateIsGuestReviewVisible(Reservation reservation, bool hasGuestAlreadyRated)
+        private bool IsGuestReviewVisible(int reservationId, bool hasGuestAlreadyRated)
         {
             if (!hasGuestAlreadyRated) return false;
 
-            var reviewFromOwner = _guestReviewService.GetReviewForReservation(reservation.Id);
-            return reviewFromOwner != null;
+            return _guestReviewService.GetReviewForReservation(reservationId) != null;
         }
+
     }
 }

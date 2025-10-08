@@ -14,34 +14,20 @@ namespace BookingApp.Presentation.ViewModel.Guest
 {
     public class MyReservationsViewModel : ViewModelBase
     {
-        private readonly IReservationService _reservationService;
-        private readonly IReservationDisplayService _reservationDisplayService;
-        private readonly IAccommodationReviewService _accommodationReviewService;
-        private readonly IGuestReviewService _guestReviewService;
+        private readonly IReservationDisplayService _displayService;
         private readonly IReservationCancellationService _cancellationService;
+        private readonly IGuestReviewService _guestReviewService;
+        private readonly IReportGenerationService _reportService; 
+
+        public event Action<ReservationDetailsDTO> RescheduleRequested;
+        public event Action<ReservationDetailsDTO> RateRequested;
 
         public static event Action NavigateBackToSearchRequested;
 
-        #region Svojstva
+        #region Properties & Commands
         public ObservableCollection<ReservationDetailsDTO> Reservations { get; set; }
-
-        private DateTime? _reportStartDate;
-        public DateTime? ReportStartDate
-        {
-            get => _reportStartDate;
-            set { _reportStartDate = value; OnPropertyChanged(); }
-        }
-
-        private DateTime? _reportEndDate;
-        public DateTime? ReportEndDate
-        {
-            get => _reportEndDate;
-            set { _reportEndDate = value; OnPropertyChanged(); }
-        }
-
-        #endregion
-
-        #region Komande
+        public DateTime? ReportStartDate { get; set; }
+        public DateTime? ReportEndDate { get; set; }
         public ICommand RescheduleCommand { get; }
         public ICommand RateCommand { get; }
         public ICommand ViewReviewCommand { get; }
@@ -52,109 +38,59 @@ namespace BookingApp.Presentation.ViewModel.Guest
 
         public MyReservationsViewModel()
         {
-            _reservationService = Injector.CreateInstance<IReservationService>();
-            _reservationDisplayService = Injector.CreateInstance<IReservationDisplayService>();
-            _accommodationReviewService = Injector.CreateInstance<IAccommodationReviewService>();
-            _guestReviewService = Injector.CreateInstance<IGuestReviewService>();
+            _displayService = Injector.CreateInstance<IReservationDisplayService>();
             _cancellationService = Injector.CreateInstance<IReservationCancellationService>();
+            _guestReviewService = Injector.CreateInstance<IGuestReviewService>();
+            _reportService = Injector.CreateInstance<IReportGenerationService>();
 
-            RescheduleCommand = new RelayCommand(Reschedule);
-            RateCommand = new RelayCommand(Rate);
+            RescheduleCommand = new RelayCommand(p => RescheduleRequested?.Invoke(p as ReservationDetailsDTO));
+            RateCommand = new RelayCommand(p => RateRequested?.Invoke(p as ReservationDetailsDTO));
             ViewReviewCommand = new RelayCommand(ViewReview);
-            CloseCommand = new RelayCommand(GoBackToSearch);
+            CloseCommand = new RelayCommand(p => NavigateBackToSearchRequested?.Invoke());
             CancelReservationCommand = new RelayCommand(CancelReservation);
             GenerateReportCommand = new RelayCommand(GenerateReport);
 
             LoadReservations();
         }
 
-        #region Logika Komandi
+        #region Command Logic (sada su metode mnogo kraće)
 
         private void GenerateReport(object parameter)
         {
-            if (!ReportStartDate.HasValue || !ReportEndDate.HasValue)
-            {
-                MessageBox.Show("Please select both a start and an end date for the report.", "Date Missing", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (ReportStartDate.Value > ReportEndDate.Value)
-            {
-                MessageBox.Show("The start date cannot be after the end date.", "Invalid Date Range", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            List<ReservationDetailsDTO> filteredReservations = Reservations
-                .Where(r => r.StartDate >= ReportStartDate.Value && r.StartDate <= ReportEndDate.Value)
-                .ToList();
-
-            if (!filteredReservations.Any())
-            {
-                MessageBox.Show("There are no reservations in the selected period.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
+            if (!IsReportDataValid(out var data)) return;
 
             try
             {
-                var pdfService = new PdfReportService();
-                pdfService.GenerateReservationReport(filteredReservations, ReportStartDate.Value, ReportEndDate.Value);
+                _reportService.GenerateReservationReport(data.FilteredReservations, data.StartDate, data.EndDate);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An error occurred while generating the PDF report: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Report Generation Failed", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
         private void CancelReservation(object parameter)
         {
-            if (parameter is not ReservationDetailsDTO selectedReservation) return;
+            if (parameter is not ReservationDetailsDTO selected) return;
 
-            var result = MessageBox.Show(
-                $"Are you sure you want to cancel your reservation for:\n\n{selectedReservation.AccommodationName}\n({selectedReservation.StartDate:dd.MM.yyyy} - {selectedReservation.EndDate:dd.MM.yyyy})?",
-                "Confirm Cancellation",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
+            var result = MessageBox.Show($"Are you sure you want to cancel the reservation for {selected.AccommodationName}?", "Confirm Cancellation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.Yes)
             {
                 try
                 {
-                    _cancellationService.CancelReservation(selectedReservation.ReservationId);
-                    MessageBox.Show("Reservation successfully cancelled.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    _cancellationService.CancelReservation(selected.ReservationId);
+                    MessageBox.Show("Reservation successfully cancelled.");
                     LoadReservations();
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Cancellation Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                catch (Exception ex) { MessageBox.Show(ex.Message, "Cancellation Failed", MessageBoxButton.OK, MessageBoxImage.Error); }
             }
-        }
-
-        private void Reschedule(object parameter)
-        {
-            var selectedDto = parameter as ReservationDetailsDTO;
-            if (selectedDto == null) return;
-
-            var rescheduleWindow = new RescheduleRequestView(selectedDto);
-            ShowDialogAndRefresh(rescheduleWindow);
-        }
-
-        private void Rate(object parameter)
-        {
-            var selectedDto = parameter as ReservationDetailsDTO;
-            if (selectedDto == null) return;
-
-            var rateWindow = new AccommodationReviewView(selectedDto);
-            ShowDialogAndRefresh(rateWindow);
         }
 
         private void ViewReview(object parameter)
         {
-            var selectedDto = parameter as ReservationDetailsDTO;
-            if (selectedDto == null) return;
+            if (parameter is not ReservationDetailsDTO selected) return;
 
-            GuestReviewDTO reviewDto = _guestReviewService.GetReviewForReservation(selectedDto.ReservationId);
-
+            var reviewDto = _guestReviewService.GetReviewForReservation(selected.ReservationId);
             if (reviewDto != null)
             {
                 var detailsWindow = new GuestReviewDetailsView(reviewDto);
@@ -166,27 +102,30 @@ namespace BookingApp.Presentation.ViewModel.Guest
             }
         }
 
-        private void GoBackToSearch(object obj)
-        {
-            NavigateBackToSearchRequested?.Invoke();
-        }
-
         #endregion
 
         #region Pomoćne metode
 
         public void LoadReservations()
         {
-            var reservationsList = _reservationDisplayService.GetReservationsForGuest(Session.CurrentUser.Id);
+            var reservationsList = _displayService.GetReservationsForGuest(Session.CurrentUser.Id);
             Reservations = new ObservableCollection<ReservationDetailsDTO>(reservationsList);
             OnPropertyChanged(nameof(Reservations));
         }
 
-        private void ShowDialogAndRefresh(Window dialogWindow)
+        private bool IsReportDataValid(out (List<ReservationDetailsDTO> FilteredReservations, DateTime StartDate, DateTime EndDate) data)
         {
-            dialogWindow.ShowDialog();
-            LoadReservations();
+            data = default;
+            if (!ReportStartDate.HasValue || !ReportEndDate.HasValue) { MessageBox.Show("Please select both a start and an end date."); return false; }
+            if (ReportStartDate.Value > ReportEndDate.Value) { MessageBox.Show("The start date cannot be after the end date."); return false; }
+
+            var filtered = Reservations.Where(r => r.StartDate >= ReportStartDate.Value && r.StartDate <= ReportEndDate.Value).ToList();
+            if (!filtered.Any()) { MessageBox.Show("There are no reservations in the selected period."); return false; }
+
+            data = (filtered, ReportStartDate.Value, ReportEndDate.Value);
+            return true;
         }
+
         #endregion
     }
 }

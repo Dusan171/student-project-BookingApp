@@ -29,12 +29,7 @@ namespace BookingApp.Services.DTO
             MaxGuests = accommodation.MaxGuests;
             MinReservationDays = accommodation.MinReservationDays;
             CancellationDeadlineDays = accommodation.CancellationDeadlineDays;
-            ImagePaths = new List<string>
-            {
-                "/Resources/Images/apartman.jpg",
-                "/Resources/Images/cottage.jpg",
-                "/Resources/Images/soba.jpg"
-            };
+            ImagePaths = accommodation.Images.Select(img => img.Path).ToList();
         }
     }
 }

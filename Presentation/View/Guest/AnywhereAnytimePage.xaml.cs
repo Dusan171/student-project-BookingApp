@@ -1,6 +1,4 @@
 ﻿using System.Windows.Controls;
-using BookingApp.Presentation.ViewModel.Guest;
-using BookingApp.Utilities;
 
 namespace BookingApp.Presentation.View.Guest
 {
@@ -9,7 +7,7 @@ namespace BookingApp.Presentation.View.Guest
         public AnywhereAnytimePage()
         {
             InitializeComponent();
-            DataContext = new AnywhereAnytimeViewModel();
+           
         }
     }
 }
