@@ -2,11 +2,17 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:util="clr-namespace:BookingApp.Utilities"
+      xmlns:controls="clr-namespace:BookingApp.Presentation.View.Guide.Controls"
       Background="White">
 
     <Page.Resources>
-        <util:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        <util:InverseBooleanConverter x:Key="InverseBoolToVisibilityConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/ToursControlStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <util:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <util:InverseBooleanConverter x:Key="InverseBoolToVisibilityConverter"/>
+        </ResourceDictionary>
     </Page.Resources>
 
     <Grid>
@@ -16,233 +22,39 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- Main Tours Section -->
             <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
+                    <!-- Header -->
                     <DockPanel Margin="0,0,0,10">
-                        <TextBlock Text="Tours" FontSize="20" FontWeight="Bold"
-                                   DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                        <Button Content="New Tour"
-                                Command="{Binding NewTourCommand}"
-                                Background="#007ACC" Foreground="White"
-                                HorizontalAlignment="Right" DockPanel.Dock="Right" Padding="10,2"
-                                Cursor="Hand" ToolTip="Create a new tour"/>
+                        <TextBlock Text="Tours" FontSize="20" FontWeight="Bold" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                        <Button Content="New Tour" Command="{Binding NewTourCommand}" Background="#007ACC" Foreground="White" HorizontalAlignment="Right" DockPanel.Dock="Right" Padding="10,2" Style="{StaticResource AnimatedButtonStyle}" ToolTip="Create a new tour"/>
                     </DockPanel>
 
+                    <!-- Filter Section -->
                     <StackPanel Margin="0,0,0,12">
                         <Label Content="Filter Tours:" HorizontalAlignment="Left"/>
-                        <ComboBox ItemsSource="{Binding FilterOptions}"
-                                  SelectedItem="{Binding SelectedFilter}"
-                                  Width="100" HorizontalAlignment="Left"
-                                  ToolTip="Select a filter for tours"/>
+                        <ComboBox ItemsSource="{Binding FilterOptions}" SelectedItem="{Binding SelectedFilter}" Width="100" HorizontalAlignment="Left" ToolTip="Select a filter for tours"/>
                     </StackPanel>
 
+                    <!-- Tours List -->
                     <ItemsControl ItemsSource="{Binding Tours}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderThickness="1" BorderBrush="Gray" Margin="0,0,0,10" Padding="10">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Width="60" Height="60" Margin="0,0,10,0"
-                                               Source="{Binding ImagePath}" Stretch="UniformToFill"></Image>
-
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
-                                            <TextBlock Text="{Binding Date}"/>
-                                            <TextBlock Text="{Binding Language}"/>
-                                            <TextBlock Text="{Binding Duration}"/>
-                                        </StackPanel>
-
-                                        <Button Content="START"
-                                                Command="{Binding DataContext.StartTourCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}"
-                                                Background="#007ACC" Margin="20,0,0,0"
-                                                VerticalAlignment="Center" Foreground="White"
-                                                Visibility="{Binding IsActive, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                                                IsEnabled="{Binding CanStart}" Cursor="Hand"
-                                                ToolTip="Start this tour"/>
-
-                                        <Button Content="TRACK"
-                                                Command="{Binding DataContext.StartTourCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}"
-                                                Background="Green" Margin="20,0,0,0"
-                                                VerticalAlignment="Center" Foreground="White"
-                                                Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibilityConverter}}"
-                                                IsEnabled="{Binding CanTrack}" Cursor="Hand"
-                                                ToolTip="Track the progress of this tour"/>
-
-                                        <Button Content="CANCEL"
-                                                Command="{Binding DataContext.CancelTourCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}"
-                                                Background="Red" Margin="10,0,0,0" Foreground="White"
-                                                VerticalAlignment="Center"
-                                                Visibility="{Binding IsToday, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                                                IsEnabled="{Binding CanCancel}" Cursor="Hand"
-                                                ToolTip="Cancel this tour"/>
-
-                                        <Button Content="ℹ️"
-                                                Command="{Binding DataContext.ShowTourDetailsCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}"
-                                                Background="Transparent"
-                                                FontSize="18"
-                                                Margin="20,0,0,0"
-                                                VerticalAlignment="Center"
-                                                Cursor="Hand"
-                                                ToolTip="View tour details"/>
-                                    </StackPanel>
-                                </Border>
+                                <controls:TourCardControl DataContext="{Binding}"/>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
             </ScrollViewer>
 
-            <StackPanel Grid.Row="1" Margin="0,12,0,0">
-                <TextBlock Text="Generate a report about scheduled tours for a time period:"
-                           FontWeight="Bold" FontSize="16" Margin="0,0,0,12"
-                           TextWrapping="Wrap" HorizontalAlignment="Left"
-                           MaxWidth="400" Width="318"/>
-
-                <StackPanel Margin="0,0,0,8">
-                    <TextBlock Text="From:" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                    <DatePicker x:Name="StartDatePicker" Width="200" HorizontalAlignment="Left"
-                                ToolTip="Select start date for report"/>
-                </StackPanel>
-
-                <StackPanel Margin="0,0,0,8">
-                    <TextBlock Text="To:" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                    <DatePicker x:Name="EndDatePicker" Width="200" HorizontalAlignment="Left"
-                                ToolTip="Select end date for report"/>
-                </StackPanel>
-
-                <Button Content="GENERATE PDF"
-                        Width="200"
-                        Height="40"
-                        Background="#007ACC" Foreground="White"
-                        Click="GenerateReport_Click"
-                        HorizontalAlignment="Left"
-                        Cursor="Hand" ToolTip="Generate PDF report"/>
-            </StackPanel>
+            <!-- Report Generator Section -->
+            <controls:ReportGeneratorControl x:Name="ReportGenerator" Grid.Row="1" GenerateReportClick="GenerateReport_Click"/>
         </Grid>
 
-        <Border x:Name="PDFOverlay" 
-                Background="#CC000000" 
-                Visibility="Collapsed" 
-                Panel.ZIndex="999">
-            <Border Background="White" 
-                    Width="900" Height="700" 
-                    CornerRadius="15"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-                <Border.Effect>
-                    <DropShadowEffect Color="Black" Direction="270" 
-                                      ShadowDepth="10" Opacity="0.3" BlurRadius="20"/>
-                </Border.Effect>
-
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <Border Grid.Row="0" 
-                            Background="#2E86AB" 
-                            CornerRadius="15,15,0,0" 
-                            Padding="15,12">
-                        <DockPanel>
-                            <TextBlock Text="PDF Izvestaj" 
-                                       FontSize="16" FontWeight="Bold" 
-                                       Foreground="White"
-                                       VerticalAlignment="Center" 
-                                       DockPanel.Dock="Left"/>
-                            <Button Content="X" 
-                                    Width="28" Height="28"
-                                    FontSize="14" FontWeight="Bold"
-                                    HorizontalAlignment="Right"
-                                    DockPanel.Dock="Right"
-                                    Click="ClosePDFOverlay_Click"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Foreground="White"
-                                    Cursor="Hand"
-                                    ToolTip="Close PDF preview">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" 
-                                                            CornerRadius="14">
-                                                        <ContentPresenter HorizontalAlignment="Center" 
-                                                                          VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#AA000000"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </DockPanel>
-                    </Border>
-
-                    <WebBrowser x:Name="PDFWebBrowser" 
-                                Grid.Row="1" 
-                                Margin="0"
-                                ToolTip="PDF preview"/>
-
-                    <Border Grid.Row="2" Background="#F8F9FA" 
-                            CornerRadius="0,0,15,15" 
-                            Padding="20,15">
-                        <StackPanel Orientation="Horizontal" 
-                                    HorizontalAlignment="Center">
-                            <Button Content="Otvori spoljašnje" 
-                                    Width="140" Height="35" 
-                                    Background="#6C757D" 
-                                    Foreground="White" 
-                                    FontSize="12"
-                                    Margin="0,0,10,0"
-                                    Click="OpenPDFExternal_Click"
-                                    Cursor="Hand"
-                                    BorderThickness="0"
-                                    ToolTip="Open PDF in external viewer">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#5A6268"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-
-                            <Button Content="Zatvori" 
-                                    Width="100" Height="35" 
-                                    Background="#2E86AB" 
-                                    Foreground="White"
-                                    FontSize="12"
-                                    Click="ClosePDFOverlay_Click"
-                                    Cursor="Hand"
-                                    BorderThickness="0"
-                                    ToolTip="Close PDF preview">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#1E5F7A"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-            </Border>
-        </Border>
+        <!-- PDF Modal -->
+        <controls:PdfModalControl x:Name="PdfModal" 
+                                  ClosePDFOverlayClick="ClosePDFOverlay_Click" 
+                                  OpenPDFExternalClick="OpenPDFExternal_Click"/>
     </Grid>
 </Page>

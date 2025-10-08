@@ -1,0 +1,25 @@
+<UserControl x:Class="BookingApp.Presentation.View.Guide.Controls.StartTimesControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/CreateTourStyles.xaml"/>
+    </UserControl.Resources>
+
+    <GroupBox Header="Start Date and Time" Margin="0,5,0,10" FontWeight="Bold" ToolTip="Select when the tour starts">
+        <StackPanel Margin="5">
+            <DatePicker SelectedDate="{Binding SelectedStartDate}" HorizontalAlignment="Stretch" Margin="0,0,0,5" ToolTip="Pick a start date"/>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <Label Content="Select time:" Width="100"/>
+                <ComboBox ItemsSource="{Binding Hours}" SelectedItem="{Binding SelectedHour}" Style="{StaticResource SmallSpinnerComboBoxStyle}" Width="70" Margin="0,0,5,0" ToolTip="Select start hour"/>
+                <ComboBox ItemsSource="{Binding Minutes}" SelectedItem="{Binding SelectedMinute}" Style="{StaticResource SmallSpinnerComboBoxStyle}" Width="70" ToolTip="Select start minutes"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <Button Content="Add" Width="70" Height="25" Margin="0,0,5,0" Command="{Binding AddStartTimeCommand}" Background="#4CAF50" Foreground="White" BorderThickness="0" Style="{StaticResource AnimatedButtonStyle}" ToolTip="Add a new start time"/>
+                <Button Content="Remove" Width="70" Command="{Binding RemoveStartTimeCommand}" CommandParameter="{Binding SelectedStartTime}" Background="#F44336" Foreground="White" BorderThickness="0" Style="{StaticResource AnimatedButtonStyle}" ToolTip="Remove the selected start time"/>
+            </StackPanel>
+            <ListBox ItemsSource="{Binding StartTimes}" SelectedItem="{Binding SelectedStartTime, Mode=TwoWay}" Height="60" HorizontalAlignment="Stretch" ItemContainerStyle="{StaticResource AnimatedListBoxItemStyle}" ToolTip="List of all selected start times"/>
+        </StackPanel>
+    </GroupBox>
+
+</UserControl>

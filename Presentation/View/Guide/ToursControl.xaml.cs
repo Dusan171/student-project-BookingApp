@@ -28,24 +28,24 @@ namespace BookingApp.Presentation.View.Guide
 
         private void GenerateReport_Click(object sender, RoutedEventArgs e)
         {
-            if (!StartDatePicker.SelectedDate.HasValue || !EndDatePicker.SelectedDate.HasValue)
+            var startDate = ReportGenerator.StartDate;
+            var endDate = ReportGenerator.EndDate;
+
+            if (!startDate.HasValue || !endDate.HasValue)
             {
                 MessageBox.Show("Molimo odaberite oba datuma za generisanje izveštaja.", "Greška",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            DateTime startDate = StartDatePicker.SelectedDate.Value;
-            DateTime endDate = EndDatePicker.SelectedDate.Value;
-
-            if (startDate > endDate)
+            if (startDate.Value > endDate.Value)
             {
                 MessageBox.Show("Datum početka mora biti pre datuma kraja.", "Greška",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var parameters = new object[] { startDate, endDate };
+            var parameters = new object[] { startDate.Value, endDate.Value };
             _viewModel.GenerateReportCommand.Execute(parameters);
         }
 
@@ -55,12 +55,11 @@ namespace BookingApp.Presentation.View.Guide
 
             try
             {
-                // Pokušaj učitavanja PDF-a u WebBrowser
                 if (File.Exists(pdfPath))
                 {
                     string fileUrl = new Uri(pdfPath).AbsoluteUri + "#zoom=40";
-                    PDFWebBrowser.Navigate(fileUrl);
-                    PDFOverlay.Visibility = Visibility.Visible;
+                    PdfModal.WebBrowser.Navigate(fileUrl);
+                    PdfModal.Overlay.Visibility = Visibility.Visible;
                 }
                 else
                 {
@@ -87,15 +86,15 @@ namespace BookingApp.Presentation.View.Guide
 
         private void ClosePDFOverlay_Click(object sender, RoutedEventArgs e)
         {
-            PDFOverlay.Visibility = Visibility.Collapsed;
+            PdfModal.Overlay.Visibility = Visibility.Collapsed;
 
             try
             {
-                PDFWebBrowser.Navigate("about:blank");
+                PdfModal.WebBrowser.Navigate("about:blank");
             }
             catch
             {
-
+                // Silent failure for navigate
             }
         }
 

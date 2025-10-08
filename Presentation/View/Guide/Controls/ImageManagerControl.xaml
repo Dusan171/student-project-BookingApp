@@ -1,0 +1,34 @@
+<UserControl x:Class="BookingApp.Presentation.View.Guide.Controls.ImageManagerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/CreateTourStyles.xaml"/>
+    </UserControl.Resources>
+
+    <GroupBox Header="Images" Margin="0,5,0,10" FontWeight="Bold" ToolTip="Upload and manage images for this tour">
+        <StackPanel Margin="5">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                <Button Content="Browse..." Height="30" Width="80" Background="#4CAF50" Foreground="White" BorderThickness="0" Command="{Binding BrowseImageCommand}" Style="{StaticResource AnimatedButtonStyle}" ToolTip="Browse for an image"/>
+                <Button Content="Remove" Height="30" Width="80" Background="#F44336" Foreground="White" BorderThickness="0" Margin="5,0,0,0" Command="{Binding RemoveImageCommand}" CommandParameter="{Binding SelectedItem, ElementName=ImagesList}" Style="{StaticResource AnimatedButtonStyle}" ToolTip="Remove the selected image"/>
+            </StackPanel>
+            <ListBox x:Name="ImagesList" ItemsSource="{Binding Images}" SelectedItem="{Binding SelectedImage}" Height="150" HorizontalAlignment="Stretch" SelectionMode="Single" ItemContainerStyle="{StaticResource AnimatedListBoxItemStyle}" ToolTip="All uploaded images">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding FullPath}" Width="70" Height="70" Margin="5" Style="{StaticResource ZoomImageStyle}" ToolTip="Double click to view image">
+                            <Image.InputBindings>
+                                <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DataContext.OpenImageViewerCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+                            </Image.InputBindings>
+                        </Image>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
+    </GroupBox>
+
+</UserControl>
