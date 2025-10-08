@@ -1,0 +1,65 @@
+<UserControl x:Class="BookingApp.Presentation.View.Guide.Controls.TourStatisticsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/StatisticsSelectionStyles.xaml"/>
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel Margin="10">
+            <TextBlock Text="Tour Statistics" FontSize="22" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,0,20"/>
+
+            <!-- Year Filter -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,15">
+                <TextBlock Text="Filter by year:" VerticalAlignment="Center" Margin="0,0,5,0" FontWeight="SemiBold"/>
+                <ComboBox Width="120" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear, Mode=TwoWay}" Padding="5" FontSize="14" ToolTip="Select a year to filter tours"/>
+            </StackPanel>
+
+            <!-- Most Visited Tour -->
+            <TextBlock Text="Most Visited Tour" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <Border Style="{StaticResource TourCardStyle}" Margin="0,0,0,15">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Width="80" Height="80" Margin="0,0,15,0" Source="{Binding MostVisitedTour.Images[0].Path}" Stretch="UniformToFill" ClipToBounds="True" ToolTip="Double-click to preview image">
+                        <Image.InputBindings>
+                            <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DataContext.OpenImageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding MostVisitedTour.Images[0].Path}"/>
+                        </Image.InputBindings>
+                    </Image>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="{Binding MostVisitedTour.Name}" FontWeight="Bold" FontSize="16"/>
+                        <TextBlock Text="{Binding MostVisitedTour.StartTimes[0].Time}" FontSize="14" Foreground="Gray"/>
+                        <TextBlock Text="{Binding MostVisitedTour.Language}" FontSize="14" Foreground="Gray"/>
+                        <TextBlock Text="{Binding MostVisitedTour.DurationHours, StringFormat=Duration: {0}h}" FontSize="14" Foreground="Gray"/>
+                    </StackPanel>
+                    <Button Content="Details" Width="90" Height="30" Margin="10,0,0,0" Command="{Binding DataContext.DetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding MostVisitedTour}" Style="{StaticResource PrimaryButtonStyle}" ToolTip="View details about this tour"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Other Tours -->
+            <TextBlock Text="Other Tours" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <ItemsControl ItemsSource="{Binding OtherTours}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource TourCardStyle}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Width="70" Height="70" Margin="0,0,15,0" Source="{Binding Images[0].Path}" Stretch="UniformToFill" ClipToBounds="True" ToolTip="Double-click to preview image">
+                                    <Image.InputBindings>
+                                        <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DataContext.OpenImageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding Images[0].Path}"/>
+                                    </Image.InputBindings>
+                                </Image>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="15"/>
+                                    <TextBlock Text="{Binding StartTimes[0].Time}" FontSize="13" Foreground="Gray"/>
+                                    <TextBlock Text="{Binding Language}" FontSize="13" Foreground="Gray"/>
+                                    <TextBlock Text="{Binding DurationHours, StringFormat=Duration: {0}h}" FontSize="13" Foreground="Gray"/>
+                                </StackPanel>
+                                <Button Content="Details" Width="80" Height="28" Margin="20,0,0,0" Command="{Binding DataContext.DetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Style="{StaticResource PrimaryButtonStyle}" ToolTip="View details about this tour"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>
