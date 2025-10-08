@@ -4,9 +4,11 @@
 4|2|4|1|Firenca|Italija|Renesansna umetnost|Italijanski|3|13-03-2025|15-03-2025|ACCEPTED|1|21-01-2025 10:15:00|13-03-2025 10:00:00
 5|2|4|2|Venecija|Italija|Kanali i gondole|Italijanski|3|16-03-2025|18-03-2025|ACCEPTED|2|22-01-2025 11:00:00|16-03-2025 11:00:00
 6|3|4|0|Beograd|Srbija|Stari grad i tvrđava|Srpski|4|01-03-2025|03-03-2025|INVALID|||
-7|4|4|0|Pariz|Francuska|Obilazak Diznilenda|Francuski|1|28-09-2025|30-09-2025|PENDING|||
+7|4|4|0|Pariz|Francuska|Obilazak Diznilenda|Francuski|1|28-09-2025|30-09-2025|ACCEPTED|3|07-10-2025 14:44:40|28-09-2025 11:00:00
 8|5|4|0|Barcelona|Španija|Sagrada Familia i Park Guell|Španski|2|17-04-2025|19-04-2025|INVALID|||
 9|5|4|1|Madrid|Španija|Prado muzej i Retiro park|Španski|2|20-04-2025|22-04-2025|INVALID|||
 10|6|4|0|Amsterdam|Holandija|Kanali i muzeji|Engleski|3|22-05-2025|24-05-2025|ACCEPTED|2|15-02-2025 14:00:00|22-05-2025 10:00:00
-11|6|4|1|Brisel|Belgija|Atomium i Grand Place|Engleski|3|25-05-2025|27-05-2025|ACCEPTED|1|16-02-2025 09:00:00|25-05-2025 11:00:00
+11|6|4|1|Brisel|Belgija|Atomium i Grand Place|Engleski|3|25-05-2025|27-05-2025|ACCEPTED|3|07-10-2025 16:32:56|25-05-2025 10:00:00
 12|7|4|0|Pariz|Francuska|Obilazak Diznilenda|Francuski|2|30-09-2025|17-10-2025|INVALID|||
+13|8|4|0|Kulpin|Srbija|Obilazak Kulpina|Srpski|2|10-10-2025|12-10-2025|ACCEPTED|3|07-10-2025 17:30:28|10-10-2025 10:00:00
+14|8|4|1|Backi Petrovac|Srbija|Obilazak Backog Petrovca|Srpski|2|10-10-2025|12-10-2025|ACCEPTED|3|07-10-2025 23:42:41|12-10-2025 13:00:00

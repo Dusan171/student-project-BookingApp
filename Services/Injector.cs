@@ -37,6 +37,7 @@ namespace BookingApp.Services
     
 
             _implementations[typeof(AccommodationValidationService)] = new AccommodationValidationService();
+            _implementations[typeof(IForumNotificationRepository)] = new ForumNotificationRepository();
 
             // Tour modules
             _implementations[typeof(ITourRepository)] = new TourRepository();
@@ -132,7 +133,11 @@ namespace BookingApp.Services
                 CreateInstance<IReservationRepository>(),
                 CreateInstance<ILocationRepository>()
             );
-
+            
+            _implementations[typeof(IForumNotificationService)] = new ForumNotificationService(
+                CreateInstance<IForumNotificationRepository>(),
+                CreateInstance<IAccommodationRepository>()
+            );
             // NOVI - Tour Presence Notification Service (registrovati PRE TourPresenceService)
             _implementations[typeof(ITourPresenceNotificationService)] = new TourPresenceNotificationService(
                 CreateInstance<ITourPresenceNotificationRepository>()
@@ -228,7 +233,8 @@ namespace BookingApp.Services
                 CreateInstance<IForumRepository>(),
                 CreateInstance<ICommentRepository>(),
                 CreateInstance<IForumCommentRepository>(),
-                CreateInstance<ILocationRepository>()
+                CreateInstance<ILocationRepository>(),
+                CreateInstance<IForumNotificationService>()
             );
             _implementations[typeof(ISuggestionService)] = new SuggestionService(
                 CreateInstance<IOccupiedDateRepository>()
@@ -354,7 +360,8 @@ namespace BookingApp.Services
         public static OwnerDashboardViewModel CreateOwnerDashboardViewModel(Action closeAction)
         {
             var notificationService = CreateInstance<INotificationService>();
-            return new OwnerDashboardViewModel(closeAction, notificationService);
+            var forumNotificationService = CreateInstance<IForumNotificationService>(); // DODAJ
+            return new OwnerDashboardViewModel(closeAction, notificationService, forumNotificationService); // DODAJ parametar
         }
 
         public static UnratedGuestsViewModel CreateUnratedGuestsViewModel(Action goBackAction)

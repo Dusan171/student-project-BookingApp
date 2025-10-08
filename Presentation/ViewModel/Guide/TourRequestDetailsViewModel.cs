@@ -49,6 +49,7 @@ namespace BookingApp.Presentation.View.Guide
             DateTo = request.DateTo;
 
             RequestedBy = request.TouristName;
+            
             Participants = request.Participants;
 
             AcceptCommand = new RelayCommand(OnAccept);

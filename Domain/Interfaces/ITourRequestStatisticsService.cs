@@ -1,5 +1,5 @@
-﻿// Domain/Interfaces/ITourRequestStatisticsService.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Domain.Interfaces
 {
@@ -8,26 +8,5 @@ namespace BookingApp.Domain.Interfaces
         TourRequestStatistics GetStatisticsForTourist(int touristId, int? year = null);
         List<LanguageStatisticData> GetLanguageStatistics(int touristId, int? year = null);
         List<LocationStatisticData> GetLocationStatistics(int touristId, int? year = null);
-    }
-
-    public class TourRequestStatistics
-    {
-        public int TotalRequests { get; set; }
-        public int AcceptedCount { get; set; }
-        public int NotAcceptedCount { get; set; }
-        public double AcceptanceRate { get; set; }
-        public double AveragePeopleInAcceptedRequests { get; set; }
-    }
-
-    public class LanguageStatisticData
-    {
-        public string Language { get; set; }
-        public int Count { get; set; }
-    }
-
-    public class LocationStatisticData
-    {
-        public string Location { get; set; }
-        public int Count { get; set; }
     }
 }

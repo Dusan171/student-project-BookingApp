@@ -12,23 +12,33 @@ namespace BookingApp.Services
         private readonly ICommentRepository _commentRepository;
         private readonly IForumCommentRepository _forumCommentRepository;
         private readonly ILocationRepository _locationRepository;
+        private readonly IForumNotificationService _forumNotificationService; 
 
         public ForumManagementService(IForumRepository forumRepository, ICommentRepository commentRepository,
-                                      IForumCommentRepository forumCommentRepository, ILocationRepository locationRepository)
+                                      IForumCommentRepository forumCommentRepository, ILocationRepository locationRepository, IForumNotificationService forumNotificationService)
         {
             _forumRepository = forumRepository;
             _commentRepository = commentRepository;
             _forumCommentRepository = forumCommentRepository;
             _locationRepository = locationRepository;
+            _forumNotificationService = forumNotificationService;
+
         }
         public Forum Create(string title, string locationName, string firstCommentText)
         {
             var location = FindOrCreateLocation(locationName);
             var savedForum = CreateAndSaveForum(title, location.Id);
 
+            string locationFullName = $"{location.City}, {location.Country}";
+            _forumNotificationService.NotifyOwnersAboutNewForum(
+                savedForum.Id,
+                savedForum.Title,
+                location.Id,
+                locationFullName);
             AddComment(savedForum.Id, firstCommentText);
 
             return savedForum;
+        
         }
 
         public Comment AddComment(int forumId, string commentText)
