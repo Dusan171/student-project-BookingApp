@@ -68,11 +68,16 @@ namespace BookingApp.Presentation.View.Guide
         private string _selectedStatus;
         public string SelectedStatus { get => _selectedStatus; set => SetProperty(ref _selectedStatus, value); }
 
+        // Add selected status for simple requests
+        private string _selectedSimpleStatus;
+        public string SelectedSimpleStatus { get => _selectedSimpleStatus; set => SetProperty(ref _selectedSimpleStatus, value); }
+
         public ObservableCollection<TourRequest> Requests { get; set; }
         public ObservableCollection<ComplexTourRequestViewModel> ComplexRequests { get; set; }
         
         // Add status options for ComboBox as strings
         public ObservableCollection<string> StatusOptions { get; set; }
+        public ObservableCollection<string> SimpleStatusOptions { get; set; }
         
         public Action<TourRequest>? NavigateToTourDetails { get; set; }
         public Action<ComplexTourRequestViewModel>? NavigateToComplexParts { get; set; }
@@ -112,6 +117,29 @@ namespace BookingApp.Presentation.View.Guide
             };
         }
 
+        // Add methods for simple request status conversion
+        private TourRequestStatus GetSimpleStatusFromString(string statusString)
+        {
+            return statusString switch
+            {
+                "Na čekanju" => TourRequestStatus.PENDING,
+                "Prihvaćen" => TourRequestStatus.ACCEPTED,
+                "Nevažeći" => TourRequestStatus.INVALID,
+                _ => TourRequestStatus.PENDING
+            };
+        }
+
+        private string GetStringFromSimpleStatus(TourRequestStatus status)
+        {
+            return status switch
+            {
+                TourRequestStatus.PENDING => "Na čekanju",
+                TourRequestStatus.ACCEPTED => "Prihvaćen",
+                TourRequestStatus.INVALID => "Nevažeći",
+                _ => "Na čekanju"
+            };
+        }
+
         public TourRequestsViewModel(UserRepository userRepository)
         {
             _userRepository = userRepository;
@@ -126,7 +154,17 @@ namespace BookingApp.Presentation.View.Guide
                 "Prihvaćen", 
                 "Nevažeći"
             };
+            
+            SimpleStatusOptions = new ObservableCollection<string>
+            {
+                "Na čekanju",
+                "Prihvaćen", 
+                "Nevažeći"
+            };
+            
+            // Set default selected status to "Na čekanju" (PENDING) for both
             SelectedStatus = "Na čekanju"; 
+            SelectedSimpleStatus = "Na čekanju";
             
             TourRequestRepository repo = new TourRequestRepository();
             ComplexTourRequestPartRepository complexPartRepo = new ComplexTourRequestPartRepository();
@@ -155,13 +193,25 @@ namespace BookingApp.Presentation.View.Guide
             ViewDetailsCommand = new RelayCommand<int>(ViewDetails);
             ViewComplexPartsCommand = new RelayCommand<int>(ViewComplexParts);
 
+            // Subscribe to property changes for automatic filtering
+            PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(SelectedStatus) || args.PropertyName == nameof(SelectedSimpleStatus))
+                {
+                    LoadRequests();
+                }
+            };
+
             LoadRequests();
         }
 
         private void LoadRequests()
         {
             Requests.Clear();
-            foreach (var r in _allRequests)
+            // Filter simple requests by selected status
+            var targetSimpleStatus = GetSimpleStatusFromString(SelectedSimpleStatus);
+            var filteredSimpleRequests = _allRequests.Where(r => r.Status == targetSimpleStatus);
+            foreach (var r in filteredSimpleRequests)
             {
                 Requests.Add(r);
             }
@@ -189,7 +239,9 @@ namespace BookingApp.Presentation.View.Guide
 
         private void FilterSimpleRequests()
         {
+            var targetSimpleStatus = GetSimpleStatusFromString(SelectedSimpleStatus);
             var filtered = _allRequests.Where(r =>
+                (r.Status == targetSimpleStatus) &&
                 (string.IsNullOrEmpty(City) || r.City.Contains(City, StringComparison.OrdinalIgnoreCase)) &&
                 (string.IsNullOrEmpty(Country) || r.Country.Contains(Country, StringComparison.OrdinalIgnoreCase)) &&
                 (string.IsNullOrEmpty(Language) || r.Language.Contains(Language, StringComparison.OrdinalIgnoreCase)) &&

@@ -17,7 +17,6 @@ namespace BookingApp.Presentation.View.Guide
             _viewModel = new TourRequestsViewModel(userRepo);
             DataContext = _viewModel;
             
-            // Subscribe to property changes to trigger automatic filtering when status changes
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
             
             _viewModel.NavigateToTourDetails = (request) =>
@@ -35,7 +34,6 @@ namespace BookingApp.Presentation.View.Guide
         {
             if (e.PropertyName == nameof(_viewModel.SelectedStatus))
             {
-                // Automatically trigger filtering when status changes
                 _viewModel.LoadCommand.Execute(null);
             }
         }
