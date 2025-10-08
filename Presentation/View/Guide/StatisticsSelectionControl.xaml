@@ -132,8 +132,14 @@
             </TabItem>
 
             <TabItem Header="Request Statistics">
-                <StackPanel>
-                    <WrapPanel VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,15" ItemHeight="30" ItemWidth="Auto">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- Filter controls fixed at top -->
+                    <WrapPanel Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,10,10,15" ItemHeight="30" ItemWidth="Auto">
                         <TextBlock Text="Filter by:" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
 
                         <RadioButton Content="Location"
@@ -176,7 +182,8 @@
                                 Style="{StaticResource HoverButtonStyle}"/>
                     </WrapPanel>
 
-                    <ScrollViewer>
+                    <!-- Scrollable content area -->
+                    <ScrollViewer Grid.Row="1">
                         <StackPanel Margin="10">
                             <TextBlock Text="Request Statistics"
                                        FontSize="20"
@@ -223,26 +230,27 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+
+                            <!-- Most Requested section now inside ScrollViewer -->
+                            <Border CornerRadius="10" BorderBrush="#DDDDDD" BorderThickness="1" Background="#F9F9F9" Padding="10" Margin="0,20,0,15">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <StackPanel>
+                                        <TextBlock Text="📈 Most Requested in the Last Year" FontWeight="Bold" FontSize="16"/>
+                                        <TextBlock Text="In the past year, we've identified a growing interest in a specific travel preference. We recommend creating a new tour to meet this demand and attract more tourists."
+                                                   TextWrapping="Wrap" FontSize="13" Foreground="Gray" Width="350"/>
+                                        <Button Content="Create Tour Based On Suggestion"
+                                                Width="220" Height="32" Margin="0,5,0,0" HorizontalAlignment="Left"
+                                                Command="{Binding CreateTourSuggestionCommand}"
+                                                Background="#007ACC" Foreground="White"
+                                                Cursor="Hand"
+                                                ToolTip="Create a new tour based on system suggestion"
+                                                Style="{StaticResource HoverButtonStyle}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
-
-                    <Border CornerRadius="10" VerticalAlignment="Bottom" BorderBrush="#DDDDDD" BorderThickness="1" Background="#F9F9F9" Padding="10" Margin="0,0,0,15">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <StackPanel>
-                                <TextBlock Text="📈 Most Requested in the Last Year" FontWeight="Bold" FontSize="16"/>
-                                <TextBlock Text="In the past year, we've identified a growing interest in a specific travel preference. We recommend creating a new tour to meet this demand and attract more tourists."
-                                           TextWrapping="Wrap" FontSize="13" Foreground="Gray" Width="350"/>
-                                <Button Content="Create Tour Based On Suggestion"
-                                        Width="220" Height="32" Margin="0,5,0,0" HorizontalAlignment="Left"
-                                        Command="{Binding CreateTourSuggestionCommand}"
-                                        Background="#007ACC" Foreground="White"
-                                        Cursor="Hand"
-                                        ToolTip="Create a new tour based on system suggestion"
-                                        Style="{StaticResource HoverButtonStyle}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

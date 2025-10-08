@@ -39,6 +39,8 @@ namespace BookingApp.Presentation.View.Guide
                 return (user?.FirstName + " " + user?.LastName) ?? $"Unknown Tourist {TouristId}";
             }
         }
+
+        public ComplexTourRequestStatus Status { get; set; } = ComplexTourRequestStatus.PENDING;
     }
 
 
@@ -63,8 +65,15 @@ namespace BookingApp.Presentation.View.Guide
         private DateTime? _dateTo;
         public DateTime? DateTo { get => _dateTo; set => SetProperty(ref _dateTo, value); }
 
+        private string _selectedStatus;
+        public string SelectedStatus { get => _selectedStatus; set => SetProperty(ref _selectedStatus, value); }
+
         public ObservableCollection<TourRequest> Requests { get; set; }
         public ObservableCollection<ComplexTourRequestViewModel> ComplexRequests { get; set; }
+        
+        // Add status options for ComboBox as strings
+        public ObservableCollection<string> StatusOptions { get; set; }
+        
         public Action<TourRequest>? NavigateToTourDetails { get; set; }
         public Action<ComplexTourRequestViewModel>? NavigateToComplexParts { get; set; }
 
@@ -75,11 +84,33 @@ namespace BookingApp.Presentation.View.Guide
         public ICommand ViewComplexPartsCommand { get; }
 
         private readonly UserRepository _userRepository;
+        private readonly ComplexTourRequestRepository _complexTourRequestRepository;
 
         private readonly ObservableCollection<TourRequest> _allRequests;
         private readonly ObservableCollection<ComplexTourRequestPart> _allComplexParts;
+        private readonly ObservableCollection<ComplexTourRequest> _allComplexRequests;
 
+        private ComplexTourRequestStatus GetStatusFromString(string statusString)
+        {
+            return statusString switch
+            {
+                "Na čekanju" => ComplexTourRequestStatus.PENDING,
+                "Prihvaćen" => ComplexTourRequestStatus.ACCEPTED,
+                "Nevažeći" => ComplexTourRequestStatus.INVALID,
+                _ => ComplexTourRequestStatus.PENDING
+            };
+        }
 
+        private string GetStringFromStatus(ComplexTourRequestStatus status)
+        {
+            return status switch
+            {
+                ComplexTourRequestStatus.PENDING => "Na čekanju",
+                ComplexTourRequestStatus.ACCEPTED => "Prihvaćen",
+                ComplexTourRequestStatus.INVALID => "Nevažeći",
+                _ => "Na čekanju"
+            };
+        }
 
         public TourRequestsViewModel(UserRepository userRepository)
         {
@@ -88,14 +119,35 @@ namespace BookingApp.Presentation.View.Guide
             ViewComplexPartsCommand = new Command<int>(ViewComplexParts);
             Requests = new ObservableCollection<TourRequest>();
             ComplexRequests = new ObservableCollection<ComplexTourRequestViewModel>();
+            
+            StatusOptions = new ObservableCollection<string>
+            {
+                "Na čekanju",
+                "Prihvaćen", 
+                "Nevažeći"
+            };
+            SelectedStatus = "Na čekanju"; 
+            
             TourRequestRepository repo = new TourRequestRepository();
             ComplexTourRequestPartRepository complexPartRepo = new ComplexTourRequestPartRepository();
+            _complexTourRequestRepository = new ComplexTourRequestRepository();
+            
             _allRequests = new ObservableCollection<TourRequest>(repo.GetAll());
-
             _allComplexParts = new ObservableCollection<ComplexTourRequestPart>(complexPartRepo.GetAll());
+            _allComplexRequests = new ObservableCollection<ComplexTourRequest>(_complexTourRequestRepository.GetAll());
 
+            var participantRepository = new TourRequestParticipantRepository();
+            foreach (var request in _allRequests)
+            {
+                request.Tourist = _userRepository.GetById(request.TouristId);
+                request.Participants = participantRepository.GetByTourRequestId(request.Id);
+            }
 
-
+            var complexParticipantRepository = new ComplexTourRequestParticipantRepository();
+            foreach (var part in _allComplexParts)
+            {
+                part.Participants = complexParticipantRepository.GetByPartId(part.Id);
+            }
 
             LoadCommand = new RelayCommand(LoadRequests);
             FilterSimpleCommand = new RelayCommand(FilterSimpleRequests);
@@ -109,14 +161,27 @@ namespace BookingApp.Presentation.View.Guide
         private void LoadRequests()
         {
             Requests.Clear();
-            foreach (var r in _allRequests) Requests.Add(r);
+            foreach (var r in _allRequests)
+            {
+                Requests.Add(r);
+            }
 
             ComplexRequests.Clear();
-            var grouped = _allComplexParts.GroupBy(p => p.ComplexTourRequestId)
-                .Select(g => new ComplexTourRequestViewModel(_userRepository)
-                {
-                    Id = g.Key,
-                    Parts = new ObservableCollection<ComplexTourRequestPart>(g)
+            var targetStatus = GetStatusFromString(SelectedStatus);
+            var grouped = _allComplexParts
+                .Where(p => {
+                    var complexRequest = _allComplexRequests.FirstOrDefault(cr => cr.Id == p.ComplexTourRequestId);
+                    return complexRequest?.Status == targetStatus;
+                })
+                .GroupBy(p => p.ComplexTourRequestId)
+                .Select(g => {
+                    var complexRequest = _allComplexRequests.FirstOrDefault(cr => cr.Id == g.Key);
+                    return new ComplexTourRequestViewModel(_userRepository)
+                    {
+                        Id = g.Key,
+                        Parts = new ObservableCollection<ComplexTourRequestPart>(g),
+                        Status = complexRequest?.Status ?? ComplexTourRequestStatus.PENDING
+                    };
                 });
 
             foreach (var cr in grouped) ComplexRequests.Add(cr);
@@ -139,20 +204,28 @@ namespace BookingApp.Presentation.View.Guide
 
         private void FilterComplexRequests()
         {
+            var targetStatus = GetStatusFromString(SelectedStatus);
             var filtered = _allComplexParts
                 .Where(p =>
-                    (string.IsNullOrEmpty(City) || p.City.Contains(City, StringComparison.OrdinalIgnoreCase)) &&
-                    (string.IsNullOrEmpty(Country) || p.Country.Contains(Country, StringComparison.OrdinalIgnoreCase)) &&
-                    (string.IsNullOrEmpty(Language) || p.Language.Contains(Language, StringComparison.OrdinalIgnoreCase)) &&
-                    (!NumberOfPeople.HasValue || p.NumberOfPeople == NumberOfPeople.Value) &&
-                    (!DateFrom.HasValue || p.DateFrom >= DateFrom.Value) &&
-                    (!DateTo.HasValue || p.DateTo <= DateTo.Value)
-                )
-                .GroupBy(p => p.ComplexTourRequestId)
-                .Select(g => new ComplexTourRequestViewModel(_userRepository)
                 {
-                    Id = g.Key,
-                    Parts = new ObservableCollection<ComplexTourRequestPart>(g)
+                    var complexRequest = _allComplexRequests.FirstOrDefault(cr => cr.Id == p.ComplexTourRequestId);
+                    return (complexRequest?.Status == targetStatus) &&
+                           (string.IsNullOrEmpty(City) || p.City.Contains(City, StringComparison.OrdinalIgnoreCase)) &&
+                           (string.IsNullOrEmpty(Country) || p.Country.Contains(Country, StringComparison.OrdinalIgnoreCase)) &&
+                           (string.IsNullOrEmpty(Language) || p.Language.Contains(Language, StringComparison.OrdinalIgnoreCase)) &&
+                           (!NumberOfPeople.HasValue || p.NumberOfPeople == NumberOfPeople.Value) &&
+                           (!DateFrom.HasValue || p.DateFrom >= DateFrom.Value) &&
+                           (!DateTo.HasValue || p.DateTo <= DateTo.Value);
+                })
+                .GroupBy(p => p.ComplexTourRequestId)
+                .Select(g => {
+                    var complexRequest = _allComplexRequests.FirstOrDefault(cr => cr.Id == g.Key);
+                    return new ComplexTourRequestViewModel(_userRepository)
+                    {
+                        Id = g.Key,
+                        Parts = new ObservableCollection<ComplexTourRequestPart>(g),
+                        Status = complexRequest?.Status ?? ComplexTourRequestStatus.PENDING
+                    };
                 });
 
             ComplexRequests.Clear();
