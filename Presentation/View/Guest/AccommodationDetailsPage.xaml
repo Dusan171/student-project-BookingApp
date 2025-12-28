@@ -7,6 +7,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000"
              Background="{DynamicResource PrimaryBackgroundColor}">
+    
+    <UserControl.Resources>
+        <loc:ImagePathConverter x:Key="ImagePathConverter"/>
+    </UserControl.Resources>
 
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
@@ -22,7 +26,7 @@
 
             <Grid Grid.Row="0">
                 <Border CornerRadius="8" ClipToBounds="True" Background="{DynamicResource SecondaryBackgroundColor}">
-                    <Image Source="{Binding SelectedImage}" Stretch="UniformToFill"/>
+                    <Image Source="{Binding SelectedImage, Converter={StaticResource ImagePathConverter}}" Stretch="UniformToFill"/>
                 </Border>
                 <Button Command="{Binding PreviousImageCommand}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="15,0" Style="{StaticResource ImageNavButtonStyle}">
                     <Path Data="M 15,0 L 0,15 L 15,30" Stroke="{DynamicResource AccentForegroundColor}" StrokeThickness="3"/>
@@ -53,7 +57,7 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Button.Style>
-                                <Image Source="{Binding}" Width="100" Height="75" Stretch="UniformToFill"/>
+                                <Image Source="{Binding Converter={StaticResource ImagePathConverter}}" Width="100" Height="75" Stretch="UniformToFill"/>
                             </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

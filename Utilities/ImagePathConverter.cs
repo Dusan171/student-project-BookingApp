@@ -15,26 +15,29 @@ namespace BookingApp.Utilities
 
             try
             {
-                string relativePath = value.ToString();
+                string inputPath = value.ToString();
 
-                // Proveri da li putanja već počinje sa Resources/Images
-                if (!relativePath.StartsWith("Resources", StringComparison.OrdinalIgnoreCase))
+                string cleanedPath = inputPath.TrimStart('/', '\\');
+
+                if (!cleanedPath.Contains("Resources/Images", StringComparison.OrdinalIgnoreCase))
                 {
-                    relativePath = Path.Combine("Resources", "Images", relativePath);
+                    if (cleanedPath.StartsWith("Images", StringComparison.OrdinalIgnoreCase))
+                    {
+                        cleanedPath = Path.Combine("Resources", cleanedPath);
+                    }
+                    else
+                    {
+                        cleanedPath = Path.Combine("Resources", "Images", cleanedPath);
+                    }
                 }
 
-                // Kreiraj apsolutnu putanju
                 string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                string fullPath = Path.Combine(baseDirectory, relativePath);
 
-                // Normalizuj putanju
-                fullPath = Path.GetFullPath(fullPath);
+                string fullPath = Path.GetFullPath(Path.Combine(baseDirectory, cleanedPath));
 
                 if (!File.Exists(fullPath))
                 {
-                    // Pokušaj alternativnu putanju (3 nivoa gore)
-                    fullPath = Path.Combine(baseDirectory, "..", "..", "..", relativePath);
-                    fullPath = Path.GetFullPath(fullPath);
+                    fullPath = Path.GetFullPath(Path.Combine(baseDirectory, "..", "..", "..", cleanedPath));
                 }
 
                 if (File.Exists(fullPath))
@@ -44,19 +47,19 @@ namespace BookingApp.Utilities
                     bitmap.UriSource = new Uri(fullPath, UriKind.Absolute);
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
                     bitmap.EndInit();
-                    bitmap.Freeze(); // Za thread safety
+                    bitmap.Freeze(); 
                     return bitmap;
                 }
 
+                System.Diagnostics.Debug.WriteLine($"Slikа nije pronađena na: {fullPath}");
                 return null;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading image: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Greška u konverteru: {ex.Message}");
                 return null;
             }
         }
-
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();

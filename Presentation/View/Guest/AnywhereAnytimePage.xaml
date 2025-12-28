@@ -9,8 +9,11 @@
              d:DesignHeight="700" d:DesignWidth="1000"
              Background="{DynamicResource PrimaryBackgroundColor}">
 
+  
+    
     <UserControl.Resources>
         <utilities:StringToVisibilityConverter x:Key="StringToVisibility"/>
+        <loc:ImagePathConverter x:Key="ImagePathConverter"/>
 
         <DataTemplate x:Key="AnywhereResultCardTemplate">
             <Border Background="{DynamicResource SecondaryBackgroundColor}" CornerRadius="8" Width="380"
@@ -22,7 +25,7 @@
                             <Image Stretch="UniformToFill">
                                 <Image.Style>
                                     <Style TargetType="Image">
-                                        <Setter Property="Source" Value="{Binding Accommodation.ImagePaths[0]}"/>
+                                        <Setter Property="Source" Value="{Binding Accommodation.ImagePaths[0], Converter={StaticResource ImagePathConverter}}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding Accommodation.ImagePaths.Count}" Value="0">
                                                 <Setter Property="Visibility" Value="Collapsed"/>

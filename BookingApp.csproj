@@ -13,27 +13,16 @@
     <None Remove="Resources\Fonts\arialbi.ttf" />
     <None Remove="Resources\Fonts\ariali.ttf" />
     <None Remove="Resources\Images\amsterdam.jpg" />
-    <None Remove="Resources\Images\apartman.jpg" />
     <None Remove="Resources\Images\barcelona.jpg" />
     <None Remove="Resources\Images\bec.jpg" />
     <None Remove="Resources\Images\budimpesta.jpg" />
-    <None Remove="Resources\Images\dvoriste.jpg" />
-    <None Remove="Resources\Images\dvoriste2.jpg" />
-    <None Remove="Resources\Images\hodnik.jpg" />
-    <None Remove="Resources\Images\kuhinja3.jpg" />
-    <None Remove="Resources\Images\kupatilo.jpg" />
-    <None Remove="Resources\Images\notredame.jpg" />
-    <None Remove="Resources\Images\ptvrdjava.jpg" />
-    <None Remove="Resources\Images\soba.jpg" />
-    <None Remove="Resources\Images\soba2.jpg" />
-    <None Remove="Resources\Images\soba3.jpg" />
-    <None Remove="Resources\Images\terasa.jpg" />
-    <None Remove="Resources\Images\trpezarija.jpg" />
 
     <None Remove="Resources\Data\tours.csv" />
     <None Remove="Resources\Images\4416c2b3-1e55-4a05-bbb9-e9e29cfe828e.jpg" />
     <None Remove="Resources\Images\6dfaecf6-7e58-4108-b687-fbd9df4f59e7.jpg" />
     <None Remove="Resources\Images\835045f9-c621-4b41-8c52-cb96e004b67a.jpg" />
+    <None Remove="Resources\Images\kuhinja3.jpg" />
+    <None Remove="Resources\Images\kupatilo.jpg" />
     <None Remove="Resources\Videos\tutorijal.mp4" />
   </ItemGroup>
 
@@ -64,6 +53,12 @@
     </Content>
     <Content Include="Resources\Images\kej.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\kuhinja3.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Images\kupatilo.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Images\sky.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

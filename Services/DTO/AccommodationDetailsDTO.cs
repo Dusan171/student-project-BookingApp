@@ -1,6 +1,8 @@
-﻿using BookingApp.Domain.Model;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using BookingApp.Domain.Model;
 
 namespace BookingApp.Services.DTO
 {
@@ -18,6 +20,22 @@ namespace BookingApp.Services.DTO
         public AccommodationDetailsDTO() 
         {
             ImagePaths = new List<string>();
+        }
+        public string FirstImagePath
+        {
+            get
+            {
+                if (ImagePaths == null || ImagePaths.Count == 0) return null;
+
+                var path = ImagePaths[0];
+
+                if (!Path.IsPathRooted(path))
+                {
+                    return Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "../../../Resources/Images/", path));
+                }
+
+                return path;
+            }
         }
 
         public AccommodationDetailsDTO(Accommodation accommodation)

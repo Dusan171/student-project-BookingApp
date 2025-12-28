@@ -100,7 +100,10 @@ namespace BookingApp.Services
                 CreateInstance<IReservationRepository>()
             );
 
-            _implementations[typeof(IAccommodationFilterService)] = new AccommodationFilterService(CreateInstance<IAccommodationRepository>());
+            _implementations[typeof(IAccommodationFilterService)] = new AccommodationFilterService(
+                CreateInstance<IAccommodationRepository>(),
+                CreateInstance<IAccommodationImageRepository>()
+            );
 
             // MOVED: IGuestReviewService registrovan RANIJE
             _implementations[typeof(IGuestReviewService)] = new GuestReviewService(

@@ -10,16 +10,28 @@ namespace BookingApp.Services
     public class AccommodationFilterService : IAccommodationFilterService
     {
         private readonly IAccommodationRepository _accommodationRepository;
+        private readonly IAccommodationImageRepository _accommodationImageRepository;
 
-        public AccommodationFilterService(IAccommodationRepository accommodationRepository)
+        public AccommodationFilterService(IAccommodationRepository accommodationRepository, IAccommodationImageRepository accommodationImageRepository)
         {
             _accommodationRepository = accommodationRepository;
+            _accommodationImageRepository = accommodationImageRepository;
         }
 
         public List<AccommodationDetailsDTO> Filter(AccommodationSearchParameters parameters)
         {
-            return _accommodationRepository.GetAll()
+            var filteredAccommodations = _accommodationRepository.GetAll()
                    .Where(acc => MatchesFilter(acc, parameters))
+                   .ToList();
+
+            var allImages = _accommodationImageRepository.GetAll();
+
+            foreach (var acc in filteredAccommodations)
+            {
+                acc.Images = allImages.Where(img => img.AccommodationId == acc.Id).ToList();
+            }
+
+            return filteredAccommodations
                    .Select(acc => new AccommodationDetailsDTO(acc))
                    .ToList();
         }

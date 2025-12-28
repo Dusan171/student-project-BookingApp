@@ -25,16 +25,25 @@ namespace BookingApp.Services
         }
         public List<AccommodationDTO> GetAllAccommodations()
         {
-            return _accommodationRepository.GetAll().Select(a => new AccommodationDTO(a)).ToList();
+            var accommodations = _accommodationRepository.GetAll();
+            var allImages = _accommodationImageRepository.GetAll(); 
+
+            foreach (var acc in accommodations)
+            {
+                acc.Images = allImages.Where(img => img.AccommodationId == acc.Id).ToList();
+            }
+
+            return accommodations.Select(a => new AccommodationDTO(a)).ToList();
         }
         public AccommodationDTO GetAccommodationById(int id)
         {
             var accommodation = _accommodationRepository.GetById(id);
-            if (accommodation == null)
+            if (accommodation != null)
             {
-                return null;
+                accommodation.Images = _accommodationImageRepository.GetByAccommodation(accommodation);
+                return new AccommodationDTO(accommodation);
             }
-            return new AccommodationDTO(accommodation);
+            return null;
         }
         public AccommodationDTO AddAccommodation(AccommodationDTO accommodation)
         {
