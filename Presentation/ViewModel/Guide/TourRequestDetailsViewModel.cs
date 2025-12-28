@@ -33,6 +33,49 @@ namespace BookingApp.Presentation.View.Guide
         public List<TourRequestParticipant> Participants { get; set; }
         public event Action<TourRequest>? TourAccepted;
 
+        // Acceptance status properties
+        private bool _isAccepted;
+        public bool IsAccepted
+        {
+            get => _isAccepted;
+            set => SetProperty(ref _isAccepted, value);
+        }
+
+        private bool _canAccept;
+        public bool CanAccept
+        {
+            get => _canAccept;
+            set => SetProperty(ref _canAccept, value);
+        }
+
+        private string _statusText;
+        public string StatusText
+        {
+            get => _statusText;
+            set => SetProperty(ref _statusText, value);
+        }
+
+        private string _acceptedByGuide;
+        public string AcceptedByGuide
+        {
+            get => _acceptedByGuide;
+            set => SetProperty(ref _acceptedByGuide, value);
+        }
+
+        private string _acceptedDate;
+        public string AcceptedDate
+        {
+            get => _acceptedDate;
+            set => SetProperty(ref _acceptedDate, value);
+        }
+
+        private string _scheduledDate;
+        public string ScheduledDate
+        {
+            get => _scheduledDate;
+            set => SetProperty(ref _scheduledDate, value);
+        }
+
         public ICommand AcceptCommand { get; }
         private TourRequest req;
 
@@ -50,13 +93,68 @@ namespace BookingApp.Presentation.View.Guide
 
             RequestedBy = request.TouristName;
             
-            Participants = request.Participants;
+            // Load participants from repository if they're not already loaded
+            if (request.Participants == null || request.Participants.Count == 0)
+            {
+                var participantRepository = new TourRequestParticipantRepository();
+                Participants = participantRepository.GetByTourRequestId(request.Id);
+                // Also update the original request object
+                request.Participants = Participants;
+            }
+            else
+            {
+                Participants = request.Participants;
+            }
 
             AcceptCommand = new RelayCommand(OnAccept);
+            
+            // Set acceptance status
+            UpdateAcceptanceStatus();
+        }
+
+        private void UpdateAcceptanceStatus()
+        {
+            IsAccepted = req.Status == TourRequestStatus.ACCEPTED;
+            CanAccept = req.Status == TourRequestStatus.PENDING;
+            
+            StatusText = req.Status switch
+            {
+                TourRequestStatus.ACCEPTED => "ACCEPTED",
+                TourRequestStatus.PENDING => "PENDING",
+                TourRequestStatus.INVALID => "INVALID",
+                _ => "UNKNOWN"
+            };
+
+            if (IsAccepted && req.AcceptedByGuideId.HasValue)
+            {
+                AcceptedByGuide = GetGuideName(req.AcceptedByGuideId.Value);
+                AcceptedDate = req.AcceptedDate?.ToString("dd.MM.yyyy HH:mm") ?? "Unknown";
+                ScheduledDate = req.ScheduledDate?.ToString("dd.MM.yyyy HH:mm") ?? "Not scheduled";
+            }
+            else
+            {
+                AcceptedByGuide = string.Empty;
+                AcceptedDate = string.Empty;
+                ScheduledDate = string.Empty;
+            }
+        }
+
+        private string GetGuideName(int guideId)
+        {
+            var userRepository = new UserRepository();
+            var guide = userRepository.GetById(guideId);
+            return guide != null ? $"{guide.FirstName} {guide.LastName}" : $"Unknown Guide {guideId}";
         }
 
         private void OnAccept()
         {
+            if (!CanAccept)
+            {
+                MessageBox.Show("This tour request has already been processed.", 
+                    "Already Processed", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             var guideAvailabilityService = new GuideAvailabilityService();
 
             var acceptWindow = new Window
@@ -214,19 +312,18 @@ namespace BookingApp.Presentation.View.Guide
                 var duration = (int)durationCombo.SelectedItem;
 
                 var startTime = selectedDate.Date.AddHours(selectedHour).AddMinutes(selectedMinute);
-                MessageBox.Show($"Checking availability for {startTime:dd.MM.yyyy HH:mm} (Duration: {duration} hours)",
-                    "Checking Availability", MessageBoxButton.OK, MessageBoxImage.Information);
+                
                 var endTime = startTime.AddHours(duration);
 
                 if (guideAvailabilityService.IsAvailable(Session.CurrentUser.Id, startTime, endTime))
                 {
-                    availabilityText.Text = "✓ Time slot is available!";
+                    availabilityText.Text = "Time slot is available!";
                     availabilityText.Foreground = System.Windows.Media.Brushes.Green;
                     confirmButton.IsEnabled = true;
                 }
                 else
                 {
-                    availabilityText.Text = "✗ You already have a tour scheduled during this time.";
+                    availabilityText.Text = "You already have a tour scheduled during this time.";
                     availabilityText.Foreground = System.Windows.Media.Brushes.Red;
                     confirmButton.IsEnabled = false;
                 }
@@ -260,6 +357,9 @@ namespace BookingApp.Presentation.View.Guide
                     req.ScheduledDate = scheduledTime;
                     TourRequestRepository tourRequestRepository = new TourRequestRepository();
                     tourRequestRepository.Update(req);
+
+                    // Update the ViewModel status
+                    UpdateAcceptanceStatus();
 
                     //napravim turu na osnovu zahteva
                     string tourName = "Tour of " + req.City + ", " + req.Country;

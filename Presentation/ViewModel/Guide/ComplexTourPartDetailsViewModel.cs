@@ -79,6 +79,14 @@ namespace BookingApp.Presentation.ViewModel.Guide
         public ComplexTourPartDetailsViewModel(ComplexTourRequestPart part)
         {
             _part = part;
+            
+            // Load participants from repository if they're not already loaded
+            if (part.Participants == null || part.Participants.Count == 0)
+            {
+                var participantRepository = new ComplexTourRequestParticipantRepository();
+                part.Participants = participantRepository.GetByPartId(part.Id);
+            }
+            
             Name = part.City;
             Location = $"{part.City}, {part.Country}";
             DateFrom = part.DateFrom;
@@ -129,7 +137,7 @@ namespace BookingApp.Presentation.ViewModel.Guide
             {
                 return $"{user.FirstName} {user.LastName}";
             }
-            return $"Unknown Tourist {id}";
+            return $"Unknown Tourist {id}!";
         }
 
         private string GetGuideName(int id)

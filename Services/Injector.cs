@@ -11,6 +11,8 @@ using BookingApp.Services;
 using BookingApp.Services.DTO;
 using BookingApp.Utilities;
 using BookingApp.Presentation.ViewModel;
+using static BookingApp.Services.PDFAccommodationReportService;
+using GalaSoft.MvvmLight.Views;
 
 namespace BookingApp.Services
 {
@@ -90,8 +92,9 @@ namespace BookingApp.Services
             );
 
             _implementations[typeof(IAccommodationReviewService)] = new AccommodationReviewService(CreateInstance<IAccommodationReviewRepository>(), CreateInstance<IAccommodationRepository>(), CreateInstance<IReservationRepository>());
-
-            _implementations[typeof(IPDFReportService)] = new PDFAccommodationReportService(CreateInstance<IAccommodationReviewService>(), CreateInstance<IAccommodationService>());
+            _implementations[typeof(AccommodationRatingPdfGenerator)] = new AccommodationRatingPdfGenerator();
+            _implementations[typeof(IPDFReportService)] = new PDFAccommodationReportService(CreateInstance<IAccommodationReviewService>(), CreateInstance<IAccommodationService>(), CreateInstance<AccommodationRatingPdfGenerator>()
+);
 
             _implementations[typeof(IRescheduleRequestService)] = new RescheduleRequestService(
                 CreateInstance<IOccupiedDateRepository>(),
@@ -121,7 +124,16 @@ namespace BookingApp.Services
                 CreateInstance<IGuestReviewService>()
             );
 
-            _implementations[typeof(INavigationService)] = new NavigationService();
+            _implementations[typeof(IAccommodationStatisticsService)] = new AccommodationStatisticsService(
+                CreateInstance<IReservationRepository>(),
+                CreateInstance<IRescheduleRequestRepository>()
+            );
+
+            _implementations[typeof(IAccommodationSummaryService)] = new AccommodationSummaryService(
+                    CreateInstance<IReservationRepository>(),
+                    CreateInstance<IAccommodationStatisticsService>() // <--- OVA LINIJA JE KLJUČNA IZMENA
+            );
+            _implementations[typeof(BookingApp.Domain.Interfaces.INavigationService)] = new NavigationService();
 
             _implementations[typeof(INotificationService)] = new NotificationService((INotificationRepository)_implementations[typeof(INotificationRepository)], (IReservationService)_implementations[typeof(IReservationService)]);
 
@@ -141,11 +153,16 @@ namespace BookingApp.Services
                 CreateInstance<IForumNotificationRepository>(),
                 CreateInstance<IAccommodationRepository>()
             );
+
+            _implementations[typeof(IImageFileHandler)] = new ImageFileHandler();
+
+            _implementations[typeof(IAccommodationValidationService)] = new AccommodationValidationService();
+
             // NOVI - Tour Presence Notification Service (registrovati PRE TourPresenceService)
             _implementations[typeof(ITourPresenceNotificationService)] = new TourPresenceNotificationService(
                 CreateInstance<ITourPresenceNotificationRepository>()
             );
-
+          
             // ------------------- Tour Services - postojeći -------------------
             _implementations[typeof(ITourService)] = new TourService(
                 CreateInstance<ITourRepository>(),
@@ -173,10 +190,6 @@ namespace BookingApp.Services
 
             _implementations[typeof(IReservationGuestService)] = new ReservationGuestService(CreateInstance<IReservationGuestRepository>());
 
-            _implementations[typeof(IAccommodationStatisticsService)] = new AccommodationStatisticsService(
-                CreateInstance<IReservationRepository>(),
-                CreateInstance<IRescheduleRequestRepository>()
-            );
             _implementations[typeof(ICommentReportRepository)] = new CommentReportRepository();
 
 
@@ -316,7 +329,10 @@ namespace BookingApp.Services
         public static RegisterAccommodationViewModel CreateRegisterAccommodationViewModel(Action navigateBack = null)
         {
             var accommodationService = CreateInstance<IAccommodationService>();
-            return new RegisterAccommodationViewModel(accommodationService, navigateBack);
+            var imageFileHandler = CreateInstance<IImageFileHandler>();
+            var validationService = CreateInstance<IAccommodationValidationService>();
+
+            return new RegisterAccommodationViewModel(accommodationService, imageFileHandler,validationService, navigateBack);
         }
 
         public static ReviewsViewModel CreateReviewsViewModel()
@@ -402,6 +418,7 @@ namespace BookingApp.Services
             return new StatisticViewModel(
                 CreateInstance<IAccommodationService>(),
                 CreateInstance<IAccommodationStatisticsService>(),
+                CreateInstance<IAccommodationSummaryService>(),
                 CreateInstance<IUserService>(),
                 CreateInstance<IPDFReportService>(),
                 CreateInstance<IAccommodationReviewService>()

@@ -1,0 +1,25 @@
+<UserControl x:Class="BookingApp.Presentation.View.Guide.Controls.ReportGeneratorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/ToursControlStyles.xaml"/>
+    </UserControl.Resources>
+
+    <StackPanel Margin="0,12,0,0">
+        <TextBlock Text="Generate a report about scheduled tours for a time period:" FontWeight="Bold" FontSize="16" Margin="0,0,0,12" TextWrapping="Wrap" HorizontalAlignment="Left" MaxWidth="400" Width="318"/>
+
+        <StackPanel Margin="0,0,0,8">
+            <TextBlock Text="From:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+            <DatePicker x:Name="StartDatePicker" Width="200" HorizontalAlignment="Left" ToolTip="Select start date for report"/>
+        </StackPanel>
+
+        <StackPanel Margin="0,0,0,8">
+            <TextBlock Text="To:" FontWeight="SemiBold" Margin="0,0,0,4"/>
+            <DatePicker x:Name="EndDatePicker" Width="200" HorizontalAlignment="Left" ToolTip="Select end date for report"/>
+        </StackPanel>
+
+        <Button Content="GENERATE PDF" Width="200" Height="40" Background="#007ACC" Foreground="White" HorizontalAlignment="Left" Style="{StaticResource AnimatedButtonStyle}" ToolTip="Generate PDF report" Click="GenerateReport_Click"/>
+    </StackPanel>
+
+</UserControl>

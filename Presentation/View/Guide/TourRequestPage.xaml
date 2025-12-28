@@ -53,6 +53,20 @@
                     <Border Padding="12" BorderBrush="#EEE" BorderThickness="0" CornerRadius="12" Background="White" Margin="0,0,0,12">
                         <WrapPanel VerticalAlignment="Center" ItemHeight="32" ItemWidth="Auto" Orientation="Horizontal">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,8">
+                                <TextBlock Text="Status:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <ComboBox Width="120" ItemsSource="{Binding SimpleStatusOptions}" 
+                                          SelectedItem="{Binding SelectedSimpleStatus, UpdateSourceTrigger=PropertyChanged}"
+                                          Background="#FFF" BorderBrush="#DDD" BorderThickness="1" 
+                                          ToolTip="Select Status" Padding="2">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,8">
                                 <TextBlock Text="Location:" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                 <TextBox Width="140" Text="{Binding City, UpdateSourceTrigger=PropertyChanged}" ToolTip="Enter City"
                                          Padding="2" Background="#FFF" BorderBrush="#DDD" BorderThickness="1"/>
@@ -97,14 +111,40 @@
                                 <DataTemplate>
                                     <Border Background="White" BorderBrush="#DDD" BorderThickness="0" Padding="12" Margin="0,0,0,12" CornerRadius="12">
                                         <StackPanel>
-                                            <TextBlock FontWeight="Bold" FontSize="16" Foreground="#333">
-                                                <TextBlock.Text>
-                                                    <MultiBinding StringFormat="Tour of {0}, {1}">
-                                                        <Binding Path="City"/>
-                                                        <Binding Path="Country"/>
-                                                    </MultiBinding>
-                                                </TextBlock.Text>
-                                            </TextBlock>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                <TextBlock FontWeight="Bold" FontSize="16" Foreground="#333" VerticalAlignment="Center" Margin="0,0,12,0">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="Tour of {0}, {1}">
+                                                            <Binding Path="City"/>
+                                                            <Binding Path="Country"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                                
+                                                <!-- Status Badge -->
+                                                <Border CornerRadius="10" Padding="8,4" VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="#FFA500"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="ACCEPTED">
+                                                                    <Setter Property="Background" Value="#4CAF50"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="PENDING">
+                                                                    <Setter Property="Background" Value="#FFA500"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="INVALID">
+                                                                    <Setter Property="Background" Value="#F44336"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding Status}" 
+                                                               FontWeight="Bold" 
+                                                               Foreground="White" 
+                                                               FontSize="10"/>
+                                                </Border>
+                                            </StackPanel>
 
                                             <TextBlock Margin="0,4,0,0" Foreground="#555">
                                                 <TextBlock.Text>
@@ -140,6 +180,20 @@
 
                     <Border Padding="12" BorderBrush="#EEE" BorderThickness="0" CornerRadius="12" Background="White" Margin="0,0,0,12">
                         <WrapPanel VerticalAlignment="Center" ItemHeight="32" ItemWidth="Auto" Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,8">
+                                <TextBlock Text="Status:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <ComboBox Width="120" ItemsSource="{Binding StatusOptions}" 
+                                          SelectedItem="{Binding SelectedStatus, UpdateSourceTrigger=PropertyChanged}"
+                                          Background="#FFF" BorderBrush="#DDD" BorderThickness="1" 
+                                          ToolTip="Select Status" Padding="2">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,8">
                                 <TextBlock Text="Location:" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                 <TextBox Width="140" Text="{Binding City, UpdateSourceTrigger=PropertyChanged}" ToolTip="Enter City"
@@ -197,6 +251,10 @@
                                             </TextBlock>
 
                                             <TextBlock Text="{Binding TouristName, StringFormat=Tourist: {0}}" Margin="0,4,0,0" Foreground="#555"/>
+
+                                            <!-- Add status display -->
+                                            <TextBlock Margin="0,4,0,0" Foreground="#666" FontStyle="Italic"
+                                                       Text="{Binding Status, StringFormat=Status: {0}}"/>
 
                                             <Button Content="View Parts"
                                                     Command="{Binding DataContext.ViewComplexPartsCommand, RelativeSource={RelativeSource AncestorType=Page}}"

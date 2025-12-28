@@ -1,224 +1,68 @@
 ﻿using BookingApp.Domain.Model;
 using BookingApp.Services.DTO;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using BookingApp.Domain.Interfaces;
 using BookingApp.Repositories;
+using BookingApp.Services.Validation;
+using BookingApp.Services.Enhancement;
+using BookingApp.Services.Management;
+using BookingApp.Services.Search;
 
 namespace BookingApp.Services
 {
     public class TourService : ITourService
     {
         private readonly ITourRepository _tourRepository;
-        private readonly ILocationRepository _locationRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ITourReservationRepository _reservationRepository;
+        private readonly TourDataValidator _dataValidator;
+        private readonly TourDataEnhancer _dataEnhancer;
+        private readonly TourAvailabilityHandler _availabilityHandler;
+        private readonly TourSearchProcessor _searchProcessor;
 
-        public TourService(ITourRepository tourRepository,
-                          ILocationRepository locationRepository,
-                          IUserRepository userRepository,
-                          ITourReservationRepository reservationRepository)
+        public TourService(ITourRepository tourRepository, ILocationRepository locationRepository, 
+            IUserRepository userRepository, ITourReservationRepository reservationRepository)
         {
             _tourRepository = tourRepository;
-            _locationRepository = locationRepository;
-            _userRepository = userRepository;
-            _reservationRepository = reservationRepository;
+            _dataValidator = new TourDataValidator();
+            _dataEnhancer = new TourDataEnhancer(locationRepository, userRepository);
+            _availabilityHandler = new TourAvailabilityHandler(tourRepository, reservationRepository);
+            _searchProcessor = new TourSearchProcessor();
         }
 
-        // ALTERNATIVNI konstruktor za kompatibilnost
-        public TourService(ITourRepository tourRepository,
-                          ILocationRepository locationRepository,
-                          IUserRepository userRepository)
+        // Alternative constructor for compatibility
+        public TourService(ITourRepository tourRepository, ILocationRepository locationRepository, IUserRepository userRepository)
         {
             _tourRepository = tourRepository;
-            _locationRepository = locationRepository;
-            _userRepository = userRepository;
-            _reservationRepository = Services.Injector.CreateInstance<ITourReservationRepository>();
+            _dataValidator = new TourDataValidator();
+            _dataEnhancer = new TourDataEnhancer(locationRepository, userRepository);
+            _availabilityHandler = new TourAvailabilityHandler(tourRepository, Services.Injector.CreateInstance<ITourReservationRepository>());
+            _searchProcessor = new TourSearchProcessor();
         }
 
-        public List<Tour> GetAvailableTours()
-        {
-            var tours = _tourRepository.GetAvailableTours();
-            EnrichToursWithDetails(tours);
-            return tours;
-        }
+        // Basic operations
+        public List<Tour> GetAvailableTours() => PopulateAndReturn(_tourRepository.GetAvailableTours());
+        public List<Tour> GetAllTours() => PopulateAndReturn(_tourRepository.GetAll());
+        public Tour? GetTourById(int id) => _tourRepository.GetById(id);
+        public Tour? GetTourWithDetails(int id) => PopulateSingle(_tourRepository.GetById(id));
 
-        public List<Tour> SearchTours(SearchCriteriaDTO criteria)
-        {
-            if (criteria == null)
-                return new List<Tour>();
+        // Availability management - delegated
+        public int GetAvailableSpots(int tourId) => _availabilityHandler.CalculateAvailableSpots(tourId);
+        public bool ReserveSpots(int tourId, int numberOfSpots) => _availabilityHandler.BookSpots(tourId, numberOfSpots);
 
-            var tours = _tourRepository.GetAll();
-            EnrichToursWithDetails(tours);
+        // Validation - delegated
+        public bool ValidateTour(Tour tour) => _dataValidator.IsValidTour(tour);
 
-            var query = tours.AsQueryable();
+        // Search operations - delegated
+        public List<Tour> SearchTours(SearchCriteriaDTO criteria) => 
+            _searchProcessor.ProcessSearchCriteria(PopulateAndReturn(_tourRepository.GetAll()), criteria, GetAvailableSpots);
 
-            if (!string.IsNullOrWhiteSpace(criteria.City))
-            {
-                query = query.Where(t => t.Location != null &&
-                    !string.IsNullOrEmpty(t.Location.City) &&
-                    t.Location.City.Contains(criteria.City, StringComparison.OrdinalIgnoreCase));
-            }
+        public List<Tour> GetAlternativeTours(int originalTourId, int requiredSpots) => 
+            _searchProcessor.FindAlternativeTours(_tourRepository.GetAll(), originalTourId, requiredSpots, GetAvailableSpots);
 
-            if (!string.IsNullOrWhiteSpace(criteria.Country))
-            {
-                query = query.Where(t => t.Location != null &&
-                    !string.IsNullOrEmpty(t.Location.Country) &&
-                    t.Location.Country.Contains(criteria.Country, StringComparison.OrdinalIgnoreCase));
-            }
+        // Data enrichment helper method
+        public void EnrichToursWithDetails(List<Tour> tours) => _dataEnhancer.PopulateToursWithData(tours);
 
-            if (!string.IsNullOrWhiteSpace(criteria.Language))
-            {
-                query = query.Where(t => !string.IsNullOrEmpty(t.Language) &&
-                    t.Language.Equals(criteria.Language, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (criteria.MaxPeople.HasValue)
-            {
-                query = query.Where(t => GetAvailableSpots(t.Id) >= criteria.MaxPeople.Value);
-            }
-
-            if (criteria.Duration.HasValue)
-            {
-                query = query.Where(t => Math.Abs(t.DurationHours - criteria.Duration.Value) < 0.1);
-            }
-
-            try
-            {
-                return query.ToList();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Greška u pretrazi: {ex.Message}");
-                return new List<Tour>();
-            }
-        }
-
-        public List<Tour> GetAlternativeTours(int originalTourId, int requiredSpots)
-        {
-            var tours = _tourRepository.GetAll();
-
-            var originalTour = tours.FirstOrDefault(t => t.Id == originalTourId);
-            if (originalTour?.Location == null)
-                return new List<Tour>();
-
-            var alternatives = tours.Where(t =>
-                t.Id != originalTourId &&
-                t.Location != null &&
-                t.Location.Id == originalTour.Location.Id &&
-                GetAvailableSpots(t.Id) >= requiredSpots
-            ).ToList();
-
-            return alternatives;
-        }
-
-        public Tour? GetTourById(int id)
-        {
-            return _tourRepository.GetById(id);
-        }
-
-        public Tour? GetTourWithDetails(int id)
-        {
-            var tour = _tourRepository.GetById(id);
-            if (tour != null)
-            {
-                EnrichTourWithDetails(tour);
-            }
-            return tour;
-        }
-
-        public bool ReserveSpots(int tourId, int numberOfSpots)
-        {
-            var tour = _tourRepository.GetById(tourId);
-            if (tour != null && GetAvailableSpots(tourId) >= numberOfSpots)
-            {
-                int newReservedSpots = tour.ReservedSpots + numberOfSpots;
-                return _tourRepository.UpdateReservedSpots(tourId, newReservedSpots);
-            }
-            return false;
-        }
-
-        public int GetAvailableSpots(int tourId)
-        {
-            var tour = _tourRepository.GetById(tourId);
-            if (tour == null) return 0;
-
-
-            if (_reservationRepository != null)
-            {
-                var activeReservationsCount = _reservationRepository.GetByTourId(tourId)
-                    .Where(r => r.Status == TourReservationStatus.ACTIVE)
-                    .Sum(r => r.NumberOfGuests);
-
-                int availableFromReservations = tour.MaxTourists - activeReservationsCount;
-
-                System.Diagnostics.Debug.WriteLine($"TourService.GetAvailableSpots({tourId}):");
-                System.Diagnostics.Debug.WriteLine($"  Tour: {tour.Name}");
-                System.Diagnostics.Debug.WriteLine($"  MaxTourists: {tour.MaxTourists}");
-                System.Diagnostics.Debug.WriteLine($"  ReservedSpots (CSV): {tour.ReservedSpots}");
-                System.Diagnostics.Debug.WriteLine($"  ActiveReservations: {activeReservationsCount}");
-                System.Diagnostics.Debug.WriteLine($"  Available (real-time): {availableFromReservations}");
-
-                return Math.Max(0, availableFromReservations);
-            }
-            else
-            {
-
-                int available = tour.MaxTourists - tour.ReservedSpots;
-                System.Diagnostics.Debug.WriteLine($"TourService.GetAvailableSpots({tourId}) - Fallback:");
-                System.Diagnostics.Debug.WriteLine($"  Available (CSV): {available}");
-                return available < 0 ? 0 : available;
-            }
-        }
-
-        public void EnrichToursWithDetails(List<Tour> tours)
-        {
-            foreach (var tour in tours)
-            {
-                EnrichTourWithDetails(tour);
-            }
-        }
-
-        private void EnrichTourWithDetails(Tour tour)
-        {
-
-            if (tour.Location != null && tour.Location.Id > 0)
-            {
-                var fullLocation = _locationRepository.GetById(tour.Location.Id);
-                if (fullLocation != null)
-                {
-                    tour.Location = fullLocation;
-                }
-            }
-
-
-            if (tour.Guide != null && tour.Guide.Id > 0)
-            {
-                var fullGuide = _userRepository.GetById(tour.Guide.Id);
-                if (fullGuide != null)
-                {
-                    tour.Guide = fullGuide;
-                }
-            }
-        }
-
-        public bool ValidateTour(Tour tour)
-        {
-            return tour != null
-                && !string.IsNullOrWhiteSpace(tour.Name)
-                && tour.Location != null
-                && tour.MaxTourists > 0
-                && tour.DurationHours > 0;
-        }
-
-        public List<Tour> GetAllTours()
-        {
-            var tours = _tourRepository.GetAll();
-            EnrichToursWithDetails(tours);
-            return tours;
-        }
-
-     
+        // Private helper methods
+        private List<Tour> PopulateAndReturn(List<Tour> tours) { _dataEnhancer.PopulateToursWithData(tours); return tours; }
+        private Tour? PopulateSingle(Tour? tour) { if (tour != null) _dataEnhancer.PopulateTourWithData(tour); return tour; }
     }
 }

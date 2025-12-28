@@ -84,30 +84,11 @@ namespace BookingApp.Services.Demo.Scenarios
                     if (statisticsViewModel?.Accommodations != null)
                     {
                         statisticsViewModel.Accommodations.Clear();
-
                         var demoAccommodations = new[]
                         {
-                            new AccommodationDTO
-                            {
-                                Id = 1,
-                                Name = "Luxury Downtown Apartment",
-                                GeoLocation = new LocationDTO { City = "Belgrade", Country = "Serbia" },
-                                Type = "APARTMENT"
-                            },
-                            new AccommodationDTO
-                            {
-                                Id = 2,
-                                Name = "Mountain Retreat Cottage",
-                                GeoLocation = new LocationDTO { City = "Zlatibor", Country = "Serbia" },
-                                Type = "COTTAGE"
-                            },
-                            new AccommodationDTO
-                            {
-                                Id = 3,
-                                Name = "City Center House",
-                                GeoLocation = new LocationDTO { City = "Novi Sad", Country = "Serbia" },
-                                Type = "HOUSE"
-                            }
+                            new AccommodationDTO{ Id = 1,Name = "Luxury Downtown Apartment",GeoLocation = new LocationDTO { City = "Belgrade", Country = "Serbia" },Type = "APARTMENT"},
+                            new AccommodationDTO{ Id = 2, Name = "Mountain Retreat Cottage", GeoLocation = new LocationDTO { City = "Zlatibor", Country = "Serbia" },Type = "COTTAGE"},
+                            new AccommodationDTO{ Id = 3, Name = "City Center House", GeoLocation = new LocationDTO { City = "Novi Sad", Country = "Serbia" }, Type = "HOUSE"}
                         };
 
                         foreach (var accommodation in demoAccommodations)
@@ -141,51 +122,23 @@ namespace BookingApp.Services.Demo.Scenarios
                 {
                     if (statisticsViewModel != null)
                     {
-                        // Simulate loading yearly data for charts
                         var reservations = new ChartValues<int> { 28, 45, 62 };
                         var cancellations = new ChartValues<int> { 2, 3, 5 };
                         var reschedules = new ChartValues<int> { 4, 7, 12 };
 
                         statisticsViewModel.YearlyChartSeries = new SeriesCollection
                         {
-                            new LineSeries
-                            {
-                                Title = "Reservations",
-                                Values = reservations,
-                                Stroke = System.Windows.Media.Brushes.Blue,
-                                Fill = System.Windows.Media.Brushes.Transparent,
-                                PointGeometry = DefaultGeometries.Circle
-                            },
-                            new LineSeries
-                            {
-                                Title = "Cancellations",
-                                Values = cancellations,
-                                Stroke = System.Windows.Media.Brushes.Red,
-                                Fill = System.Windows.Media.Brushes.Transparent,
-                                PointGeometry = DefaultGeometries.Square
-                            },
-                            new LineSeries
-                            {
-                                Title = "Reschedules",
-                                Values = reschedules,
-                                Stroke = System.Windows.Media.Brushes.Orange,
-                                Fill = System.Windows.Media.Brushes.Transparent,
-                                PointGeometry = DefaultGeometries.Triangle
-                            }
+                            new LineSeries{ Title = "Reservations",Values = reservations,Stroke = System.Windows.Media.Brushes.Blue,Fill = System.Windows.Media.Brushes.Transparent,PointGeometry = DefaultGeometries.Circle},
+                            new LineSeries{ Title = "Cancellations", Values = cancellations, Stroke = System.Windows.Media.Brushes.Red, Fill = System.Windows.Media.Brushes.Transparent,PointGeometry = DefaultGeometries.Square},
+                            new LineSeries{Title = "Reschedules", Values = reschedules,Stroke = System.Windows.Media.Brushes.Orange,Fill = System.Windows.Media.Brushes.Transparent,PointGeometry = DefaultGeometries.Triangle}
                         };
-
                         statisticsViewModel.YearLabels = new[] { "2022", "2023", "2024" };
-
-                        // Update available years
                         if (statisticsViewModel.AvailableYears != null)
                         {
                             statisticsViewModel.AvailableYears.Clear();
                             for (int year = 2022; year <= 2024; year++)
-                            {
-                                statisticsViewModel.AvailableYears.Add(year);
-                            }
+                            { statisticsViewModel.AvailableYears.Add(year);}
                         }
-
                         statisticsViewModel.HasSelectedAccommodation = true;
                     }
                 });
@@ -220,33 +173,9 @@ namespace BookingApp.Services.Demo.Scenarios
 
                         statisticsViewModel.MonthlyChartSeries = new SeriesCollection
                         {
-                            new LineSeries
-                            {
-                                Title = "Reservations",
-                                Values = monthlyReservations,
-                                Stroke = System.Windows.Media.Brushes.Blue,
-                                Fill = System.Windows.Media.Brushes.Transparent,
-                                PointGeometry = DefaultGeometries.Circle,
-                                StrokeThickness = 3
-                            },
-                            new LineSeries
-                            {
-                                Title = "Cancellations",
-                                Values = monthlyCancellations,
-                                Stroke = System.Windows.Media.Brushes.Red,
-                                Fill = System.Windows.Media.Brushes.Transparent,
-                                PointGeometry = DefaultGeometries.Square,
-                                StrokeThickness = 3
-                            },
-                            new LineSeries
-                            {
-                                Title = "Reschedules",
-                                Values = monthlyReschedules,
-                                Stroke = System.Windows.Media.Brushes.Orange,
-                                Fill = System.Windows.Media.Brushes.Transparent,
-                                PointGeometry = DefaultGeometries.Triangle,
-                                StrokeThickness = 3
-                            }
+                            new LineSeries{ Title = "Reservations",Values = monthlyReservations,Stroke = System.Windows.Media.Brushes.Blue,Fill = System.Windows.Media.Brushes.Transparent,PointGeometry = DefaultGeometries.Circle, StrokeThickness = 3 },
+                            new LineSeries{Title = "Cancellations",Values = monthlyCancellations,Stroke = System.Windows.Media.Brushes.Red,Fill = System.Windows.Media.Brushes.Transparent, PointGeometry = DefaultGeometries.Square,StrokeThickness = 3 },
+                            new LineSeries{ Title = "Reschedules",Values = monthlyReschedules,Stroke = System.Windows.Media.Brushes.Orange, Fill = System.Windows.Media.Brushes.Transparent, PointGeometry = DefaultGeometries.Triangle, StrokeThickness = 3}
                         };
 
                         statisticsViewModel.MonthLabels = new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };

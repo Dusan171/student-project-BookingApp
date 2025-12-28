@@ -226,9 +226,9 @@ public string NotificationMessage
                         break;
                     case "Forums":
                         var forumViewModel = Injector.CreateForumViewModel();
-                        forumViewModel.OnShowCommentsRequested += (forumId) => // Sada je int, ne DTO objekat
+                        forumViewModel.OnShowCommentsRequested += (forumId) => 
                         {
-                            var commentsViewModel = Injector.CreateForumCommentsViewModel(forumId); // Šalješ int
+                            var commentsViewModel = Injector.CreateForumCommentsViewModel(forumId); 
                             commentsViewModel.OnBackToForumsRequested += () =>
                             {
                                 forumViewModel.RefreshForums();

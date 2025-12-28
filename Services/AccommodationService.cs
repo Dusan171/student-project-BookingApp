@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BookingApp.Services.DTO;
 using BookingApp.Repositories;
+using BookingApp.Domain.Interfaces.ServiceInterfaces;
 
 namespace BookingApp.Services
 {
@@ -15,13 +16,13 @@ namespace BookingApp.Services
         private readonly IAccommodationRepository _accommodationRepository;
         private readonly ILocationRepository _locationRepository;
         private readonly IAccommodationImageRepository _accommodationImageRepository;
-        private readonly AccommodationValidationService _accommodationValidationService;
-        public AccommodationService(IAccommodationRepository accommodationRepository, ILocationRepository locationRepository, IAccommodationImageRepository accommodationImageRepository, AccommodationValidationService accommodationValidationService)
+        private readonly IAccommodationValidationService _accommodationValidationService;
+        public AccommodationService(IAccommodationRepository accommodationRepository, ILocationRepository locationRepository, IAccommodationImageRepository accommodationImageRepository, IAccommodationValidationService accommodationValidationService)
         {
             _accommodationRepository = accommodationRepository;
             _locationRepository = locationRepository;
             _accommodationImageRepository = accommodationImageRepository;
-            _accommodationValidationService=accommodationValidationService;
+            _accommodationValidationService = accommodationValidationService;
         }
         public List<AccommodationDTO> GetAllAccommodations()
         {
@@ -47,7 +48,7 @@ namespace BookingApp.Services
         }
         public AccommodationDTO AddAccommodation(AccommodationDTO accommodation)
         {
-            if (!_accommodationValidationService.IsValid(accommodation))
+            if (!_accommodationValidationService.IsAccommodationValid(accommodation, out string errorMessage))
                 throw new System.Exception("Accommodation is not valid");
             _accommodationRepository.Save(accommodation.ToAccommodation());
             return accommodation;
@@ -69,7 +70,7 @@ namespace BookingApp.Services
         }
         public bool RegisterAccommodation(AccommodationDTO accommodationDto)
         {
-            if (!_accommodationValidationService.IsValid(accommodationDto))
+            if (!_accommodationValidationService.IsAccommodationValid(accommodationDto, out string errorMessage))
             {
                 return false;
             }
@@ -119,7 +120,6 @@ namespace BookingApp.Services
         }
         public List<Accommodation> GetByOwnerId(int ownerId)
         {
-            // Implementacija
             return _accommodationRepository.GetByOwnerId(ownerId);
         }
 

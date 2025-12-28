@@ -34,13 +34,11 @@ namespace BookingApp.Services
             var ownersReviews = allReviews
                                 .Where(r => reservationIds.Contains(r.ReservationId))
                                 .ToList();
-
             double averageGrade = 0;
             if (ownersReviews.Any())
             {
                 averageGrade = ownersReviews.Average(r => (r.CleanlinessRating + r.OwnerRating) / 2.0);
             }
-
             return new HomeStatisticDTO
             {
                 TotalReviews = ownersReviews.Count,

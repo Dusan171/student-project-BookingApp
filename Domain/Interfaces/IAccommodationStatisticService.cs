@@ -8,14 +8,7 @@ namespace BookingApp.Domain.Interfaces
         
         List<YearlyStatisticDTO> GetYearlyStatistics(int accommodationId);
  
-        List<MonthlyStatisticDTO> GetMonthlyStatistics(int accommodationId, int year);
+        List<MonthlyStatisticDTO> GetMonthlyStatistics(int accommodationId, int year);        
 
-        AccommodationStatisticsSummaryDTO GetStatisticsSummary(int accommodationId);
-        
-        List<int> GetAvailableYears(int accommodationId);
-
-        YearlyStatisticDTO GetBestPerformingYear(int accommodationId);
-
-        MonthlyStatisticDTO GetBestPerformingMonth(int accommodationId, int year);
     }
 }

@@ -21,6 +21,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
         private readonly IUserService _userService;
         private readonly IPDFReportService _pdfReportService;
         private readonly IAccommodationReviewService _accommodationReviewService;
+        private readonly IAccommodationSummaryService _summaryService; // NOVO: Koristi se za GetStatisticsSummary
 
         private AccommodationDTO _selectedAccommodation;
         private bool _hasSelectedAccommodation;
@@ -136,13 +137,14 @@ namespace BookingApp.Presentation.ViewModel.Owner
         public ICommand LoadStatisticsCommand { get; }
         public ICommand GeneratePDFReportCommand { get; }
 
-        public StatisticViewModel(IAccommodationService accommodationService, IAccommodationStatisticsService statisticsService, IUserService userService, IPDFReportService pdfReportService, IAccommodationReviewService accommodationReviewService)
+        public StatisticViewModel(IAccommodationService accommodationService, IAccommodationStatisticsService statisticsService, IAccommodationSummaryService summaryService, IUserService userService, IPDFReportService pdfReportService, IAccommodationReviewService accommodationReviewService)
         {
             _accommodationService = accommodationService;
             _statisticsService = statisticsService;
             _userService = userService;
             _pdfReportService = pdfReportService; 
-            _accommodationReviewService = accommodationReviewService; 
+            _accommodationReviewService = accommodationReviewService;
+            _summaryService = summaryService; 
 
             Accommodations = new ObservableCollection<AccommodationDTO>();
             AvailableYears = new ObservableCollection<int>();
@@ -193,7 +195,7 @@ namespace BookingApp.Presentation.ViewModel.Owner
         private void LoadStatisticsData()
         {
             // Get summary
-            _summary = _statisticsService.GetStatisticsSummary(SelectedAccommodation.Id);
+            _summary = _summaryService.GetStatisticsSummary(SelectedAccommodation.Id);
 
             // Get yearly statistics
             var yearlyStats = _statisticsService.GetYearlyStatistics(SelectedAccommodation.Id);
@@ -241,30 +243,9 @@ namespace BookingApp.Presentation.ViewModel.Owner
 
             YearlyChartSeries = new SeriesCollection
             {
-                new LineSeries
-                {
-                    Title = "Reservations",
-                    Values = reservations,
-                    Stroke = System.Windows.Media.Brushes.Blue,
-                    Fill = System.Windows.Media.Brushes.Transparent,
-                    PointGeometry = LiveCharts.Wpf.DefaultGeometries.Circle
-                },
-                new LineSeries
-                {
-                    Title = "Cancellations",
-                    Values = cancellations,
-                    Stroke = System.Windows.Media.Brushes.Red,
-                    Fill = System.Windows.Media.Brushes.Transparent,
-                    PointGeometry = LiveCharts.Wpf.DefaultGeometries.Square
-                },
-                new LineSeries
-                {
-                    Title = "Reschedules",
-                    Values = reschedules,
-                    Stroke = System.Windows.Media.Brushes.Orange,
-                    Fill = System.Windows.Media.Brushes.Transparent,
-                    PointGeometry = LiveCharts.Wpf.DefaultGeometries.Triangle
-                }
+                new LineSeries{Title = "Reservations",Values = reservations, Stroke = System.Windows.Media.Brushes.Blue,Fill = System.Windows.Media.Brushes.Transparent, PointGeometry = LiveCharts.Wpf.DefaultGeometries.Circle},
+                new LineSeries{Title = "Cancellations",Values = cancellations,Stroke = System.Windows.Media.Brushes.Red, Fill = System.Windows.Media.Brushes.Transparent,PointGeometry = LiveCharts.Wpf.DefaultGeometries.Square},
+                new LineSeries{Title = "Reschedules",Values = reschedules, Stroke = System.Windows.Media.Brushes.Orange,Fill = System.Windows.Media.Brushes.Transparent,PointGeometry = LiveCharts.Wpf.DefaultGeometries.Triangle}
             };
 
             YearLabels = years;
@@ -298,38 +279,14 @@ namespace BookingApp.Presentation.ViewModel.Owner
                 reservations.Add(stat.ReservationCount);
                 cancellations.Add(stat.CancellationCount);
                 reschedules.Add(stat.RescheduleCount);
-                months[i] = stat.MonthName.Substring(0, Math.Min(3, stat.MonthName.Length)); // Jan, Feb, etc.
+                months[i] = stat.MonthName.Substring(0, Math.Min(3, stat.MonthName.Length)); 
             }
 
             MonthlyChartSeries = new SeriesCollection
             {
-                new LineSeries
-                {
-                    Title = "Reservations",
-                    Values = reservations,
-                    Stroke = System.Windows.Media.Brushes.Blue,
-                    Fill = System.Windows.Media.Brushes.Transparent,
-                    PointGeometry = LiveCharts.Wpf.DefaultGeometries.Circle,
-                    StrokeThickness = 3
-                },
-                new LineSeries
-                {
-                    Title = "Cancellations",
-                    Values = cancellations,
-                    Stroke = System.Windows.Media.Brushes.Red,
-                    Fill = System.Windows.Media.Brushes.Transparent,
-                    PointGeometry = LiveCharts.Wpf.DefaultGeometries.Square,
-                    StrokeThickness = 3
-                },
-                new LineSeries
-                {
-                    Title = "Reschedules",
-                    Values = reschedules,
-                    Stroke = System.Windows.Media.Brushes.Orange,
-                    Fill = System.Windows.Media.Brushes.Transparent,
-                    PointGeometry = LiveCharts.Wpf.DefaultGeometries.Triangle,
-                    StrokeThickness = 3
-                }
+                new LineSeries{ Title = "Reservations", Values = reservations, Stroke = System.Windows.Media.Brushes.Blue, Fill = System.Windows.Media.Brushes.Transparent,PointGeometry = LiveCharts.Wpf.DefaultGeometries.Circle,StrokeThickness = 3 },
+                new LineSeries{ Title = "Cancellations",Values = cancellations, Stroke = System.Windows.Media.Brushes.Red,Fill = System.Windows.Media.Brushes.Transparent,PointGeometry = LiveCharts.Wpf.DefaultGeometries.Square,StrokeThickness = 3},
+                new LineSeries{ Title = "Reschedules",Values = reschedules,Stroke = System.Windows.Media.Brushes.Orange,Fill = System.Windows.Media.Brushes.Transparent, PointGeometry = LiveCharts.Wpf.DefaultGeometries.Triangle,StrokeThickness = 3}
             };
 
             MonthLabels = months;

@@ -31,12 +31,9 @@ namespace BookingApp.Services
             var forum = _forumRepository.GetById(forumId);
             if (forum == null || forum.IsClosed)
                 return false;
-
-            // Proveri da li vlasnik ima smeštaj na lokaciji foruma
             var ownerAccommodations = _accommodationRepository.GetAll()
                 .Where(a => a.OwnerId == ownerId)
                 .ToList();
-
             return ownerAccommodations.Any(a => a.GeoLocation.Id == forum.LocationId);
         }
 

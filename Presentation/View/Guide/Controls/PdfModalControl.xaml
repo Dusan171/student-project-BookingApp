@@ -1,0 +1,41 @@
+<UserControl x:Class="BookingApp.Presentation.View.Guide.Controls.PdfModalControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="../Resources/ToursControlStyles.xaml"/>
+    </UserControl.Resources>
+
+    <Border x:Name="PDFOverlay" Background="#CC000000" Visibility="Collapsed" Panel.ZIndex="999">
+        <Border Background="White" Width="900" Height="700" CornerRadius="15" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Direction="270" ShadowDepth="10" Opacity="0.3" BlurRadius="20"/>
+            </Border.Effect>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="#2E86AB" CornerRadius="15,15,0,0" Padding="15,12">
+                    <DockPanel>
+                        <TextBlock Text="PDF Report" FontSize="16" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" DockPanel.Dock="Left"/>
+                        <Button Content="X" Width="28" Height="28" FontSize="14" FontWeight="Bold" HorizontalAlignment="Right" DockPanel.Dock="Right" Background="Transparent" BorderThickness="0" Foreground="White" Style="{StaticResource CloseButtonStyle}" ToolTip="Close PDF preview" Click="ClosePDFOverlay_Click"/>
+                    </DockPanel>
+                </Border>
+
+                <WebBrowser x:Name="PDFWebBrowser" Grid.Row="1" Margin="0" ToolTip="PDF preview"/>
+
+                <Border Grid.Row="2" Background="#F8F9FA" CornerRadius="0,0,15,15" Padding="20,15">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="Open External" Width="140" Height="35" Background="#6C757D" Foreground="White" FontSize="12" Margin="0,0,10,0" Style="{StaticResource ModalButtonStyle}" ToolTip="Open PDF in external viewer" Click="OpenPDFExternal_Click"/>
+                        <Button Content="Close" Width="100" Height="35" Background="#2E86AB" Foreground="White" FontSize="12" Style="{StaticResource ModalButtonStyle}" ToolTip="Close PDF preview" Click="ClosePDFOverlay_Click"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Border>
+
+</UserControl>
