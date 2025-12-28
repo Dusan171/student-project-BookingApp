@@ -37,7 +37,7 @@
                                 BorderThickness="1" Margin="10" Padding="15">
                             <StackPanel>
                                 <WrapPanel>
-                                    <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding AuthorName}" FontWeight="Bold" Foreground="{DynamicResource PrimaryTextColor}" FontSize="16" VerticalAlignment="Center"/>
 
                                     <Border Background="{DynamicResource VisitorTagBackground}" CornerRadius="10" Padding="8,3" Margin="10,0,0,0" 
                                             Visibility="{Binding IsFromVisitor, Converter={StaticResource BooleanToVisibilityConverter}}">
