@@ -28,8 +28,8 @@ Otvorite .sln fajl u Visual Studio 2022.
 Obavite Build Solution da se povuku svi dependency-ji.
 Pritisnite F5 za pokretanje aplikacije.
 
-👥 Tim (Team B - Group 7)
-Aleksandra Rudež - Funkcionalnosti koje podržavaju ulogu Vlasnik.
-Anja Gagić - Funkcionalnosti koje podržavaju ulogu Turista.
-Ana Marković - Funkcionalnosti koje podržavaju ulogu Vodič.
-Dušan Lazić  - Funkcionalnosti koje podržavaju ulogu Gost.
+## 👥 Tim (Team B - Group 7)
+1. Aleksandra Rudež - Funkcionalnosti koje podržavaju ulogu Vlasnik.
+2. Anja Gagić - Funkcionalnosti koje podržavaju ulogu Turista.
+3. Ana Marković - Funkcionalnosti koje podržavaju ulogu Vodič.
+4. Dušan Lazić  - Funkcionalnosti koje podržavaju ulogu Gost.
